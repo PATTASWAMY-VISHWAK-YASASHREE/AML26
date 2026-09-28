@@ -1,0 +1,194 @@
+{
+  "task": "D123",
+  "title": "remaining gaps in indic_token_dict",
+  "status": "complete",
+  "verdict": "DICTIONARY IS CORRECT. Not dead weight, not broken. One NEW structural defect: 16 of 167 values (9.58%) have exactly one key, and all 16 are Indian state/region words -> single-script coverage gap. France value exactly 0, France cost negligible. Cross-country collision impossible by construction.",
+  "reference_docs": {
+    "D095_audit_indic_token_dict.md": "present, used as ground truth",
+    "D096_mine_indic_token_dict_India.md": "DOES NOT EXIST in analysis_out/findings/ - only analysis_out/tasks/D096.json exists. Not waited for."
+  },
+  "file_under_audit": {
+    "path": "_upstream/src/resources/indic_token_dict.json",
+    "bytes": 47788,
+    "entries": 1363,
+    "distinct_keys": 1363,
+    "distinct_values": 167,
+    "keys_with_latin_letter": 0,
+    "keys_with_digit": 0,
+    "keys_with_whitespace": 0,
+    "keys_with_zwnj_u200c_or_zwj_u200d": 0,
+    "empty_or_null_values": 0,
+    "read_only_honoured": true
+  },
+  "headline_number": {
+    "single_key_values": 16,
+    "distinct_values": 167,
+    "pct": 9.58,
+    "all_16_are_state_region_words": true
+  },
+  "new_defect_single_script_state_coverage": {
+    "confidence_gap": "CONFIRMED",
+    "confidence_change": "SPECULATIVE",
+    "is_code_defect": false,
+    "explanation": "Coverage gap in the learned table, faithful to its training data. learn_translit.py address branch records only the script observed in a given address; it never iterates over scripts.",
+    "key_count_distribution": { "1": 16, "3": 2, "4": 1, "5": 3, "6": 1, "7": 1, "8": 2, "9": 129, "10": 7, "11": 2, "13": 2, "14": 1 },
+    "arithmetic_check": "16*1 + 2*3 + 1*4 + 3*5 + 1*6 + 1*7 + 2*8 + 129*9 + 7*10 + 2*11 + 2*13 + 1*14 = 1363",
+    "values_with_9_script_fanout": 129,
+    "pct_with_9_script_fanout": 77.25,
+    "the_16_single_key_values": {
+      "andhra pradesh": "U+0C06 Telugu",
+      "bihar": "U+092B Devanagari",
+      "haryana": "U+0939 Devanagari",
+      "karnataka": "U+0C95 Telugu",
+      "kerala": "U+0D15 Malayalam",
+      "madhya": "U+092E Devanagari",
+      "maharashtra": "U+092E Devanagari",
+      "new delhi": "U+0926 Devanagari",
+      "orissa": "U+0B13 Oriya",
+      "pradesh": "U+092A Devanagari",
+      "punjab": "U+0A2A Gujarati",
+      "rajasthan": "U+0930 Devanagari",
+      "tamil nadu": "U+0BA4 Tamil",
+      "telangana": "U+0C24 Telugu",
+      "uttar": "U+0909 Devanagari",
+      "west bengal": "U+09AA Bengali"
+    },
+    "control_contrast_gujarat": {
+      "keys": 9,
+      "scripts": ["Devanagari U+0917", "Kannada U+0C97", "Telugu U+0C17", "Tamil U+0B95", "Gujarati U+0A97", "Bengali U+0997", "Malayalam U+0D17", "Gurmukhi U+0A17", "Oriya U+0B17"],
+      "why": "only state name with full 9-way fanout; appeared in the source-1 NAME alignment branch as well as the address branch"
+    },
+    "learner_mechanism": {
+      "name_branch": "learn_translit.py:41-48 - aligns native tokens to Latin tokens for business names; a name is the same word in 9 scripts so each concept accumulates 9 keys",
+      "address_branch": "learn_translit.py:50-67 - fires only when source-1 address component is an IN_STATES key (:51,:55) and the native component contains Indic (:59); records only the script actually observed, once",
+      "no_script_iteration_anywhere": true
+    }
+  },
+  "collisions": {
+    "cross_country_collision_possible": false,
+    "cross_country_argument": "All 1363 keys are pure U+0900-U+0D7F. Gate at normalize.py:91 is INDIC_RE.search(s), per-STRING not per-country. A US or France row must contain a literal Brahmic codepoint for the table to fire. Zero for US and every non-India country, by construction rather than by measurement.",
+    "within_table_shadowing_possible": false,
+    "lookup_mechanism": "normalize.py:18 INDIC_TOKEN_RE = [U+0900-U+0D7F + ZWNJ/ZWJ]+ used with .sub() at :103. The + is GREEDY so it emits MAXIMAL runs. rep() does an EXACT whole-run hash lookup (:97,:100).",
+    "romanize_consults_dict": false,
+    "romanize_note": "normalize.py:40 romanize() is a pure code-point loop and NEVER consults the dictionary. Therefore no prefix scan, no longest-match, no first-match ambiguity, and no key can shadow another.",
+    "work_order_first_vs_longest_match_question": "DOES NOT APPLY - it is a single exact dict lookup on a maximally-munched run",
+    "keys_that_are_proper_substring_of_another_key": 140,
+    "of_those_value_disagrees_with_a_superstring": 131,
+    "substring_disagreement_is_harmless": true,
+    "substring_harmless_reason": "Maximal munch means a fragment and its superstring can never be candidates for the same input span, so they cannot disagree on any row. The raw count 131 would otherwise read as a serious defect."
+  },
+  "multiword_values": {
+    "count": 4,
+    "defect_found": false,
+    "all_4_are_IN_STATES_keys": true,
+    "entries": {
+      "west bengal": { "key": "Bengali U+09AA..U+0997", "in_states_code": "wb" },
+      "new delhi": { "key": "Devanagari U+0926..U+0940", "in_states_code": "dl" },
+      "tamil nadu": { "key": "Tamil U+0BA4..U+0BC1", "in_states_code": "tn" },
+      "andhra pradesh": { "key": "Telugu U+0C06..U+0C4D", "in_states_code": "ap" }
+    },
+    "space_is_required_not_broken": "IN_STATES (normalize.py:231-242) is itself keyed on the space-joined form, so the space is necessary for the state to resolve.",
+    "address_path_trace": "normalize_address:331 ck=re.sub(r'[^a-z0-9& ]+',' ',c) - the class INCLUDES the space (only non-alnum char preserved); :332 normalises; :333 if ck in smap matches; :334 sets state; :335 continues",
+    "name_path_trace": "normalize_name:276 _non_alnum.split(s) splits on [^a-z0-9]+ so a name-borne 'west bengal' becomes tokens west, bengal",
+    "keys_py_safety": "keys.py:33,39,46 all .str.split(' ') on space-joined columns, so no blocking key can contain a space"
+  },
+  "france_cost": {
+    "verdict": "NEGLIGIBLE - do not inflate. A country-scoping guard would be churn, not a fix.",
+    "france_test_rows": 1694445,
+    "arithmetic": "259452 + 703378 + 731615 = 1694445",
+    "regex_scans_over_name_and_address": 3388890,
+    "arithmetic_scans": "1694445 * 2 = 3388890",
+    "per_row_cost": "one regex scan of a short Latin string, returns s at normalize.py:92. No dict lookup, no allocation, no romanize().",
+    "dict_loaded_on_france_run": false,
+    "dict_load_note": "_load_dict() is called at :93 AFTER the INDIC_RE.search gate at :91, so a run containing no Brahmic anywhere never loads the 47,788-byte JSON.",
+    "estimated_wall_clock": "well under one second, once, for the entire France test set"
+  },
+  "latin_side_extension": {
+    "coherent": false,
+    "verdict": "CATEGORY ERROR, not a task. Re-keying this file on Latin would duplicate NAME_CANON / ADDR_CANON_COMMON / ADDR_CANON_FR / LEET / STATE_MAPS in a second, learned, strictly worse place. NOT PROPOSED.",
+    "reason": "learn_translit.py:46 for x,y in zip(b,a) -- x is always the NATIVE token (dict key), y always the Latin token (dict value). :42 discards every pair whose source-2 name has no Brahmic. No code path or parameter could emit a Latin key.",
+    "legitimate_extension": "Add the 8 missing scripts for the 16 single-key state values."
+  },
+  "clean_checks": {
+    "empty_or_null_values": 0,
+    "keys_with_latin": 0,
+    "keys_with_digit": 0,
+    "keys_with_whitespace": 0,
+    "duplicate_keys": 0,
+    "self_maps_possible": false,
+    "self_maps_note": "Structurally impossible: keys are U+0900-U+0D7F, values match ^[a-z ]+$, disjoint by construction. D095 already called this class vacuous; not re-raised as a defect.",
+    "zwnj_double_lookup": "normalize.py:100-101 is UNREACHABLE dead code because 0 keys contain ZWNJ/ZWJ. Benign, pre-established by D095."
+  },
+  "name_stop_interaction": {
+    "name_stop_size_normalize_py_144_149": 44,
+    "entries_whose_value_is_in_NAME_STOP": 15,
+    "breakdown": { "llp": 9, "ltd": 3, "pvt": 3 },
+    "verdict": "CORRECT BEHAVIOUR not a defect - llp/ltd/pvt are legal-form noise by design (NAME_STOP:145). The 6 ltd/pvt entries are exactly D095 affix fragments, and they are independently protected by maximal munch."
+  },
+  "declared_gaps": {
+    "india_brahmic_row_count": "GAP - not collected, and not collectable from the current profile. build_profile.py:28 TOKEN_RE=[a-z0-9]+ matches ZERO characters of a Brahmic string and :110-111 applies it to the RAW untransliterated name. Every Brahmic token is invisible to every profile field. No estimate offered.",
+    "profile_cannot_answer_dead_weight_question": "The profile is STRUCTURALLY incapable of answering the work order 'which entries are never fired' question for this table. Any such list would be invented. Declaring this a GAP is the correct output.",
+    "rows_with_non_devanagari_script_state_name": "GAP - the impact of the 16-single-key defect cannot be sized.",
+    "top4000_caveat": "name_tokens/addr_tokens are Counter.most_common(4000) over counters periodically pruned of count==1 (build_profile.py:26,45-48,128-133). Doubly truncated. Absence means 'not in the top 4000', never 'does not occur'.",
+    "token_occurrences_not_rows": "The profile counts TOKEN OCCURRENCES, never ROWS.",
+    "profile_flattens_components": "build_profile.py:126-127 splits addresses on [,;] and counts tokens per component; consuming code (normalize_address:333) matches whole components. Any downstream component-level claim needs its own trace."
+  },
+  "measurement_artefact_warning": {
+    "reported": "0 of 8,000 India tokens affected",
+    "verdict": "MEASUREMENT ARTEFACT, NOT INERTNESS. Do not quote this zero as evidence the table does nothing.",
+    "proof_of_liveness": "1363 entries each backed by n>=2 real train observations (learn_translit.py:70-72) is proof that Brahmic-script text exists in India train S2/S3 at volume."
+  },
+  "raw_counts_used_for_scale_only": {
+    "source": "analysis_out/profile/train_s1.json by_country.India",
+    "note": "RAW counts on the UNTRANSLITERATED field (build_profile.py:127). These are the destination the table converts INTO, not evidence of what it converted. Top-4000 truncated.",
+    "addr_tokens": {
+      "delhi": 321971, "maharashtra": 192382, "west": 123775, "pradesh": 116200,
+      "uttar": 75822, "karnataka": 70523, "tamil": 63594, "nadu": 63587,
+      "gujarat": 58151, "bengal": 57198, "telangana": 56251, "haryana": 36972,
+      "kerala": 35828, "rajasthan": 32625, "bihar": 23752, "madhya": 22660,
+      "andhra": 18368, "orissa": 13989, "punjab": 13984
+    },
+    "name_tokens": { "delhi": 8795, "west": 925, "gujarat": 3919, "punjab": 217, "rajasthan": 192, "pradesh": 186, "uttar": 174, "kerala": 163, "haryana": 149, "karnataka": 139, "andhra": 133, "bihar": 114, "maharashtra": 110, "madhya": 60 }
+  },
+  "population_denominators": {
+    "train_has_france_rows": false,
+    "country_rows": {
+      "train_s1": { "US": 1323633, "India": 883188 },
+      "train_s2": { "India": 2017799, "US": 3016817 },
+      "train_s3": { "US": 3170056, "India": 2115547 },
+      "test_s1": { "US": 663106, "France": 259452, "India": 809986 },
+      "test_s2": { "India": 2312565, "France": 703378, "US": 1871330 },
+      "test_s3": { "India": 2405000, "France": 731615, "US": 1945701 }
+    },
+    "note": "France appears ONLY in test_*, never in train_*. Verified across all six profile files. This is why the France-postcode and France-region hypotheses were dead on arrival."
+  },
+  "recommended_change": {
+    "propose_country_scoping_guard": false,
+    "propose_latin_rekeying": false,
+    "propose_extend_state_scripts": "SPECULATIVE - the only legitimate extension this file admits, but unmeasurable against the current profile. Needs the two counters below first."
+  },
+  "closure_requirement": {
+    "new_build_profile_counters": ["rows_with_indic_name", "rows_with_indic_addr"],
+    "definition": "count U+0900-U+0D7F in the RAW field",
+    "cost": "streaming any() tests, ~4 lines, same cost as the existing pass",
+    "why": "Without them this file can be audited for CORRECTNESS (done, clean) but never for COVERAGE (still open)."
+  },
+  "self_corrections": [
+    "First check of the split-token state entries (madhya/pradesh/uttar in Devanagari) appeared to show them MISSING from the dictionary. That was my own transcription error - I typed the word madhya with a trailing matra instead of the correct form. The dictionary is correct and D095 section 4d is correct. Verified keys: madhya = U+092E U+0927 U+094D U+092F; pradesh = U+092A U+094D U+0930 U+0926 U+0947 U+0936; uttar = U+0909 U+0924 U+094D U+0924 U+0930."
+  ],
+  "not_re_derived": [
+    "France-postcode / pin hypothesis", "FR_REGIONS thinness", "US_STATES/IN_STATES expansion",
+    "retracted French function-word finding (ADDR_CANON_FR de/la/du/des/le/les)",
+    "LEET", "ADDR_CANON_FR", "ADDR_GENERIC", "France blocking caps",
+    "address component order", "ligature defect", "pin_eq", "alt_tset"
+  ],
+  "constraints": {
+    "upstream_read_only": true,
+    "dataset_read_only": true,
+    "raw_tsv_opened": false,
+    "network_access": false,
+    "python_used": false,
+    "powershell_only": true,
+    "files_written": 2
+  }
+}

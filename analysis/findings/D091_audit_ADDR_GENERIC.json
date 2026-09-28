@@ -1,0 +1,195 @@
+{
+  "task_id": "D091",
+  "family": "B-dictionary",
+  "title": "audit current ADDR_GENERIC",
+  "author": "a04",
+  "status": "ground_truth_established",
+  "proposes_changes": false,
+  "md_path": "analysis_out/findings/D091_audit_ADDR_GENERIC.md",
+  "location_verification": {
+    "work_order_claim": "_upstream/src/keys.py",
+    "work_order_claim_correct": true,
+    "actual_file": "_upstream/src/keys.py",
+    "actual_lines": "14-19",
+    "defined_in_normalize_py": false,
+    "defined_in_both": false,
+    "imported_from_elsewhere": false,
+    "import_line": "none - consumed in the same module at keys.py:39; no `from keys import ADDR_GENERIC` anywhere in src/"
+  },
+  "addr_generic": {
+    "type": "list (NOT a dict)",
+    "entry_count": 62,
+    "distinct_entries": 62,
+    "duplicates": [],
+    "uppercase_entries": [],
+    "empty_or_null_entries": [],
+    "self_maps": "not applicable - list has no key->value mapping",
+    "empty_values": "not representable in a list",
+    "distinct_canonical_values": null,
+    "distinct_canonical_values_note": "NOT APPLICABLE. Work order asked for this; the list has no values. Consumed by pl.element().is_in(ADDR_GENERIC) at keys.py:39, a membership test only.",
+    "country_scoped": false,
+    "call_sites": ["_upstream/src/keys.py:39"],
+    "call_site_count": 1
+  },
+  "sibling_tables": {
+    "ADDR_CANON_COMMON": {
+      "file_lines": "_upstream/src/normalize.py:153-198",
+      "type": "dict",
+      "entry_count": 177,
+      "distinct_values": 81,
+      "empty_valued_keys_count": 15,
+      "empty_valued_keys": ["na","door","nil","hno","house","nos","no","none","num","flat","null","h","number","shop","plot"],
+      "keys_without_self_map": 114,
+      "used": true,
+      "call_sites": ["normalize.py:319","normalize.py:321"]
+    },
+    "ADDR_CANON_FR": {
+      "file_lines": "_upstream/src/normalize.py:199-214",
+      "type": "dict",
+      "entry_count": 68,
+      "distinct_values": 30,
+      "empty_valued_keys_count": 5,
+      "empty_valued_keys": ["no","null","n","na","numero"],
+      "keys_without_self_map": 39,
+      "used": true,
+      "call_sites": ["normalize.py:321"]
+    },
+    "FR_keys_shadowing_COMMON_key_count": 23
+  },
+  "relationship_to_sibling_tables": {
+    "verdict": "Three DIFFERENT STAGES of one pipeline, not three overlapping tables. Neither dict is a superset of the other; ADDR_GENERIC overlaps neither as a value set.",
+    "ADDR_CANON_COMMON_and_FR_role": "normalisation - many spellings to one canonical form; can DELETE a token by mapping to empty string",
+    "ADDR_GENERIC_role": "blocking-time noise suppression - one fixed list of already-canonical forms dropped; can only delete",
+    "order_of_operations": [
+      "prep.py:13 calls N.normalize_address(a, c)",
+      "normalize.py:319-321 builds canon (country-scoped)",
+      "normalize.py:347 t = canon.get(t, t) REWRITES every address token",
+      "prep.py:16 writes post-canon string to atoks column",
+      "keys.py:39 filters that post-canon string against ADDR_GENERIC - ONLY consumer",
+      "blocking.py:11,30 call make_keys / make_keys_chunked"
+    ],
+    "all_three_used": true,
+    "dead_code": false,
+    "blast_radius": "BLOCKING KEYS ONLY. Not referenced in features.py at all. features.py:129 _weighted_overlap(... q_atoks, s_atoks, addr_idf, wa) runs on raw post-canon atoks, unstripped. blocking.py:31 atoks=='' CAPS_NOADDR test is also pre-ADDR_GENERIC."
+  },
+  "country_scoping": {
+    "ADDR_GENERIC_scoped": false,
+    "evidence": "keys.py:39 tests membership against one global list, no country predicate anywhere in the expression",
+    "canon_scoped": true,
+    "canon_france_key_drop": ["st","ste","dr","n","s","e","w"],
+    "canon_france_source": "normalize.py:321",
+    "french_words_in_global_list": ["rue","chemin","allee","impasse"],
+    "french_words_in_ADDR_CANON_FR": true,
+    "french_words_in_ADDR_CANON_COMMON": false,
+    "inert_for_france_due_to_key_drop": ["st","ste"],
+    "not_inert_for_france": "dr - ADDR_CANON_FR re-adds it as docteur->dr at normalize.py:208",
+    "contamination_count_quantified": false,
+    "contamination_gap_reason": "profile addr_tokens is top-4000 per country per file and records no cross-country token provenance"
+  },
+  "defects": [
+    {
+      "id": "D1",
+      "title": "plaza is dead on arrival; its replacement plz is not stoplisted",
+      "confidence": "CONFIRMED",
+      "stoplist_entries_rewritten_before_check": 5,
+      "harmless_redundant": [
+        {"entry":"floor","rewrites_to":"fl","covered":true},
+        {"entry":"road","rewrites_to":"rd","covered":true},
+        {"entry":"lane","rewrites_to":"ln","covered":true},
+        {"entry":"street","rewrites_to":"st","covered":true}
+      ],
+      "uncovered": [
+        {"entry":"plaza","rewrites_to":"plz","covered":false,"source_line":"normalize.py:177"}
+      ],
+      "plz_occurrences_india_test_all3": 61183
+    },
+    {
+      "id": "D2",
+      "title": "canon OUTPUTS missing from ADDR_GENERIC leak into blocking keys",
+      "confidence": "CONFIRMED",
+      "missing_forms_count_US_India": 37,
+      "missing_forms_count_France": 57,
+      "leak_mass_by_file": {
+        "test_s1": {"US": 59843, "US_listed": 3189237, "US_pct": 1.88,
+                    "France": 58310, "France_listed": 2253877, "France_pct": 2.59,
+                    "India": 643093, "India_listed": 8617430, "India_pct": 7.46},
+        "test_s2": {"US": 179270, "US_listed": 8135308, "US_pct": 2.20,
+                    "France": 141579, "France_listed": 4745780, "France_pct": 2.98,
+                    "India": 1354501, "India_listed": 21702626, "India_pct": 6.24},
+        "test_s3": {"US": 333694, "US_listed": 9208864, "US_pct": 3.62,
+                    "France": 147583, "France_listed": 4993261, "France_pct": 2.96,
+                    "India": 1582320, "India_listed": 20814196, "India_pct": 7.60}
+      },
+      "noise_tokens_measured": {
+        "plz": 61183,
+        "France_saint": 141364,
+        "France_st_to_saint": 25454,
+        "France_saint_total": 166818,
+        "France_bis": 52072,
+        "US_pt": 24882, "US_ft": 30871, "US_mt": 27617, "US_hts": 23567,
+        "India_west_to_w": 479074, "India_s": 308923, "India_south_to_s": 251318,
+        "India_east_to_e": 210416, "India_e": 147218, "India_north_to_n": 204278,
+        "India_n": 126990, "India_w": 69209,
+        "US_north_to_n": 170197, "US_west_to_w": 56704, "US_n": 45885,
+        "US_south_to_s": 29310, "US_east_to_e": 23048
+      },
+      "IMPORTANT_caveat": "Leak totals INCLUDE city-name canon entries (mumbai 647363, bangalore 428707, gurgaon 96243, kolkata, chennai, kochi, pune, mysore, visakhapatnam, ahmedabad, calicut, orissa, kerala). These are identity-bearing, NOT noise, and are CORRECTLY absent from the stoplist. They dominate the India column. Noise-only subset = direction words, plz, pt, ft, mt, hts, ctr, and the French morphemes.",
+      "french_saint_is_design_question": "saint/sainte are genuine French place-name morphemes; for France the leak is arguably desirable. As written it is accidental, not designed."
+    },
+    {
+      "id": "D3",
+      "title": "15 stoplist entries have no canon rule in either table and fire in all countries",
+      "confidence": "CONFIRMED",
+      "count": 15,
+      "entries": ["and","des","the","off","wing","block","office","tower","pvt","ltd","1st","2nd","3rd","4th","5th"],
+      "function_words_not_mitigating_D081": "and/des/the are dropped for BLOCKING only. features.py never consults ADDR_GENERIC, so the settled D081 finding (French de/la/du/des/le/les dilute IDF) is NOT mitigated by this list. Do not double-count a fix.",
+      "ordinals_safe": "1st..5th produced by canon from first..fifth at normalize.py:184; not ^\\d+$ so keys.py:41 does not treat as num, falls to alph at keys.py:42, then removed at keys.py:39. No MAX_ALPHA interaction."
+    },
+    {
+      "id": "D3b",
+      "title": "four French street words are France-scoped in canon but GLOBAL in the stoplist",
+      "confidence": "CONFIRMED",
+      "entries": ["rue","chemin","allee","impasse"],
+      "in_ADDR_CANON_FR": true,
+      "in_ADDR_CANON_COMMON": false,
+      "effect": "identity-preserving in France, deleted for US and Indian rows too, because keys.py:39 has no country predicate",
+      "count_quantified": false,
+      "gap_reason": "top-4000 truncation plus no cross-country token provenance in profile"
+    },
+    {
+      "id": "D4",
+      "title": "st and ste are inert for France because of the canon France key-drop",
+      "confidence": "CONFIRMED",
+      "entries_inert_for_france": ["st","ste"],
+      "cause": "normalize.py:321 removes st,ste,dr,n,s,e,w from COMMON for France, so those tokens never reach keys.py:39 for French rows",
+      "dr_exception": "dr is re-added for France by ADDR_CANON_FR as docteur->dr at normalize.py:208"
+    }
+  ],
+  "denominator_semantics": {
+    "profile_token_field": "addr_tokens[country]",
+    "profile_is_pre_canon": true,
+    "pre_canon_evidence": "build_profile.py:113 bal = ba.lower(); build_profile.py:126-127 ADDR_SPLIT then TOKEN_RE.findall. No canon.get anywhere in build_profile.py.",
+    "method": "Applied the real canon transform from normalize.py:321/347 to profile tokens, then tested ADDR_GENERIC membership exactly as keys.py:39 does.",
+    "topN": 4000,
+    "topN_source": "build_profile.py:27,140",
+    "truncation_warning": "All masses are LOWER BOUNDS on absolute mass and exact only WITHIN the top-4000 listed set. Per FLEET_BRIEF: a token missing from the top 4000 is not proof it is absent."
+  },
+  "post_canon_mass_fate_all3_test_files": {
+    "US":      {"listed": 20533409, "removed_by_ADDR_GENERIC": 5029788, "removed_pct": 24.50, "removed_by_empty_canon": 118742, "empty_pct": 0.58, "survives": 15384879, "survives_pct": 74.93},
+    "France":  {"listed": 11992918, "removed_by_ADDR_GENERIC": 1770731, "removed_pct": 14.76, "removed_by_empty_canon": 184862, "empty_pct": 1.54, "survives": 10037325, "survives_pct": 83.69},
+    "India":   {"listed": 51134252, "removed_by_ADDR_GENERIC": 7852293, "removed_pct": 15.36, "removed_by_empty_canon": 4927131, "empty_pct": 9.64, "survives": 38354828, "survives_pct": 75.01}
+  },
+  "gaps": [
+    "Whether the D2 leak changes recall or score. Profile carries no key-level or recall data. D2 is proven to change blocking-key CONTENTS but not proven to change the metric.",
+    "Cross-country contamination occurrence count (D3b).",
+    "Number of distinct blocking keys added or removed by any fix - not computable from the profile."
+  ],
+  "not_rederived_per_brief": [
+    "US_STATES / IN_STATES / FR_REGIONS dictionary expansion",
+    "France postcode-loss claim (FALSE)",
+    "pin_eq and alt_tset (dead)",
+    "France blocking caps (healthy)",
+    "ADDR_CANON_COMMON empty mappings and France w/e/s differences (harmless)"
+  ],
+  "maintenance_rule_for_followups": "ADDR_GENERIC is a stoplist over canon OUTPUTS. Every key of ADDR_CANON_COMMON/ADDR_CANON_FR should have its canonical value in ADDR_GENERIC if it is meant to be suppressed. Invariant violated by 37 forms (US/India) and 57 forms (France); the city aliases are correctly absent."
+}

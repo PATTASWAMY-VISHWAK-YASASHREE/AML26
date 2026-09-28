@@ -1,0 +1,314 @@
+{
+  "id": "P033",
+  "title": "[France] train_s3: digit structure and address-number behaviour",
+  "agent": "c02",
+  "family": "A-profile",
+  "status": "COMPLETE",
+  "deliverable": "analysis_out/findings/P033_France_train_s3_digits.md",
+  "filename_note": "analysis_out/tasks/P033.json names P033_France_train_s3_numeric.md; the work order names P033_France_train_s3_digits.md as EXACT. Work order followed.",
+  "primary_input": "analysis_out/profile/train_s3.json",
+  "cross_checked_inputs": [
+    "analysis_out/profile/train_s1.json",
+    "analysis_out/profile/train_s2.json",
+    "analysis_out/profile/test_s1.json",
+    "analysis_out/profile/test_s2.json",
+    "analysis_out/profile/test_s3.json"
+  ],
+  "code_read": [
+    "_upstream/src/normalize.py",
+    "_upstream/src/keys.py",
+    "_upstream/src/features.py",
+    "_upstream/src/build_features.py",
+    "_upstream/src/decoy_postfilter.py",
+    "_upstream/src/crossfit.py"
+  ],
+  "constraints_honoured": {
+    "raw_tsv_opened": false,
+    "network_used": false,
+    "upstream_modified": false,
+    "dataset_modified": false,
+    "python_used": false,
+    "computation": "PowerShell only"
+  },
+
+  "france_in_train_s3": {
+    "verdict": "EMPTY",
+    "train_s3_rows": 5285603,
+    "country_rows": { "US": 3170056, "India": 2115547 },
+    "country_rows_sum": 5285603,
+    "sum_equals_rows": true,
+    "france_key_present_in_country_rows": false,
+    "france_key_present_in_by_country": false,
+    "france_key_present_in_addr_tokens": false,
+    "france_key_present_in_name_tokens": false,
+    "france_rows": 0,
+    "france_share_pct": 0.0,
+    "france_share_expression": "0 / 5285603 = 0.000000% exactly",
+    "all_france_rates": "UNDEFINED (0/0), NOT 0%",
+    "train_all_files": {
+      "train_s1_rows": 2206821,
+      "train_s1_split": { "US": 1323633, "India": 883188 },
+      "train_s2_rows": 5034616,
+      "train_s2_split": { "US": 3016817, "India": 2017799 },
+      "train_s3_rows": 5285603,
+      "train_s3_split": { "US": 3170056, "India": 2115547 },
+      "total_train_rows": 12527040,
+      "france_train_rows_all_files": 0
+    },
+    "code_confirmation": [
+      "crossfit.py:112 iterates for c in (\"US\",\"India\")",
+      "decoy_postfilter.py:17-18 names France as a country with no training labels",
+      "build_profile.py:61-62 country_rows is a Counter; line 142 emits dict(country_rows); a zero-count country produces NO key"
+    ]
+  },
+  "digit_structure_train_s3": {
+    "semantics_note": "num_digits = ADDRESS only (build_profile.py:114). dig5/dig6 are lookaround-guarded (?<!\\d)\\d{5}(?!\\d) at build_profile.py:29-30. All fields are slice totals; rates = value / rows. alpha_only_addr = rows whose address has no digit at all (build_profile.py:117-118).",
+    "US": {
+      "rows": 3170056,
+      "num_digits": 12614249,
+      "num_digits_per_row": 3.9792,
+      "dig5": 341738,
+      "dig5_per_row": 0.107802,
+      "dig6": 42321,
+      "dig6_per_row": 0.013350,
+      "alpha_only_addr": 164957,
+      "alpha_only_addr_pct": 5.2036,
+      "addr_empty": 110968,
+      "addr_empty_pct": 3.5005,
+      "has_comma": 3059088,
+      "has_comma_pct": 96.4995,
+      "addr_chars": 121873446,
+      "addr_chars_per_row": 38.45,
+      "has_digit_name": 199652,
+      "has_digit_name_pct": 6.2981
+    },
+    "India": {
+      "rows": 2115547,
+      "num_digits": 7979194,
+      "num_digits_per_row": 3.7717,
+      "dig5": 22317,
+      "dig5_per_row": 0.010549,
+      "dig6": 410,
+      "dig6_per_row": 0.000194,
+      "alpha_only_addr": 145433,
+      "alpha_only_addr_pct": 6.8745,
+      "addr_empty": 64948,
+      "addr_empty_pct": 3.0700,
+      "has_comma": 2050598,
+      "has_comma_pct": 96.9299,
+      "addr_chars": 125040524,
+      "addr_chars_per_row": 59.11,
+      "has_digit_name": 71195,
+      "has_digit_name_pct": 3.3653
+    },
+    "France": {
+      "verdict": "UNDEFINED - 0 rows in train_s3, every rate is 0/0"
+    }
+  },
+
+  "us_pin_asymmetry_does_hold_for_s3": {
+    "verdict": "YES - train_s3 groups with train_s2, not train_s1",
+    "US_dig6_per_row": { "train_s1": 0.001251, "train_s2": 0.013931, "train_s3": 0.013350 },
+    "s3_over_s1_dig6_ratio": 10.671,
+    "s3_vs_s2_dig6_pct_difference": 4.2,
+    "US_dig5_per_row": { "train_s1": 0.109844, "train_s2": 0.107340, "train_s3": 0.107802 },
+    "s3_over_s1_dig5_ratio": 0.981,
+    "conclusion": "dig5/row is FLAT across all three US train sources; only the 6-digit/pin structure shifts. s3 does not reproduce the source-1 deficit.",
+    "India_dig5_per_row": { "train_s1": 0.003021, "train_s2": 0.011378, "train_s3": 0.010549 },
+    "note": "Mechanism not re-derived; already-covered finding. Confirmation only, as the work order requested."
+  },
+
+  "pure_digit_token_ladder_train_s3": {
+    "unit": "token OCCURRENCES (not rows)",
+    "caveat": "top-4000 bag only -> LOWER BOUNDS. Floor: US 440, India 362.",
+    "US": { "L1": [10, 303604], "L2": [100, 416680], "L3": [676, 1016608], "L4": [454, 300876], "L5": [0, 0], "L6": [0, 0] },
+    "India": { "L1": [10, 928554], "L2": [100, 1150128], "L3": [807, 987378], "L4": [36, 21338], "L5": [0, 0], "L6": [0, 0] },
+    "hard_cliff_at_5": true,
+    "cliff_interpretation": "L5/L6 = 0 in the bag is a TRUNCATION artefact, not absence. Lower bounds on distinct 5-digit values: US ceil(341738/440)=777, India ceil(22317/362)=62.",
+    "shape": "house/street-number field, not a postcode - consistent with the settled 'no country has a postal field' conclusion"
+  },
+  "s3_state_representation_shift": {
+    "headline": "s3 inverts the state representation, and it does so in OPPOSITE directions for the two countries",
+    "label": "CONFIRMED",
+    "India": {
+      "direction": "s1/s2 write the state in FULL; s3 writes the 2-letter CODE",
+      "code_occ": { "train_s1": 11089, "train_s2": 19558, "train_s3": 1449612, "test_s1": 10175, "test_s2": 22897, "test_s3": 1675500 },
+      "code_per_1k": { "train_s1": 12.56, "train_s2": 9.69, "train_s3": 685.22, "test_s1": 12.56, "test_s2": 9.90, "test_s3": 696.67 },
+      "state_word_occ": { "train_s1": 540052, "train_s2": 910115, "train_s3": 109730, "test_s1": 495614, "test_s2": 1050557, "test_s3": 111759 },
+      "state_word_per_1k": { "train_s1": 611.48, "train_s2": 451.04, "train_s3": 51.87, "test_s1": 611.88, "test_s2": 454.28, "test_s3": 46.47 },
+      "code_kinds_present_of_36": { "train_s1": 17, "train_s2": 16, "train_s3": 27 },
+      "spot_check_train_s3": { "mh": 321405, "maharashtra": 24074 },
+      "spot_check_train_s1": { "mh": 2099, "maharashtra": 192382 },
+      "dl_tn": { "s1_s2": "not in top 4000 (floors 182 / 394)", "train_s3_dl": 201584, "train_s3_tn": 104459 }
+    },
+    "US": {
+      "direction": "s1/s2 write the 2-letter CODE; s3 writes the state in FULL - THE REVERSE of India",
+      "code_occ": { "train_s1": 1359620, "train_s2": 3002591, "train_s3": 280424, "test_s1": 680728, "test_s2": 1876297, "test_s3": 154358 },
+      "code_per_1k": { "train_s1": 1027.19, "train_s2": 995.28, "train_s3": 88.46, "test_s1": 1026.57, "test_s2": 1002.65, "test_s3": 79.33 },
+      "state_word_occ": { "train_s1": 38124, "train_s2": 80883, "train_s3": 2494884, "test_s1": 19188, "test_s2": 50448, "test_s3": 1557020 },
+      "state_word_per_1k": { "train_s1": 28.80, "train_s2": 26.81, "train_s3": 787.02, "test_s1": 28.94, "test_s2": 26.96, "test_s3": 800.24 },
+      "state_word_kinds_present_of_40": { "train_s1": 32, "train_s2": 33, "train_s3": 38 },
+      "spot_check_train_s3": { "texas": 294385, "tx": 15282 },
+      "spot_check_train_s1": { "texas": 713, "tx": 133224 },
+      "corroboration": "ny 77.32 -> 3.66 per 1k while new 10.30 -> 88.07 per 1k (s3 writes 'New York'); ca 28.25 -> 1.32 and california 0.43 -> 26.36 per 1k",
+      "note": "D118 measured the India direction only. This US direction is NEW and not previously recorded."
+    },
+    "conclusion": "s3 is not 'shorter addresses'; it is a different geography encoding whose direction depends on the country. A 's3 is compressed' intuition is wrong for the US."
+  },
+  "self_map_loop_exposure": {
+    "code": "normalize.py:252-254  for _m in (US_STATES, IN_STATES): _m.setdefault(_v, _v)",
+    "per_map": {
+      "IN_STATES": { "total_occ_6_files": 3188831, "occ_in_s3": 3125112, "s3_share_pct": 98.00 },
+      "US_STATES": { "total_occ_6_files": 7354018, "occ_in_s3": 434782, "s3_share_pct": 5.91 }
+    },
+    "combined": { "total_occ": 10542849, "occ_in_s3": 3559894, "s3_share_pct": 33.77 },
+    "correction_to_D118": "D118's 98.00% (3,125,112 of 3,188,831) is an IN_STATES-only statistic. US_STATES runs the opposite way (5.91% in s3). The pooled 33.77% is a meaningless average of two opposite effects.",
+    "real_exposure": {
+      "basis": "mass sitting in files that WRITE 2-LETTER CODES, because those are the files with no blocking-key fallback",
+      "india_s3": 3125112,
+      "us_s1_s2_test_s1_test_s2": 6919236,
+      "us_s1_s2_test_s1_test_s2_expression": "1359620 + 3002591 + 680728 + 1876297 = 6919236",
+      "total_mass_in_code_writing_files": 10044348,
+      "total_self_map_mass_all_files": 10542849,
+      "share_pct": 95.27,
+      "residual_check": "10044348 + 498501 = 10542849, where 498501 = US s3 434782 + India s1/s2/test_s1/test_s2 63719",
+      "multiple_vs_D118": 3.21,
+      "verdict": "CONFIRMED. A 'tidy up the redundant bare-code keys' refactor would silently delete the state feature for 10,044,348 occurrences across BOTH countries.",
+      "action": "DO NOT refactor. No change recommended."
+    }
+  },
+
+  "blocking_key_asymmetry": {
+    "label": "CONFIRMED as a code-path asymmetry; scoring impact NOT measurable from this profile",
+    "mechanism": [
+      "keys.py:42 requires str.len_chars() >= 3 to enter alph",
+      "keys.py:41 requires ^\\d+$ to enter nums",
+      "all 36 IN_STATES and all 51 US_STATES canonical values are exactly 2 characters (verified against normalize.py:216-242; zero codes with len < 3)",
+      "no state code collides with any of the 62 ADDR_GENERIC entries (keys.py:14-19), so the earlier filter rescues nothing; len >= 3 is the sole blocker"
+    ],
+    "consequence": "a 2-letter state token can never become a blocking key of any kind (0, 1, 2, 3 or 4). The only carrier is the state field, reaching the model solely via state_eq (features.py:114, tri(q_state,s_state)) - a 3-way {-1,0,1} feature, NOT a retrieval route.",
+    "both_ways": "normalize.py:333-335 requires the WHOLE comma-component to equal the key; on success the component is CONSUMED (continue) and never appended to toks. On failure it falls through into toks and is then killed by len >= 3. Either way no blocking key exists.",
+    "asymmetry": "s3 Indian state resolution rests ENTIRELY on the state field with zero blocking redundancy, whereas train_s1/train_s2 write 'maharashtra' (10 chars), which WOULD retain a length>=3 blocking token even if the dictionary missed.",
+    "direction_note": "US s3 writes 'texas' (5 chars), which WOULD survive keys.py:42 on a lookup failure. So India s3 is the brittle case and US s3 is the robust case - the asymmetry runs the opposite way for the two countries.",
+    "inference_flag": "The claim that s3 resolution is field-only is INFERENCE from the code path plus the whole-component requirement. build_profile.py flattens components, so how many 'mh' occurrences sit in a standalone component versus inside a longer one is NOT measurable here.",
+    "france_exempt": "France has no 2-letter state representation, so this asymmetry does not arise for France at all.",
+    "action": "NO CHANGE. The dictionary is correct and the corpus is closed; adding a code-based blocking key would add mass with no measured recall problem to fix."
+  },
+  "fused_number_suffix_forms": {
+    "regex": "^\\d+[a-z]{1,4}$",
+    "unit": "token OCCURRENCES (not rows), top-4000 bag",
+    "per_file_country": {
+      "train_s1_US":   { "kinds": 120, "occ": 88017,  "len2_kinds": 7,  "len2_occ": 2011,  "len3plus_kinds": 113, "len3plus_occ": 86006 },
+      "train_s1_India":{ "kinds": 85,  "occ": 192672, "len2_kinds": 33, "len2_occ": 26554, "len3plus_kinds": 52,  "len3plus_occ": 166118 },
+      "train_s2_US":   { "kinds": 110, "occ": 113327, "len2_kinds": 0,  "len2_occ": 0,     "len3plus_kinds": 110, "len3plus_occ": 113327 },
+      "train_s2_India":{ "kinds": 88,  "occ": 374034, "len2_kinds": 31, "len2_occ": 51732, "len3plus_kinds": 57,  "len3plus_occ": 322302 },
+      "train_s3_US":   { "kinds": 112, "occ": 125050, "len2_kinds": 7,  "len2_occ": 3987,  "len3plus_kinds": 105, "len3plus_occ": 121063 },
+      "train_s3_India":{ "kinds": 87,  "occ": 307654, "len2_kinds": 33, "len2_occ": 49331, "len3plus_kinds": 54,  "len3plus_occ": 258323 }
+    },
+    "train_s3_sum_checks": {
+      "US": "3987 + 121063 = 125050",
+      "India": "49331 + 258323 = 307654"
+    },
+    "train_s3_len2_per_1k_rows": { "US": 1.2577, "India": 23.3183 },
+    "french_bis_form": {
+      "in_any_train_file": false,
+      "bare_bis_occ_train": 0,
+      "digits_bis_occ_train": 0,
+      "bis_substring_hits_are_proper_nouns_only": {
+        "train_s3_US": ["bismarck 1780", "bishop 594"],
+        "train_s3_India": ["bishrakh 908", "biswas 577", "bishnupur 545"]
+      },
+      "verdict": "The French-shaped fused number+suffix form does NOT exist in train_s3, nor in any train file, for US or India."
+    },
+    "bis_is_test_only": {
+      "test_s1": { "digits_bis_kinds": 0, "digits_bis_occ": 0, "bare_bis_occ": 11010, "digits_b_kinds": 1, "digits_b_occ": 31 },
+      "test_s2": { "digits_bis_kinds": 10, "digits_bis_occ": 765, "bare_bis_occ": 20062, "digits_b_kinds": 25, "digits_b_occ": 1871 },
+      "test_s3": { "digits_bis_kinds": 9, "digits_bis_occ": 640, "bare_bis_occ": 21000, "digits_b_kinds": 19, "digits_b_occ": 1525 },
+      "note": "The bis form arrives with source 2, exactly like the France department-vs-region shift. It is France-test-only."
+    },
+    "what_the_train_s3_fused_mass_actually_is": {
+      "India_train_s3_1digit_suffix_occ": 262207,
+      "India_train_s3_2digit_suffix_occ": 45447,
+      "US_train_s3_1digit_suffix_occ": 43572,
+      "US_train_s3_2digit_suffix_occ": 80519,
+      "dominant_forms": "Indian ordinals (2nd 53858, 1st 50756, 3rd 37164, 4th 24026, 5th 15354) plus Indian society-block flat designations: 1a 7350, 2a 4698, 1b 3378, 3a 3263, 2b 2961, 4a 2472, 5a 2202, 3b 2056",
+      "classification": "Indian flat-designation phenomenon, NOT a French bis phenomenon"
+    },
+    "keys_py_impact": {
+      "mechanism": "1a / 1b / 2a are 2 characters. keys.py:42 requires len >= 3 for alph and keys.py:41 requires ^\\d+$ for nums, so a 2-char fused token satisfies NEITHER: the house number is dropped from blocking nums (D127) AND the fused token is dropped from alph.",
+      "train_s3_exposure_occ": { "US": 3987, "India": 49331 },
+      "is_s3_a_regression": false,
+      "why_not": "s1 India 26554 and s2 India 51732 are both LARGER than s3's 49331. This is a pre-existing, source-independent issue, not something s3 introduced.",
+      "action": "NO CHANGE. ~23/1k rows on one country; the affected forms are low-entropy (1a, 1b recur across thousands of unrelated addresses) and adding them as blocking keys would mostly add collisions."
+    }
+  },
+  "house_number_reliability_verdict": {
+    "verdict": "high-precision, low-recall. A reliable key for the ~94% of rows that have one, and a designed-in noise source for exactly the rows the decoy post-filter targets.",
+    "data_shows": [
+      "only 5.2036% of US and 6.8745% of India train_s3 rows have a digit-free address (alpha_only_addr), so ~93-95% of rows carry a usable number",
+      "keys.py:41 puts the first three (MAX_NUM = 3) into nums, feeding the kind-2 address-number x word key",
+      "numbers are short and highly concentrated: train_s3 US has 676 distinct 3-digit values carrying 1016608 occurrences, a mean of ~1504 rows per value",
+      "keys.py:23 CAPS = {0:50,1:50,2:30,3:50,4:20} with S1_MAXCAP = 300 drops over-frequent keys, so the CAP is doing the discriminating; the number is low-entropy and survives only in the tail"
+    ],
+    "inference": "decoy_postfilter.py:5-9 states the generator shifts house numbers by a fixed POSITIVE offset (+1,+2,+3,+4,+5,+7,+9,+11,+13,+21) and that 79.8% of same-name US decoys carry one of those offsets vs 0.126% of true US pairs (0.299% India) for the strong offsets. NOT re-measured; the profile holds no pair-level data and cannot verify it.",
+    "practical_reading": "Trustworthy when the number AGREES; near-worthless when it disagrees by a small POSITIVE amount. Treat a small positive number delta as evidence of a decoy, not a typo. num1_eq (features.py:114) is a 3-way feature, so a missing number is distinguishable from a mismatch."
+  },
+
+  "france_supplement_TEST_ONLY": {
+    "warning": "These are test_* figures, NOT train_* figures. They must never be cited as a train_s3 France figure and are not a substitute for one.",
+    "test_s1": { "rows": 259452, "num_digits": 510818, "num_digits_per_row": 1.9688, "dig5": 1082, "dig5_per_row": 0.004170, "dig6": 34, "dig6_per_row": 0.000131, "alpha_only_addr": 1089, "alpha_only_addr_pct": 0.4197, "addr_empty": 0, "has_comma_pct": 100.0000, "has_digit_name": 2002 },
+    "test_s2": { "rows": 703378, "num_digits": 1360296, "num_digits_per_row": 1.9339, "dig5": 3613, "dig5_per_row": 0.005137, "dig6": 130, "dig6_per_row": 0.000185, "alpha_only_addr": 26656, "alpha_only_addr_pct": 3.7897, "addr_empty": 21537, "has_comma_pct": 96.9125, "has_digit_name": 7818 },
+    "test_s3": { "rows": 731615, "num_digits": 1415333, "num_digits_per_row": 1.9345, "dig5": 3909, "dig5_per_row": 0.005343, "dig6": 115, "dig6_per_row": 0.000157, "alpha_only_addr": 26857, "alpha_only_addr_pct": 3.6709, "addr_empty": 21541, "has_comma_pct": 97.0348, "has_digit_name": 8094 },
+    "france_total_test_rows": 1694445,
+    "test_s1_share_of_france_pct": 15.3119,
+    "density_comparison": "France num_digits/row 1.93-1.97 vs US 3.9792 / India 3.7717 in train_s3 - roughly half the density, consistent with a short leading house number then a long French street name.",
+    "denominator_warning": "The 0.42% no-digit figure quoted in the work order is test_s1 ONLY. s2/s3 is 3.67-3.79%, about 9x higher. Quoting 0.42% without naming test_s1 repeats the retracted-figure denominator error. The s1/s2/s3 gap mirrors the US alpha_only_addr gap (0.0001% -> 6.1192% -> 5.2036%), so it is a SOURCE artefact, not a France fact.",
+    "france_two_char_tokens_test_s3": {
+      "bag_occ": 4993261,
+      "len2_kinds": 190,
+      "len2_occ": 1293935,
+      "len2_share_of_bag": 0.2591,
+      "top": ["de 410366", "la 188981", "du 94953", "no 35742", "av 27570"],
+      "per_D119": "these function words are largely consumed by the whole-component continue at normalize.py:333-335 and are behaviourally harmless",
+      "none_is_a_state_code": true
+    }
+  },
+  "gaps": [
+    "Component ORDER and house-number position: NOT in the profile. build_profile.py:126-127 lowercases, splits on [,;] and feeds a Counter - no order and no component boundaries retained. Cannot distinguish '175 Boulevard ...' from '... 175'; cannot count leading-number rows. Structural gap in the PROFILE, not in the data. Not estimated.",
+    "Whether a state code sits in a standalone comma-component: not measurable, same flattening. This bounds the blocking_key_asymmetry magnitude claim.",
+    "Pair-level decoy statistics (79.8% / 0.126% / 0.299%): quoted from decoy_postfilter.py:5-9, NOT re-measured; the profile holds no pair data.",
+    "Top-4000 truncation floors: train_s1 182, train_s2 394, train_s3 362, test_s1 166, test_s2 459, test_s3 416. Every 'absent' means 'not in the top 4000', never 'does not occur'.",
+    "All token figures are OCCURRENCES, never rows. A token appearing twice in one address counts twice.",
+    "Row-level digit co-occurrence is not collected. dig5 and dig6 are independent totals and MUST NOT be added."
+  ],
+
+  "new_findings": [
+    {
+      "id": "P033-N1",
+      "label": "CONFIRMED",
+      "title": "The s3 state-representation shift is BIDIRECTIONAL and COUNTRY-OPPOSITE",
+      "body": "India s1/s2 write the state in full and s3 writes the 2-letter code (12.56 -> 685.22 per 1k). The US does the exact reverse: s1/s2 write the 2-letter code (1027.19 -> 88.46 per 1k) and s3 writes the full name (28.80 -> 787.02 per 1k). D118 measured the India direction only. Source 3 is a different geography encoding, not a compression.",
+      "evidence": "train_s3 India mh 321405 vs maharashtra 24074; train_s3 US texas 294385 vs tx 15282, against train_s1 US tx 133224 vs texas 713"
+    },
+    {
+      "id": "P033-N2",
+      "label": "CONFIRMED (correction to D118)",
+      "title": "Self-map loop exposure is 10,044,348 occurrences, 3.21x the recorded 3,125,112",
+      "body": "D118's 98.00% is an IN_STATES-only statistic. US_STATES runs the other way (5.91% in s3). The true stake is the mass in files that WRITE 2-letter codes, because those have no blocking-key fallback: India s3 3,125,112 + US s1/s2/test_s1/test_s2 6,919,236 = 10,044,348 = 95.27% of all self-map mass. Do not refactor normalize.py:252-254."
+    },
+    {
+      "id": "P033-N3",
+      "label": "CONFIRMED (structural); impact NOT measurable",
+      "title": "A 2-letter state code can never be a blocking key; India s3 state resolution is field-only with zero fallback",
+      "body": "keys.py:42 requires len >= 3 and keys.py:41 requires ^\\d+$; all 51 US and 36 IN canonical values are exactly 2 chars, and none collides with ADDR_GENERIC. The only carrier is state_eq (features.py:114), a 3-way feature not a retrieval route. US s3 writes 'texas' (5 chars) and WOULD retain a blocking token on a lookup failure, so India s3 is the brittle case and US s3 the robust one. No action."
+    }
+  ],
+
+  "new_defects_found": [],
+  "defect_note": "No new code defect. The French 'bis' fused-form concern is refuted for train (0 occurrences in any train file); the train_s3 fused mass is Indian flat designations and is a PRE-EXISTING keys.py:41 issue that is LARGER in s1/s2 than s3, so not an s3 regression.",
+
+  "trap": {
+    "statement": "Any France rate computed over a train-file France denominator is meaningless. A train file cannot produce one. France digit / postcode / state rates must be quoted from test_s1/s2/s3, never from a train file, and always with the sub-file named.",
+    "this_is_the_retracted_figure_error": "The retracted '100% of France rows resolve a state' figure was a test_source1-only denominator (259,452 rows = 15.3119% of 1,694,445 France test rows) presented as a France-wide rate. Its arithmetic summed exactly to the s1 row count, which was the tell."
+  }
+}

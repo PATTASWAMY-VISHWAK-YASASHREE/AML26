@@ -1,0 +1,311 @@
+{
+    "task_id":  "P015",
+    "title":  "[France] train_s3: shape, null rates, length distribution",
+    "agent":  "b04c",
+    "family":  "A-profile",
+    "status":  "COMPLETE",
+    "headline":  "The France slice in train_s3 is EMPTY. country_rows has no France key; sum(country_rows) closes exactly on rows, so France = 0 rows = 0.000000% of the file. Every France rate in the work order is 0/0 (undefined), NOT 0%.",
+    "data_source":  "analysis_out/profile/*.json only; no raw TSV opened",
+    "slice":  {
+                  "file":  "train_s3.json",
+                  "split":  "train",
+                  "source":  3,
+                  "cols":  [
+                               "entity_id",
+                               "business_name",
+                               "business_address",
+                               "country"
+                           ],
+                  "rows":  5285603,
+                  "country_rows":  {
+                                       "US":  3170056,
+                                       "India":  2115547
+                                   },
+                  "country_rows_keys":  [
+                                            "US",
+                                            "India"
+                                        ],
+                  "has_france_key":  false,
+                  "sum_country_rows":  5285603,
+                  "sum_closes_on_rows":  true,
+                  "france_rows":  0,
+                  "france_share_pct":  0,
+                  "france_share_arithmetic":  "0 / 5285603 = 0.000000%"
+              },
+    "france_rates":  {
+                         "status":  "UNDEFINED_ZERO_DENOMINATOR",
+                         "denominator":  0,
+                         "note":  "Each requested statistic is f(France)/rows(France) with rows(France)=0 -\u003e 0/0. Reporting these as 0% would be a fabricated figure. Same class of error as the RETRACTED 100%-of-France-resolve-a-state figure, in the opposite direction.",
+                         "empty_name_rate":  null,
+                         "empty_address_rate":  null,
+                         "mean_name_length":  null,
+                         "mean_address_length":  null,
+                         "name_length_histogram":  null,
+                         "digit_in_name_rate":  null,
+                         "comma_in_address_rate":  null,
+                         "entity_id_prefix_validity":  null,
+                         "large_enough_to_conclude":  "NO - n = 0, undefined not negative"
+                     },
+    "observed_countries":  {
+                               "US":  {
+                                          "rows":  3170056,
+                                          "share_of_file_pct":  59.9753,
+                                          "name_empty":  0,
+                                          "name_empty_pct":  0,
+                                          "addr_empty":  110968,
+                                          "addr_empty_pct":  3.5005,
+                                          "name_chars":  76009139,
+                                          "addr_chars":  121873446,
+                                          "mean_name_length_chars":  23.9772,
+                                          "mean_address_length_chars":  38.4452,
+                                          "has_digit_name":  199652,
+                                          "digit_in_name_rate_pct":  6.2981,
+                                          "digit_in_name_stderr_pp":  0.0136,
+                                          "has_comma":  3059088,
+                                          "comma_in_address_rate_pct":  96.4995,
+                                          "prefix_bad":  0,
+                                          "entity_id_prefix_guard":  "S3-",
+                                          "entity_id_prefix_validity":  "CLEAN - prefix_bad = 0",
+                                          "alpha_only_addr":  164957,
+                                          "alpha_only_addr_pct":  5.2036,
+                                          "dig5":  341738,
+                                          "dig5_per_row":  0.1078,
+                                          "dig6":  42321,
+                                          "dig6_per_row":  0.01335,
+                                          "name_tokens_occurrences":  11522038,
+                                          "num_digits_address_only":  12614249,
+                                          "name_len_hist":  {
+                                                                "bin0_to_+10":  117192,
+                                                                "bin10_to_+10":  968304,
+                                                                "bin20_to_+10":  1276652,
+                                                                "bin30_to_+10":  628392,
+                                                                "bin40_to_+10":  149220,
+                                                                "bin50_to_+10":  26607,
+                                                                "bin60_to_+10":  3417,
+                                                                "bin70_to_+10":  259,
+                                                                "bin80_to_+10":  13
+                                                            },
+                                          "name_len_hist_sum":  3170056,
+                                          "name_len_hist_closes_on_rows":  true
+                                      },
+                               "India":  {
+                                             "rows":  2115547,
+                                             "share_of_file_pct":  40.0247,
+                                             "name_empty":  0,
+                                             "name_empty_pct":  0,
+                                             "addr_empty":  64948,
+                                             "addr_empty_pct":  3.07,
+                                             "name_chars":  57199388,
+                                             "addr_chars":  125040524,
+                                             "mean_name_length_chars":  27.0376,
+                                             "mean_address_length_chars":  59.1055,
+                                             "has_digit_name":  71195,
+                                             "digit_in_name_rate_pct":  3.3653,
+                                             "digit_in_name_stderr_pp":  0.0124,
+                                             "has_comma":  2050598,
+                                             "comma_in_address_rate_pct":  96.9299,
+                                             "prefix_bad":  0,
+                                             "entity_id_prefix_guard":  "S3-",
+                                             "entity_id_prefix_validity":  "CLEAN - prefix_bad = 0",
+                                             "alpha_only_addr":  145433,
+                                             "alpha_only_addr_pct":  6.8745,
+                                             "dig5":  22317,
+                                             "dig5_per_row":  0.01055,
+                                             "dig6":  410,
+                                             "dig6_per_row":  0.00019,
+                                             "name_tokens_occurrences":  7032501,
+                                             "num_digits_address_only":  7979194,
+                                             "name_len_hist":  {
+                                                                   "bin0_to_+10":  64887,
+                                                                   "bin10_to_+10":  405990,
+                                                                   "bin20_to_+10":  799604,
+                                                                   "bin30_to_+10":  645037,
+                                                                   "bin40_to_+10":  169414,
+                                                                   "bin50_to_+10":  26650,
+                                                                   "bin60_to_+10":  3480,
+                                                                   "bin70_to_+10":  409,
+                                                                   "bin80_to_+10":  57,
+                                                                   "bin90_to_+10":  16,
+                                                                   "bin100_to_+10":  2,
+                                                                   "bin120_to_+10":  1
+                                                               },
+                                             "name_len_hist_sum":  2115547,
+                                             "name_len_hist_closes_on_rows":  true
+                                         }
+                           },
+    "france_zero_train_cross_file":  {
+                                         "note":  "sum(country_rows) closes exactly on rows in ALL SIX profiles, so no breakdown is partial",
+                                         "train_s1":  {
+                                                          "rows":  2206821,
+                                                          "keys":  [
+                                                                       "US",
+                                                                       "India"
+                                                                   ],
+                                                          "US":  1323633,
+                                                          "India":  883188,
+                                                          "france_rows":  0
+                                                      },
+                                         "train_s2":  {
+                                                          "rows":  5034616,
+                                                          "keys":  [
+                                                                       "India",
+                                                                       "US"
+                                                                   ],
+                                                          "India":  2017799,
+                                                          "US":  3016817,
+                                                          "france_rows":  0
+                                                      },
+                                         "train_s3":  {
+                                                          "rows":  5285603,
+                                                          "keys":  [
+                                                                       "US",
+                                                                       "India"
+                                                                   ],
+                                                          "US":  3170056,
+                                                          "India":  2115547,
+                                                          "france_rows":  0
+                                                      },
+                                         "test_s1":  {
+                                                         "rows":  1732544,
+                                                         "keys":  [
+                                                                      "US",
+                                                                      "France",
+                                                                      "India"
+                                                                  ],
+                                                         "US":  663106,
+                                                         "France":  259452,
+                                                         "India":  809986
+                                                     },
+                                         "test_s2":  {
+                                                         "rows":  4887273,
+                                                         "keys":  [
+                                                                      "India",
+                                                                      "France",
+                                                                      "US"
+                                                                  ],
+                                                         "India":  2312565,
+                                                         "France":  703378,
+                                                         "US":  1871330
+                                                     },
+                                         "test_s3":  {
+                                                         "rows":  5082316,
+                                                         "keys":  [
+                                                                      "India",
+                                                                      "France",
+                                                                      "US"
+                                                                  ],
+                                                         "India":  2405000,
+                                                         "France":  731615,
+                                                         "US":  1945701
+                                                     },
+                                         "total_train_rows":  12527040,
+                                         "total_train_france_rows":  0,
+                                         "total_france_test_rows":  1694445
+                                     },
+    "state_representation_asymmetry":  {
+                                           "claim":  "train_s3 and test_s3 encode Indian states as TWO-LETTER CODES; train_s1/s2 write the state in full",
+                                           "unit":  "TOKEN OCCURRENCES from addr_tokens (top 4000, periodically pruned) - never rows",
+                                           "denominator":  "by_country.India.rows",
+                                           "method":  "partitioned the 49 IN_STATES keys into 49 full-name keys and 37 distinct canonical codes; the two sets are DISJOINT (Compare-Object -IncludeEqual returns empty) so the masses sum without double-counting",
+                                           "key_evidence":  {
+                                                                "train_s3":  {
+                                                                                 "mh":  321405,
+                                                                                 "mh_per_1k":  151.93,
+                                                                                 "maharashtra":  24074,
+                                                                                 "maharashtra_per_1k":  11.38,
+                                                                                 "code_mass":  1449612,
+                                                                                 "fullname_mass":  546661,
+                                                                                 "code_share_of_resolvable_pct":  72.62
+                                                                             },
+                                                                "train_s1":  {
+                                                                                 "mh":  2099,
+                                                                                 "mh_per_1k":  2.38,
+                                                                                 "maharashtra":  192382,
+                                                                                 "maharashtra_per_1k":  217.83,
+                                                                                 "code_mass":  11089,
+                                                                                 "fullname_mass":  857493,
+                                                                                 "code_share_of_resolvable_pct":  1.28
+                                                                             }
+                                                            },
+                                           "reproduces_d118":  true,
+                                           "per_file":  [
+                                                            {
+                                                                "file":  "train_s1.json",
+                                                                "india_rows":  883188,
+                                                                "code_mass":  11089,
+                                                                "fullname_mass":  857493,
+                                                                "code_per_1k_rows":  12.56,
+                                                                "fullname_per_1k_rows":  970.91,
+                                                                "code_share_of_resolvable_pct":  1.28,
+                                                                "listed_addr_token_mass":  9395284
+                                                            },
+                                                            {
+                                                                "file":  "train_s2.json",
+                                                                "india_rows":  2017799,
+                                                                "code_mass":  19558,
+                                                                "fullname_mass":  1373764,
+                                                                "code_per_1k_rows":  9.69,
+                                                                "fullname_per_1k_rows":  680.82,
+                                                                "code_share_of_resolvable_pct":  1.4,
+                                                                "listed_addr_token_mass":  18762478
+                                                            },
+                                                            {
+                                                                "file":  "train_s3.json",
+                                                                "india_rows":  2115547,
+                                                                "code_mass":  1449612,
+                                                                "fullname_mass":  546661,
+                                                                "code_per_1k_rows":  685.22,
+                                                                "fullname_per_1k_rows":  258.4,
+                                                                "code_share_of_resolvable_pct":  72.62,
+                                                                "listed_addr_token_mass":  18171162
+                                                            },
+                                                            {
+                                                                "file":  "test_s3.json",
+                                                                "india_rows":  2405000,
+                                                                "code_mass":  1675500,
+                                                                "fullname_mass":  605241,
+                                                                "code_per_1k_rows":  696.67,
+                                                                "fullname_per_1k_rows":  251.66,
+                                                                "code_share_of_resolvable_pct":  73.46,
+                                                                "listed_addr_token_mass":  20814196
+                                                            }
+                                                        ],
+                                           "self_map":  {
+                                                            "source":  "_upstream/src/normalize.py",
+                                                            "lines":  "252-254",
+                                                            "quoted":  "for _m in (US_STATES, IN_STATES):\n    for _v in list(_m.values()):\n        _m.setdefault(_v, _v)",
+                                                            "state_maps_line":  "250: STATE_MAPS = {\"US\": US_STATES, \"India\": IN_STATES, \"France\": FR_REGIONS}",
+                                                            "matcher_lines":  "333-335: if ck in smap: state = smap[ck]; continue",
+                                                            "role":  "sole mechanism by which an s3 Indian state code resolves; without line 254 the 37 codes are not keys of IN_STATES and would fall through to the token loop with state=\"\"",
+                                                            "fr_regions_excluded_from_loop":  true,
+                                                            "fr_regions_note":  "FR_REGIONS is not in the line-252 tuple. All 14 canonical values (hdf/naq/pdl/idf) occur 0 times as input, so the effect is zero. Already-settled item; no new claim made here."
+                                                        },
+                                           "self_map_key_mass":  {
+                                                                     "definition":  "sum of the 37 canonical-code token occurrences across all six profiles",
+                                                                     "total_all_6_files":  3188831,
+                                                                     "train_s3":  1449612,
+                                                                     "test_s3":  1675500,
+                                                                     "s3_combined":  3125112,
+                                                                     "s3_share_pct":  98,
+                                                                     "train_s1":  11089,
+                                                                     "train_s2":  19558,
+                                                                     "test_s1":  10175,
+                                                                     "test_s2":  22897,
+                                                                     "india_rows_train_s3_plus_test_s3":  4520547
+                                                                 }
+                                       },
+    "new_defects_found":  {
+                              "count":  0,
+                              "note":  "None. prefix_bad = 0 and name_empty = 0 for both present countries; both len_hist bin sets reconcile exactly to rows. The France-zero-train condition is already known and already handled in code (crossfit.py:112 iterates (\"US\",\"India\"); decoy_postfilter.py:17-18 documents the France no-labels case). The self-map loop at normalize.py:252-254 is correctly scoped for this data. No defect manufactured to look productive."
+                          },
+    "gaps_and_limits":  [
+                            "Every France-train statistic is undefined (zero denominator). A gap in the DATA, unfixable from the provided files - not a gap in effort.",
+                            "NOT MEASURABLE from the profile: whether a state code resolves via the whole-component match at normalize.py:333. build_profile.py:126-127 FLATTENS address components (ADDR_SPLIT = [,;] then per-component findall), so the profile cannot distinguish a standalone mh component (resolves) from mh glued to a postcode inside one component (does not resolve). Any per-file India state-resolution rate is therefore NOT computable from these artifacts.",
+                            "name_tokens / addr_tokens are the TOP 4000 per country and are periodically pruned (prune(), PRUNE_EVERY=8, build_profile.py:45-48, 128-133). Token counts are lower bounds with a pruned tail; a missing token means not in the top 4000, never does not occur. The code-vs-fullname split understates both masses by an unknown amount. INFERENCE (not measured): the 72.62% vs 1.28% separation is nonetheless robust, because the pruned tail is dominated by ordinary address words rather than state names.",
+                            "num_digits counts digits in the ADDRESS only (build_profile.py:114), not the name. The digit-in-name figure uses the separate ROW counter has_digit_name (lines 106-107).",
+                            "dig5 / dig6 are lookaround-guarded ((?\u003c!\\d)\\d{5}(?!\\d), lines 29-30): a digit inside a longer digit run does not count.",
+                            "All per-country stats are totals across the whole slice; every rate here is field / by_country.\u003cc\u003e.rows.",
+                            "Did not re-derive anything in the ALREADY RULED OUT list, and does not repeat the RETRACTED French function-word finding."
+                        ],
+    "deliverable":  "analysis_out/findings/P015_France_train_s3_shape.md"
+}

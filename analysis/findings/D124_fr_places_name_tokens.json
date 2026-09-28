@@ -1,0 +1,419 @@
+{
+ "task_id": "D124",
+ "family": "B-dictionary",
+ "title": "France name_tokens: city and place-name coverage",
+ "status": "delivered",
+ "scope": "all three test sources jointly; denominator by_country.France.rows",
+ "headline": "The France name_tokens axis contains zero place names in its top 30 (legal-form and organisational vocabulary); the highest city bordeaux is rank 41. Places are only visible on addr_tokens (ranks 8-30). Top-10 place tokens carry 1,443,294 occurrences = 85.17 per 100 French rows, an upper bound on rows.",
+ "answers": {
+  "a_top30_places_on_name_axis": "IMPOSSIBLE - the top 30 of name_tokens contains 0 place names; premise is wrong about the axis",
+  "a_correct_axis": "addr_tokens, where the 10 named places occupy ranks 8-30",
+  "b_top10_concentration": "1443294 occurrences / 1694445 rows = 85.17 per 100 rows; token-occurrence sum, UPPER BOUND on rows, not a row count",
+  "c_separability": "clean on addr_tokens (disjoint rank bands vs rue/avenue), not on name_tokens",
+  "blocking": "city should NOT be a blocking key and structurally CANNOT be one - keys.py emits address tokens only inside conjunctive kind-0/kind-2 keys, never bare"
+ },
+ "denominators": {
+  "france_rows_total": 1694445,
+  "name_token_mass_total": 5775884,
+  "name_tokens_per_row": 3.409,
+  "per_source": [
+   {
+    "source": "test_s1",
+    "france_rows": 259452,
+    "france_name_tokens": 828812,
+    "top10_occurrences": 222942,
+    "per100": 85.93,
+    "len_hist_sum": 259452
+   },
+   {
+    "source": "test_s2",
+    "france_rows": 703378,
+    "france_name_tokens": 2421234,
+    "top10_occurrences": 598004,
+    "per100": 85.02,
+    "len_hist_sum": 703378
+   },
+   {
+    "source": "test_s3",
+    "france_rows": 731615,
+    "france_name_tokens": 2525838,
+    "top10_occurrences": 622348,
+    "per100": 85.06,
+    "len_hist_sum": 731615
+   }
+  ]
+ },
+ "top30_name_tokens_france": [
+  [
+   "sarl",
+   358676,
+   6.21
+  ],
+  [
+   "sas",
+   252882,
+   4.38
+  ],
+  [
+   "france",
+   157343,
+   2.72
+  ],
+  [
+   "s",
+   136182,
+   2.36
+  ],
+  [
+   "club",
+   122195,
+   2.12
+  ],
+  [
+   "de",
+   100867,
+   1.75
+  ],
+  [
+   "eurl",
+   100795,
+   1.75
+  ],
+  [
+   "sa",
+   82278,
+   1.42
+  ],
+  [
+   "d",
+   80655,
+   1.4
+  ],
+  [
+   "amicale",
+   79613,
+   1.38
+  ],
+  [
+   "sasu",
+   73614,
+   1.27
+  ],
+  [
+   "sci",
+   63630,
+   1.1
+  ],
+  [
+   "a",
+   63142,
+   1.09
+  ],
+  [
+   "maison",
+   61373,
+   1.06
+  ],
+  [
+   "du",
+   60732,
+   1.05
+  ],
+  [
+   "ecole",
+   58804,
+   1.02
+  ],
+  [
+   "centre",
+   56194,
+   0.97
+  ],
+  [
+   "groupe",
+   55316,
+   0.96
+  ],
+  [
+   "comite",
+   53381,
+   0.92
+  ],
+  [
+   "com",
+   49784,
+   0.86
+  ],
+  [
+   "union",
+   49247,
+   0.85
+  ],
+  [
+   "fils",
+   46583,
+   0.81
+  ],
+  [
+   "l",
+   45951,
+   0.8
+  ],
+  [
+   "des",
+   44387,
+   0.77
+  ],
+  [
+   "veloppement",
+   44238,
+   0.77
+  ],
+  [
+   "sportive",
+   43661,
+   0.76
+  ],
+  [
+   "cie",
+   39275,
+   0.68
+  ],
+  [
+   "amis",
+   37380,
+   0.65
+  ],
+  [
+   "e",
+   35433,
+   0.61
+  ],
+  [
+   "primaire",
+   34769,
+   0.6
+  ]
+ ],
+ "top30_place_tokens_contains_any_place": false,
+ "cities": [
+  {
+   "token": "bordeaux",
+   "name_rank": 41,
+   "name_count": 31401,
+   "addr_rank": 8,
+   "addr_count": 277474,
+   "addr_per_100_rows": 16.38
+  },
+  {
+   "token": "nantes",
+   "name_rank": 47,
+   "name_count": 27226,
+   "addr_rank": 11,
+   "addr_count": 238748,
+   "addr_per_100_rows": 14.09
+  },
+  {
+   "token": "lille",
+   "name_rank": 50,
+   "name_count": 25716,
+   "addr_rank": 12,
+   "addr_count": 221585,
+   "addr_per_100_rows": 13.08
+  },
+  {
+   "token": "calais",
+   "name_rank": 87,
+   "name_count": 11874,
+   "addr_rank": 19,
+   "addr_count": 128762,
+   "addr_per_100_rows": 7.6
+  },
+  {
+   "token": "tourcoing",
+   "name_rank": 79,
+   "name_count": 13274,
+   "addr_rank": 22,
+   "addr_count": 115914,
+   "addr_per_100_rows": 6.84
+  },
+  {
+   "token": "dunkerque",
+   "name_rank": 81,
+   "name_count": 12950,
+   "addr_rank": 23,
+   "addr_count": 111538,
+   "addr_per_100_rows": 6.58
+  },
+  {
+   "token": "roubaix",
+   "name_rank": 82,
+   "name_count": 12586,
+   "addr_rank": 24,
+   "addr_count": 107111,
+   "addr_per_100_rows": 6.32
+  },
+  {
+   "token": "nazaire",
+   "name_rank": 93,
+   "name_count": 10274,
+   "addr_rank": 27,
+   "addr_count": 88016,
+   "addr_per_100_rows": 5.19
+  },
+  {
+   "token": "pessac",
+   "name_rank": 99,
+   "name_count": 9037,
+   "addr_rank": 28,
+   "addr_count": 81815,
+   "addr_per_100_rows": 4.83
+  },
+  {
+   "token": "buch",
+   "name_rank": 102,
+   "name_count": 7958,
+   "addr_rank": 29,
+   "addr_count": 72331,
+   "addr_per_100_rows": 4.27
+  }
+ ],
+ "top10_places": {
+  "tokens": [
+   "bordeaux",
+   "nantes",
+   "lille",
+   "calais",
+   "tourcoing",
+   "dunkerque",
+   "roubaix",
+   "nazaire",
+   "pessac",
+   "buch"
+  ],
+  "occurrences": 1443294,
+  "rows_denominator": 1694445,
+  "per_100_rows": 85.18,
+  "measure": "token occurrences, upper bound on rows; multi-word communes double-count"
+ },
+ "tokeniser_artifacts": {
+  "mechanism": "build_profile.py:28 TOKEN_RE=[a-z0-9]+ applied WITHOUT accent stripping, so an accented char acts as a delimiter and splits the word",
+  "confirmed": [
+   {
+    "fragment": "veloppement",
+    "axis": "name_tokens",
+    "count": 44238,
+    "real_word": "developpement",
+    "mechanism": "e-acute dropped by [a-z0-9]+ split"
+   },
+   {
+    "fragment": "cole",
+    "axis": "name_tokens",
+    "count": 29147,
+    "real_word": "ecole",
+    "mechanism": "e-acute dropped by [a-z0-9]+ split"
+   },
+   {
+    "fragment": "sidence",
+    "axis": "addr_tokens",
+    "count": 1467,
+    "real_word": "residence",
+    "mechanism": "e-acute dropped by [a-z0-9]+ split"
+   },
+   {
+    "fragment": "sidence",
+    "axis": "name_tokens",
+    "count": 950,
+    "real_word": "residence",
+    "mechanism": "e-acute dropped by [a-z0-9]+ split"
+   },
+   {
+    "fragment": "tienne",
+    "axis": "addr_tokens",
+    "count": 667,
+    "real_word": "etienne (Saint-Etienne)",
+    "mechanism": "E-acute dropped by [a-z0-9]+ split"
+   }
+  ],
+  "clean_counterparts": [
+   {
+    "token": "ecole",
+    "axis": "name_tokens",
+    "count": 58804,
+    "note": "accent-free form, real word"
+   }
+  ],
+  "unattributed": [
+   {
+    "token": "chal",
+    "axis": "addr_tokens",
+    "count": 8318,
+    "note": "artifact per D081; producer string not isolated, no conclusion rests on it"
+   }
+  ],
+  "note": "artifact in profile only; normalize.py:264-266 strip_accents uses NFKD and transliterates correctly, so this is a tooling defect not a pipeline defect"
+ },
+ "new_defect": {
+  "title": "ADDR_CANON_FR canonical outputs absent from ADDR_GENERIC stoplist in keys.py",
+  "canon_outputs_total": 30,
+  "non_empty_canon_outputs": 29,
+  "absent_from_ADDR_GENERIC_incl_empty": 20,
+  "absent_non_empty": 19,
+  "of_which_actually_occur": 13,
+  "leak_occurrences": 238175,
+  "leak_per_100_rows": 14.06,
+  "per_token": {
+   "saint": 141364,
+   "bis": 52072,
+   "rte": 11995,
+   "res": 8340,
+   "quai": 8089,
+   "sainte": 7486,
+   "crs": 4520,
+   "bat": 1767,
+   "gen": 1227,
+   "mal": 612,
+   "pres": 496,
+   "lieu": 181,
+   "zone": 26
+  },
+  "zero_occurrence_tokens": [
+   "fbg",
+   "lieudit",
+   "prof",
+   "za",
+   "zac",
+   "zi"
+  ],
+  "verdict": {
+   "rte_quai_crs": "CONFIRMED street-type leak",
+   "bis": "LIKELY",
+   "saint": "SPECULATIVE - deliberately normalised at normalize.py:207, judgement call for a human"
+  }
+ },
+ "blocking_caps": {
+  "S1_MAXCAP": 300,
+  "CAPS_kind2": 30,
+  "binding_cap_for_city_keys": 30,
+  "s1_bordeaux_token_count": 43634,
+  "note": "key-level DF NOT measurable from profile; figures are token counts, an upper bound on key DF",
+  "s1_addr_tokens_at_or_above_300": 389,
+  "s1_name_tokens_at_or_above_300": 199,
+  "rows_with_digits_pct": 96.78
+ },
+ "gaps": [
+  "true row share of top-10 places not recoverable (component structure discarded at build_profile.py:126-127)",
+  "key-level document frequency not measurable from token counts",
+  "address component order not observable",
+  "saint cannot be split into place vs street namesake",
+  "s1/s2/s3 department coverage not attempted (needs component structure)",
+  "chal producer string not isolated",
+  "end-to-end F0.5 effect of the stoplist leak unquantified"
+ ],
+ "already_checked_compliance": {
+  "refuted_1_fr_postcode": "not re-derived; no postal figure quoted",
+  "refuted_2_fr_region": "not re-derived; the 100% s1-only figure and the 71.10%/97.44% contradiction are neither restated nor relied on",
+  "denominator_discipline": "all figures are 3-source joint; no single-source rate quoted as a France-wide rate"
+ },
+ "recompute_note": "Every figure re-derived from analysis_out/profile/*.json; a prior draft of this deliverable contained incorrect counts for s (204158 vs actual 136182) and eurl (104795 vs actual 100795) and has been replaced."
+}

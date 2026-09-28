@@ -1,0 +1,956 @@
+{
+ "task_id": "D082",
+ "family": "B-dictionary",
+ "title": "mine evidence to extend ADDR_CANON_FR for France",
+ "headline": "ADDR_CANON_FR (68 keys) is a street-type dictionary that works: its 55 live keys absorb 2,084,136 of 11,992,918 listed France address tokens (17.38%). But 82.46% of French address-token mass is unhandled, and the holes are French function words (16.40%) and geography (18.40%), not street types. NEW DEFECT: French 'est' (east) is silently rewritten to the English noun 'estate' (469 occurrences) via an inherited ADDR_CANON_COMMON entry. France is test-only - 0 France rows in train.",
+ "most_important_number": {
+  "value": 2084136,
+  "denominator": 11992918,
+  "pct": 17.38,
+  "meaning": "address tokens handled by ADDR_CANON_FR's own keys across test_s1+s2+s3"
+ },
+ "new_defect_found": true,
+ "new_defects": [
+  {
+   "id": "A",
+   "confidence": "CONFIRMED",
+   "title": "French 'est' (east) -> English 'estate'",
+   "mechanism": "normalize.py:321 drops 7 COMMON keys for France (st ste dr n s e w) but not 'est'; ADDR_CANON_COMMON['est']='estate' (normalize.py:186) survives and ADDR_CANON_FR does not override it",
+   "mass": {
+    "s1": 76,
+    "s2": 189,
+    "s3": 204,
+    "total": 469
+   },
+   "pct_of_listed_mass": 0.0,
+   "siblings": {
+    "ouest": {
+     "s1": 212,
+     "s2": 504,
+     "s3": 505,
+     "total": 1221
+    },
+    "sud": {
+     "s1": 193,
+     "s2": 507,
+     "s3": 554,
+     "total": 1254
+    },
+    "nord": {
+     "s1": 200,
+     "s2": 75362,
+     "s3": 76449,
+     "total": 152011
+    }
+   },
+   "note": "nord is an FR_REGIONS key, consumed at normalize.py:331-335 before canonicalisation, so it is a state-map matter not an ADDR_CANON_FR defect. FR_REGIONS intersect ADDR_CANON keys = 0 (empty set)."
+  },
+  {
+   "id": "B",
+   "confidence": "CONFIRMED",
+   "title": "LEET applied to names but not to addresses",
+   "mechanism": "normalize.py:279-280 applies LEET in _name_tokens; address path normalize.py:342-349 has no LEET call",
+   "address_side": {
+    "token_count": 46,
+    "mass": 13580,
+    "pct_of_listed_mass": 0.0011,
+    "word_then_digit": {
+     "tokens": 6,
+     "mass": 5576
+    },
+    "digit_then_word": {
+     "tokens": 40,
+     "mass": 8004
+    },
+    "other": {
+     "tokens": 0,
+     "mass": 0
+    },
+    "top": [
+     {
+      "token": "cour2",
+      "s1": 657,
+      "s2": 1563,
+      "s3": 1652,
+      "total": 3872
+     },
+     {
+      "token": "1er",
+      "s1": 343,
+      "s2": 795,
+      "s3": 825,
+      "total": 1963
+     },
+     {
+      "token": "chem1",
+      "s1": 207,
+      "s2": 443,
+      "s3": 452,
+      "total": 1102
+     },
+     {
+      "token": "2eme",
+      "s1": 135,
+      "s2": 279,
+      "s3": 283,
+      "total": 697
+     },
+     {
+      "token": "3eme",
+      "s1": 74,
+      "s2": 139,
+      "s3": 137,
+      "total": 350
+     },
+     {
+      "token": "espl1",
+      "s1": 56,
+      "s2": 130,
+      "s3": 125,
+      "total": 311
+     },
+     {
+      "token": "2b",
+      "s1": 0,
+      "s2": 99,
+      "s3": 138,
+      "total": 237
+     },
+     {
+      "token": "1b",
+      "s1": 0,
+      "s2": 119,
+      "s3": 102,
+      "total": 221
+     },
+     {
+      "token": "2bis",
+      "s1": 0,
+      "s2": 104,
+      "s3": 92,
+      "total": 196
+     },
+     {
+      "token": "1bis",
+      "s1": 0,
+      "s2": 92,
+      "s3": 89,
+      "total": 181
+     },
+     {
+      "token": "80b",
+      "s1": 31,
+      "s2": 70,
+      "s3": 78,
+      "total": 179
+     },
+     {
+      "token": "chau1",
+      "s1": 28,
+      "s2": 73,
+      "s3": 76,
+      "total": 177
+     }
+    ],
+    "canon_key_hits": [],
+    "assessment": "house-number and ordinal notation (2b, 1bis, 1er, 2eme) plus truncated street types (cour2, chem1), NOT leetspeak"
+   },
+   "name_side": {
+    "token_count": 24,
+    "mass": 5307,
+    "all_contain_leet_mapped_char": true,
+    "top": [
+     {
+      "token": "4l",
+      "total": 1943
+     },
+     {
+      "token": "3eme",
+      "total": 748
+     },
+     {
+      "token": "5arl",
+      "total": 637
+     },
+     {
+      "token": "5as",
+      "total": 417
+     },
+     {
+      "token": "c1ub",
+      "total": 190
+     },
+     {
+      "token": "amica1e",
+      "total": 136
+     },
+     {
+      "token": "1er",
+      "total": 131
+     },
+     {
+      "token": "5a",
+      "total": 129
+     },
+     {
+      "token": "3e",
+      "total": 121
+     },
+     {
+      "token": "mais0n",
+      "total": 118
+     },
+     {
+      "token": "1ere",
+      "total": 102
+     },
+     {
+      "token": "uni0n",
+      "total": 87
+     }
+    ],
+    "assessment": "genuine leetspeak, already handled by the existing name-side LEET call"
+   },
+   "leet_gap": "normalize.py:256 LEET maps 0 1 3 4 5 6 7 8 @ $ - no entry for 2 or 9, so 2eme keeps its 2 and 3eme becomes seme even where LEET IS applied (name-side limitation)"
+  },
+  {
+   "id": "C",
+   "confidence": "CONFIRMED",
+   "title": "profile tokenizer != normalize.py tokenizer; short-token counts inflated",
+   "mechanism": "build_profile.py:28 TOKEN_RE=[a-z0-9]+ applied to the RAW lowercased address; normalize.py:317 calls strip_accents FIRST and normalize.py:342 deletes apostrophes. Accents and apostrophes are therefore SEPARATORS in the profile but removed in normalize.py.",
+   "artifact_evidence": [
+    {
+     "token": "teau",
+     "mass": 1793,
+     "ascii_full_form": "chateau",
+     "full_form_mass": 1640
+    },
+    {
+     "token": "cit",
+     "mass": 5580,
+     "ascii_full_form": "cite",
+     "full_form_mass": 2546
+    },
+    {
+     "token": "ge",
+     "mass": 41120,
+     "ascii_full_form": "general",
+     "full_form_mass": 4826
+    },
+    {
+     "token": "all",
+     "mass": 61298,
+     "ascii_full_form": "allee",
+     "full_form_mass": 17779
+    },
+    {
+     "token": "ch",
+     "mass": 12774,
+     "ascii_full_form": "chemin",
+     "full_form_mass": 15244
+    }
+   ],
+   "apostrophe_leftovers": {
+    "l": 99889,
+    "d": 50816,
+    "c": 6197,
+    "j": 1243
+   },
+   "note": "teau cannot be a French word - it exists only as the tail of chateau split at the accented a. Inflated keys include n 106424, no 72021, all 61298, ch 12774, r 368224. all->allee happens to be correct despite inflation.",
+   "action": "treat any candidate whose evidence is a token of <=4 chars as unverified"
+  }
+ ],
+ "dictionary_ground_truth": {
+  "ADDR_CANON_FR_keys": 68,
+  "ADDR_CANON_COMMON_keys": 177,
+  "france_drop_tuple": [
+   "st",
+   "ste",
+   "dr",
+   "n",
+   "s",
+   "e",
+   "w"
+  ],
+  "FR_REGIONS_entries": 14,
+  "FR_REGIONS_distinct_values": 4,
+  "effective_france_canon_keys": 219,
+  "effective_definition": "{**{k:v for k,v in ADDR_CANON_COMMON if k not in DROP}, **ADDR_CANON_FR}"
+ },
+ "denominators": {
+  "listed_france_addr_tokens_by_source": {
+   "test_s1": 2253877,
+   "test_s2": 4745780,
+   "test_s3": 4993261
+  },
+  "listed_france_addr_tokens_total": 11992918,
+  "france_rows_by_source": {
+   "test_s1": 259452,
+   "test_s2": 703378,
+   "test_s3": 731615,
+   "train_s1": 0,
+   "train_s2": 0,
+   "train_s3": 0
+  },
+  "france_test_rows": 1694445,
+  "france_train_rows": 0,
+  "s1_share_of_france_test_pct": 15.31,
+  "note": "train France rows = 0 in all three train files; France is test-only"
+ },
+ "handled_vs_unhandled": {
+  "total": 11992918,
+  "handled": 2103882,
+  "handled_pct": 0.1754,
+  "FR_own": 2084136,
+  "FR_own_pct": 0.1738,
+  "COMMON_inherited": 19746,
+  "unhandled": 9889036,
+  "unhandled_pct": 0.8246,
+  "by_source": {
+   "test_s1": {
+    "mass": 2253877,
+    "handled": 313379,
+    "handled_pct": 0.139,
+    "unhandled": 1940498,
+    "unhandled_pct": 0.861
+   },
+   "test_s2": {
+    "mass": 4745780,
+    "handled": 878118,
+    "handled_pct": 0.185,
+    "unhandled": 3867662,
+    "unhandled_pct": 0.815
+   },
+   "test_s3": {
+    "mass": 4993261,
+    "handled": 912385,
+    "handled_pct": 0.1827,
+    "unhandled": 4080876,
+    "unhandled_pct": 0.8173
+   }
+  },
+  "invariants": [
+   "FR_own + COMMON_inherited == handled (exact)",
+   "handled + unhandled == total (exact)"
+  ]
+ },
+ "unhandled_category_breakdown": [
+  {
+   "category": "names_cities_other_alpha",
+   "mass": 4077440,
+   "pct_of_listed_mass": 0.34
+  },
+  {
+   "category": "geography",
+   "mass": 2206125,
+   "pct_of_listed_mass": 0.184
+  },
+  {
+   "category": "function_words",
+   "mass": 1966401,
+   "pct_of_listed_mass": 0.164
+  },
+  {
+   "category": "house_numbers",
+   "mass": 1567275,
+   "pct_of_listed_mass": 0.1307
+  },
+  {
+   "category": "other_canon_miss",
+   "mass": 58215,
+   "pct_of_listed_mass": 0.0049
+  },
+  {
+   "category": "digit_glued",
+   "mass": 13580,
+   "pct_of_listed_mass": 0.0011
+  }
+ ],
+ "unhandled_category_sum_check": {
+  "sum": 9889036,
+  "expected": 9889036,
+  "closes_exactly": true
+ },
+ "addr_canon_fr_key_liveness": {
+  "live_count": 55,
+  "dead_count": 13,
+  "dead_keys": [
+   "avn",
+   "bld",
+   "boul",
+   "chem",
+   "fbg",
+   "fg",
+   "lieudit",
+   "null",
+   "numero",
+   "prof",
+   "za",
+   "zac",
+   "zi"
+  ],
+  "live_top": [
+   {
+    "key": "rue",
+    "canon": "rue",
+    "mass": 728583
+   },
+   {
+    "key": "r",
+    "canon": "rue",
+    "mass": 368224
+   },
+   {
+    "key": "saint",
+    "canon": "saint",
+    "mass": 141364
+   },
+   {
+    "key": "avenue",
+    "canon": "ave",
+    "mass": 126497
+   },
+   {
+    "key": "n",
+    "canon": "",
+    "mass": 106424
+   },
+   {
+    "key": "no",
+    "canon": "",
+    "mass": 72021
+   },
+   {
+    "key": "all",
+    "canon": "allee",
+    "mass": 61298
+   },
+   {
+    "key": "av",
+    "canon": "ave",
+    "mass": 57361
+   },
+   {
+    "key": "bis",
+    "canon": "bis",
+    "mass": 52072
+   },
+   {
+    "key": "boulevard",
+    "canon": "blvd",
+    "mass": 38275
+   },
+   {
+    "key": "st",
+    "canon": "saint",
+    "mass": 25454
+   },
+   {
+    "key": "bd",
+    "canon": "blvd",
+    "mass": 25273
+   },
+   {
+    "key": "ave",
+    "canon": "ave",
+    "mass": 21614
+   },
+   {
+    "key": "impasse",
+    "canon": "impasse",
+    "mass": 21102
+   },
+   {
+    "key": "route",
+    "canon": "rte",
+    "mass": 17932
+   },
+   {
+    "key": "allee",
+    "canon": "allee",
+    "mass": 17779
+   },
+   {
+    "key": "b",
+    "canon": "bis",
+    "mass": 17685
+   },
+   {
+    "key": "chemin",
+    "canon": "chemin",
+    "mass": 15244
+   },
+   {
+    "key": "place",
+    "canon": "pl",
+    "mass": 13363
+   },
+   {
+    "key": "pl",
+    "canon": "pl",
+    "mass": 12989
+   }
+  ]
+ },
+ "street_type_candidates": [
+  {
+   "token": "cour",
+   "verdict": "LIKELY",
+   "s1": 1571,
+   "s2": 3800,
+   "s3": 4032,
+   "total": 9403,
+   "pct_of_listed_mass": 0.0008
+  },
+  {
+   "token": "parc",
+   "verdict": "LIKELY",
+   "s1": 735,
+   "s2": 1751,
+   "s3": 1758,
+   "total": 4244,
+   "pct_of_listed_mass": 0.0004
+  },
+  {
+   "token": "pont",
+   "verdict": "LIKELY",
+   "s1": 654,
+   "s2": 1604,
+   "s3": 1608,
+   "total": 3866,
+   "pct_of_listed_mass": 0.0003
+  },
+  {
+   "token": "port",
+   "verdict": "LIKELY",
+   "s1": 652,
+   "s2": 1541,
+   "s3": 1632,
+   "total": 3825,
+   "pct_of_listed_mass": 0.0003
+  },
+  {
+   "token": "passage",
+   "verdict": "CONFIRMED",
+   "s1": 787,
+   "s2": 1164,
+   "s3": 1216,
+   "total": 3167,
+   "pct_of_listed_mass": 0.0003
+  },
+  {
+   "token": "lotissement",
+   "verdict": "CONFIRMED",
+   "s1": 296,
+   "s2": 719,
+   "s3": 773,
+   "total": 1788,
+   "pct_of_listed_mass": 0.0001
+  },
+  {
+   "token": "gare",
+   "verdict": "CONFIRMED",
+   "s1": 295,
+   "s2": 679,
+   "s3": 761,
+   "total": 1735,
+   "pct_of_listed_mass": 0.0001
+  },
+  {
+   "token": "domaine",
+   "verdict": "LIKELY",
+   "s1": 205,
+   "s2": 490,
+   "s3": 499,
+   "total": 1194,
+   "pct_of_listed_mass": 0.0001
+  },
+  {
+   "token": "chaussee",
+   "verdict": "CONFIRMED",
+   "s1": 76,
+   "s2": 549,
+   "s3": 500,
+   "total": 1125,
+   "pct_of_listed_mass": 0.0001
+  },
+  {
+   "token": "hameau",
+   "verdict": "CONFIRMED",
+   "s1": 178,
+   "s2": 429,
+   "s3": 460,
+   "total": 1067,
+   "pct_of_listed_mass": 0.0001
+  },
+  {
+   "token": "esplanade",
+   "verdict": "CONFIRMED",
+   "s1": 150,
+   "s2": 374,
+   "s3": 354,
+   "total": 878,
+   "pct_of_listed_mass": 0.0001
+  },
+  {
+   "token": "sentier",
+   "verdict": "CONFIRMED",
+   "s1": 102,
+   "s2": 247,
+   "s3": 269,
+   "total": 618,
+   "pct_of_listed_mass": 0.0001
+  },
+  {
+   "token": "villa",
+   "verdict": "LIKELY",
+   "s1": 105,
+   "s2": 226,
+   "s3": 263,
+   "total": 594,
+   "pct_of_listed_mass": 0.0
+  },
+  {
+   "token": "ruelle",
+   "verdict": "CONFIRMED",
+   "s1": 99,
+   "s2": 235,
+   "s3": 259,
+   "total": 593,
+   "pct_of_listed_mass": 0.0
+  },
+  {
+   "token": "parvis",
+   "verdict": "CONFIRMED",
+   "s1": 97,
+   "s2": 240,
+   "s3": 250,
+   "total": 587,
+   "pct_of_listed_mass": 0.0
+  },
+  {
+   "token": "sente",
+   "verdict": "LIKELY",
+   "s1": 97,
+   "s2": 231,
+   "s3": 234,
+   "total": 562,
+   "pct_of_listed_mass": 0.0
+  },
+  {
+   "token": "promenade",
+   "verdict": "LIKELY",
+   "s1": 90,
+   "s2": 219,
+   "s3": 227,
+   "total": 536,
+   "pct_of_listed_mass": 0.0
+  },
+  {
+   "token": "venelle",
+   "verdict": "CONFIRMED",
+   "s1": 76,
+   "s2": 203,
+   "s3": 202,
+   "total": 481,
+   "pct_of_listed_mass": 0.0
+  }
+ ],
+ "street_type_candidates_combined_mass": 36263,
+ "street_type_candidates_combined_pct": 0.003,
+ "abbrev_pairs": [
+  {
+   "long": "cours",
+   "long_mass": 8761,
+   "abbrev": "crs",
+   "abbrev_mass": 4520,
+   "status": "both handled",
+   "verdict": "OK"
+  },
+  {
+   "long": "cours",
+   "long_mass": 8761,
+   "abbrev": "cour",
+   "abbrev_mass": 9403,
+   "status": "long handled, ABBREV UNHANDLED",
+   "verdict": "LIKELY"
+  },
+  {
+   "long": "chemin",
+   "long_mass": 15244,
+   "abbrev": "che",
+   "abbrev_mass": 314,
+   "status": "both handled",
+   "verdict": "OK"
+  },
+  {
+   "long": "saint",
+   "long_mass": 141364,
+   "abbrev": "st",
+   "abbrev_mass": 25454,
+   "status": "both handled",
+   "verdict": "OK"
+  },
+  {
+   "long": "residence",
+   "long_mass": 4748,
+   "abbrev": "res",
+   "abbrev_mass": 8340,
+   "status": "both handled",
+   "verdict": "OK"
+  },
+  {
+   "long": "batiment",
+   "long_mass": 1978,
+   "abbrev": "bat",
+   "abbrev_mass": 1767,
+   "status": "both handled",
+   "verdict": "OK"
+  },
+  {
+   "long": "parvis",
+   "long_mass": 587,
+   "abbrev": "parv",
+   "abbrev_mass": 97,
+   "status": "both unhandled",
+   "verdict": "SPECULATIVE"
+  },
+  {
+   "long": "passage",
+   "long_mass": 3167,
+   "abbrev": "pass",
+   "abbrev_mass": 874,
+   "status": "both unhandled",
+   "verdict": "SPECULATIVE"
+  }
+ ],
+ "abbrev_mining_caveat": {
+  "generic_prefix_pairs_found": 3546,
+  "false_positive_examples": [
+   {
+    "short": "r",
+    "short_mass": 368224,
+    "long": "roubaix"
+   },
+   {
+    "short": "r",
+    "short_mass": 368224,
+    "long": "rignac"
+   },
+   {
+    "short": "r",
+    "short_mass": 368224,
+    "long": "roger"
+   }
+  ],
+  "note": "r is the street-type 'rue' abbrev colliding with surname initials; a naive prefix miner would add r->roubaix. Restricted to real French street-type pairs."
+ },
+ "geography_FRMAP_tokens": {
+  "FR_REGIONS_distinct_component_tokens": 20,
+  "total_token_mass": 3737379,
+  "pct_of_listed_mass": 0.3116,
+  "tokens": [
+   {
+    "token": "de",
+    "mass": 1050023
+   },
+   {
+    "token": "la",
+    "mass": 481231
+   },
+   {
+    "token": "loire",
+    "mass": 334419
+   },
+   {
+    "token": "france",
+    "mass": 293150
+   },
+   {
+    "token": "hauts",
+    "mass": 289655
+   },
+   {
+    "token": "nouvelle",
+    "mass": 242802
+   },
+   {
+    "token": "aquitaine",
+    "mass": 242531
+   },
+   {
+    "token": "pays",
+    "mass": 207396
+   },
+   {
+    "token": "nord",
+    "mass": 152011
+   },
+   {
+    "token": "gironde",
+    "mass": 150787
+   },
+   {
+    "token": "calais",
+    "mass": 128762
+   },
+   {
+    "token": "atlantique",
+    "mass": 128348
+   },
+   {
+    "token": "pas",
+    "mass": 29032
+   },
+   {
+    "token": "paris",
+    "mass": 2263
+   },
+   {
+    "token": "somme",
+    "mass": 1973
+   },
+   {
+    "token": "ile",
+    "mass": 1914
+   },
+   {
+    "token": "landes",
+    "mass": 721
+   },
+   {
+    "token": "oise",
+    "mass": 361
+   },
+   {
+    "token": "aisne",
+    "mass": 0
+   },
+   {
+    "token": "vendee",
+    "mass": 0
+   }
+  ],
+  "interpretation": "upper bound on state-map absorption only; the profile cannot see component boundaries"
+ },
+ "function_words": {
+  "per_source": {
+   "de": {
+    "s1": 257777,
+    "s2": 381880,
+    "s3": 410366,
+    "total": 1050023
+   },
+   "la": {
+    "s1": 116064,
+    "s2": 176186,
+    "s3": 188981,
+    "total": 481231
+   },
+   "du": {
+    "s1": 34709,
+    "s2": 90693,
+    "s3": 94953,
+    "total": 220355
+   },
+   "des": {
+    "s1": 31485,
+    "s2": 82399,
+    "s3": 85299,
+    "total": 199183
+   },
+   "le": {
+    "s1": 1992,
+    "s2": 4882,
+    "s3": 5050,
+    "total": 11924
+   },
+   "les": {
+    "s1": 631,
+    "s2": 1451,
+    "s3": 1603,
+    "total": 3685
+   }
+  },
+  "s1s2s3_total": 1966401,
+  "s1s2s3_pct": 0.164,
+  "any_is_canon_key": false,
+  "already_checked_reconciliation": {
+   "already_checked_claim": "731,158 of 4,745,780 = 15.41% for de la du des in test_s2",
+   "my_de_la_du_des_s2": 731158,
+   "my_de_la_du_des_s2_pct": 0.1541,
+   "reproduces_exactly": true,
+   "all_six_s2": 737491,
+   "all_six_s2_pct": 0.1554,
+   "clarification": "15.41% covers de/la/du/des only; adding le+les gives 15.54%. Not a contradiction."
+  }
+ },
+ "gaps": [
+  "component boundaries destroyed by build_profile.py:126 - cannot determine how many nord/gironde occurrences sit inside a matching FR_REGIONS component; all geography figures are upper bounds",
+  "no per-row state-resolution field in the profile - the 71.10% vs 97.44% dispute cannot be settled from these fields",
+  "cannot tell street-type sense from ordinary-noun sense from token counts alone (parc, port, pont, villa, sente, domaine, promenade)",
+  "cannot decompose inflated short-token counts (all 61298 vs allee 17779) without raw address strings",
+  "0 France rows in train - nothing cross-validatable against training data",
+  "did not measure France name tokens containing bare 2 or 9 (name-side LEET gap, outside address-dictionary scope)"
+ ],
+ "recommendations": [
+  {
+   "priority": 1,
+   "action": "apply strip_accents in build_profile.py before tokenising; re-run France profiles",
+   "type": "instrumentation",
+   "measured_effect": "removes teau 1793, cit 5580, ral 10251, ge 41120; correctly sizes all short tokens"
+  },
+  {
+   "priority": 2,
+   "action": "add 'est' to the France drop tuple at normalize.py:321; consider ouest 1221 and sud 1254 as self-mapping entries",
+   "type": "dictionary",
+   "measured_effect": "469 corrupted tokens repaired; three compass words made consistent"
+  },
+  {
+   "priority": 3,
+   "action": "add the 11 CONFIRMED street types (passage, lotissement, gare, hameau, chaussee, esplanade, sentier, ruelle, parvis, venelle) plus LIKELY cour",
+   "type": "dictionary",
+   "measured_effect": "~20,000 tokens (~0.17% of listed mass) gain a canonical form"
+  },
+  {
+   "priority": 4,
+   "action": "handle French function words (stopword decision, already established by another task)",
+   "type": "stopword",
+   "measured_effect": "16.40% of listed mass is unhandled and IDF-diluting"
+  },
+  {
+   "priority": 5,
+   "action": "do NOT add builder-artifact tokens cit, ch, teau, l, d, e, m, s, j, c, g, ge, ral",
+   "type": "negative",
+   "measured_effect": "avoids encoding a tokenizer bug into the dictionary"
+  },
+  {
+   "priority": 6,
+   "action": "no leetspeak work on the address side",
+   "type": "negative",
+   "measured_effect": "0.1132% of mass and it is house-number notation, not leetspeak"
+  },
+  {
+   "priority": 7,
+   "action": "no change to the 13 dead ADDR_CANON_FR keys",
+   "type": "negative",
+   "measured_effect": "inert, zero cost, zero benefit"
+  },
+  {
+   "priority": 8,
+   "action": "optionally add a state_resolved per-country counter to the profile builder",
+   "type": "instrumentation",
+   "verdict": "SPECULATIVE"
+  }
+ ],
+ "constraints_respected": {
+  "raw_tsv_opened": false,
+  "network_used": false,
+  "upstream_modified": false,
+  "files_written": [
+   "analysis_out/findings/D082_mine_ADDR_CANON_FR_France.md",
+   "analysis_out/findings/D082_mine_ADDR_CANON_FR_France.json"
+  ],
+  "method": "upstream dicts extracted with Python ast (not hand-transcribed); LEET is a str.maketrans call and was transcribed from normalize.py:256 and flagged"
+ }
+}

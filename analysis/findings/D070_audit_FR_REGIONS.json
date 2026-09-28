@@ -1,0 +1,207 @@
+{
+  "task_id": "D070",
+  "family": "B-dictionary",
+  "title": "audit current FR_REGIONS",
+  "headline": "FR_REGIONS (normalize.py:243-249) holds 14 entries over 4 canonical values (hdf, idf, naq, pdl). Scoping is exhaustively correct (sum(country_rows.values())==rows in all 6 profile files) and there is zero overlap with US_STATES/IN_STATES/ADDR_CANON. Two defects: the known missing self-map at line 252 (CONFIRMED code, ZERO measurable effect, independently re-confirmed) and a NEW order-dependence defect - line 334 does 'state = smap[ck]' with no break, so a later matched component OVERWRITES an earlier one: 'Paris, Hauts-de-France' -> hdf but 'Hauts-de-France, Paris' -> idf. The 9 departement keys are load-bearing (0.3266 dept-tok/row on test_s2), so thinning FR_REGIONS to 18 regions would be a large regression.",
+  "new_defect_found": true,
+  "new_defect": "normalize.py:334 assigns state=smap[ck] with no break, making state last-match-wins. Two comma-orderings of the same French address resolve to different regions. CONFIRMED by executing the real module. Blast radius bounded at <=388/952/923 France rows (0.150%/0.135%/0.126%).",
+  "second_new_defect": "FR_REGIONS conflates 3 administrative levels in one flat namespace: 4 regions + 9 departements + 1 city (paris). 10/14 entries (71.4%) are not regions. CONFIRMED structural.",
+  "source": {
+    "file": "_upstream/src/normalize.py",
+    "git_commit": "8445b7f11a6f23f2b6adec254ef1dc3bb45507ad",
+    "lines": "243-249 (FR_REGIONS), 250 (STATE_MAPS), 251-254 (self-map loop), 317 (strip_accents), 318 (STATE_MAPS.get(country)), 320-321 (France canon swap), 322 (split on comma only), 331-335 (component match + continue, no break), 336-340 (nums/pin guard), 341-350 (ctoks/toks.extend), 351-352 (city_comps.append)",
+    "measurement_paths": ["ast.literal_eval on module source (dicts as written)", "importlib module load with stubbed polars + python -B (dicts post-loop)", "build_profile.py field semantics"]
+  },
+  "fr_regions_entries": 14,
+  "fr_regions_distinct_values": 4,
+  "fr_regions_values": ["hdf", "idf", "naq", "pdl"],
+  "comparison": {
+    "US_STATES": {"entries_written": 52, "entries_after_selfmap_loop": 104, "distinct_values": 52, "selfmaps_after_loop": 104},
+    "IN_STATES": {"entries_written": 49, "entries_after_selfmap_loop": 86, "distinct_values": 37, "selfmaps_after_loop": 86},
+    "FR_REGIONS": {"entries_written": 14, "entries_after_selfmap_loop": 14, "distinct_values": 4, "selfmaps_after_loop": 0}
+  },
+
+  "structural_defects": {
+    "missing_selfmaps": {
+      "present": true, "status": "CONFIRMED",
+      "detail": "normalize.py:252 loops over (US_STATES, IN_STATES) only; FR_REGIONS is omitted so 0 of its 4 values are also keys",
+      "canonical_code_token_counts_France": {"hdf": [0, 0, 0], "idf": [0, 0, 0], "naq": [0, 0, 0], "pdl": [0, 0, 0]},
+      "measured_effect": "ZERO on this dataset; agrees with already_checked REFUTED-2"
+    },
+    "empty_values": {"present": false, "count": 0, "contrast": "ADDR_CANON_COMMON:196-197 and ADDR_CANON_FR:213 do map keys to empty string"},
+    "empty_or_whitespace_keys": {"present": false, "count": 0},
+    "cross_dictionary_overlap": {
+      "keys_vs_US_keys": 0, "keys_vs_IN_keys": 0, "values_vs_US_values": 0, "values_vs_IN_values": 0,
+      "keys_vs_ADDR_CANON_COMMON_keys": 0, "keys_vs_ADDR_CANON_FR_keys": 0,
+      "values_vs_ADDR_CANON_values": 0,
+      "status": "CLEAN - no collision in any of 7 directions tested"
+    },
+    "country_scoping": {
+      "status": "CLEAN",
+      "detail": "STATE_MAPS keyed by exact strings US/India/France; STATE_MAPS['France'] is FR_REGIONS (identity check True); sum(country_rows.values())==rows exactly in all 6 profile files, so no row and no country string falls outside the key set",
+      "train_files_have_france": false
+    },
+    "administrative_level_conflation": {
+      "present": true, "status": "CONFIRMED",
+      "region_keys": 4, "department_keys": 9, "city_keys": 1,
+      "non_region_share_of_entries": "10/14 = 71.4%",
+      "regions_covered": "4 of 18 = 22.2%"
+    },
+    "state_overwritten_by_later_component": {
+      "present": true, "status": "CONFIRMED", "severity": "highest of all findings - can yield a WRONG region, not just a missing feature",
+      "mechanism": "normalize.py:333-335 has no break; loop continues and a later match reassigns state",
+      "evidence": [
+        "normalize_address('10 rue de Rivoli, Paris, Hauts-de-France','France') -> state='hdf'",
+        "normalize_address('10 rue de Rivoli, Hauts-de-France, Paris','France') -> state='idf'",
+        "normalize_address('9 Rue T, Paris, Nord','France') -> state='hdf'",
+        "normalize_address('9 Rue T, Nord, Paris','France') -> state='idf'",
+        "not France-specific: ('9 Rue T, Washington, DC','US')->'dc' vs ('9 Rue T, DC, Washington','US')->'wa'; ('9 Rue T, Delhi, Uttar Pradesh','India')->'up' vs reversed->'dl'"
+      ],
+      "blast_radius_upper_bound_pct_of_france_rows": {"test_s1": 0.150, "test_s2": 0.135, "test_s3": 0.126},
+      "blast_radius_basis": "addr_tokens['France']['paris'] = 388/952/923 over by_country['France']['rows']; token counts are an UPPER bound on rows",
+      "no_structural_shield": "by_country['France']['has_comma']/rows = 1.0000 (s1), 0.9691 (s2), 0.9703 (s3), so nearly every French address has >=2 components"
+    },
+    "matched_component_consumed": {
+      "present": true, "status": "CONFIRMED",
+      "mechanism": "normalize.py:335 continue skips toks.extend (line 350) and city_comps.append (line 352), deleting the component from both atoks and acity",
+      "evidence": "normalize_address('12 avenue Foch, Paris','France') -> state='idf', toks=['12','ave','foch'], acity=[]",
+      "contrast": "normalize_address('5 Main St, Paris, TX','US') -> state='tx', toks include 'paris', acity=['paris']",
+      "downstream": "features.py:87-90 builds city_tset and city_last from acity, so those compare against the empty string",
+      "blast_radius_upper_bound_pct_of_france_rows": {"test_s1": 0.150, "test_s2": 0.135, "test_s3": 0.126}
+    }
+  },
+  "level_classification": {
+    "region": ["hauts de france", "nouvelle aquitaine", "pays de la loire", "ile de france"],
+    "department": ["nord", "pas de calais", "somme", "aisne", "oise", "gironde", "landes", "loire atlantique", "vendee"],
+    "city": ["paris"]
+  },
+  "load_bearing_finding": {
+    "claim": "s1 is region-stated; s2/s3 are departement-stated. The 9 departement keys are load-bearing, not decoration.",
+    "region_tokens_per_france_row": {"test_s1": 1.0015, "test_s2": 0.3213, "test_s3": 0.3472},
+    "region_token_totals": {"test_s1": 259840, "test_s2": 225997, "test_s3": 254016},
+    "department_tokens_per_france_row": {"test_s1": 0.0047, "test_s2": 0.3266, "test_s3": 0.3175},
+    "department_token_totals": {"test_s1": 1217, "test_s2": 229735, "test_s3": 232281},
+    "arithmetic": "region = hauts+nouvelle+pays. department = nord+gironde+atlantique+pas+landes+somme+oise+aisne+vendee. s2: 75362+75104+63697+14325+292+807+148+0+0=229735; 229735/703378=0.3266. s3: 76449+75621+64398+14528+313+833+139+0+0=232281; 232281/731615=0.3175. s1: 200+62+253+179+116+333+74+0+0=1217; 1217/259452=0.0047",
+    "caveat_pas": "'pas' is also the ordinary French word 'step', so pas-de-calais is a loose upper bound; calais=55273 in s2 vs pas=14325, so most calais occurrences are the CITY not the departement",
+    "caveat_loire": "'loire' unusable for loire atlantique because it also occurs in pays de la loire; used 'atlantique' instead (s2 loire=126216 vs atlantique=63697)",
+    "implication": "Deleting the departement keys would be a LARGE REGRESSION on 2 of 3 test sources. This is the highest-value warning for the follow-up tasks."
+  },
+  "per_key_activity": {
+    "probe_token_note": "single-word keys use the key itself; multi-word keys use a distinctive sub-token (atlantique for loire atlantique, pas for pas de calais)",
+    "order": ["test_s1", "test_s2", "test_s3"],
+    "rows": [
+      {"key": "hauts de france", "value": "hdf", "level": "region", "counts": [101717, 88519, 99419], "verdict": "active"},
+      {"key": "nouvelle aquitaine", "value": "naq", "level": "region", "counts": [85311, 74392, 83099], "verdict": "active"},
+      {"key": "pays de la loire", "value": "pdl", "level": "region", "counts": [72812, 63086, 71498], "verdict": "active"},
+      {"key": "ile de france", "value": "idf", "level": "region", "counts": [303, 817, 794], "verdict": "active but marginal (0.11-0.12% of rows)"},
+      {"key": "nord", "value": "hdf", "level": "department", "counts": [200, 75362, 76449], "verdict": "active, s2/s3 only"},
+      {"key": "gironde", "value": "naq", "level": "department", "counts": [62, 75104, 75621], "verdict": "active, s2/s3 only"},
+      {"key": "loire atlantique", "probe": "atlantique", "value": "pdl", "level": "department", "counts": [253, 63697, 64398], "verdict": "active, s2/s3 only"},
+      {"key": "pas de calais", "probe": "pas", "value": "hdf", "level": "department", "counts": [179, 14325, 14528], "verdict": "active"},
+      {"key": "landes", "value": "naq", "level": "department", "counts": [116, 292, 313], "verdict": "active"},
+      {"key": "somme", "value": "hdf", "level": "department", "counts": [333, 807, 833], "verdict": "active"},
+      {"key": "oise", "value": "hdf", "level": "department", "counts": [74, 148, 139], "verdict": "active"},
+      {"key": "aisne", "value": "hdf", "level": "department", "counts": [0, 0, 0], "verdict": "DEAD, bounded by truncation floor"},
+      {"key": "vendee", "value": "pdl", "level": "department", "counts": [0, 0, 0], "verdict": "DEAD, bounded by truncation floor"},
+      {"key": "calais (bare, NOT a key)", "value": null, "level": "city", "counts": [15967, 55273, 57522], "verdict": "correctly absent from the dictionary"}
+    ]
+  },
+  "dead_entries": {"keys": ["aisne", "vendee"], "count": 2, "share_of_entries": "2/14 = 14.3%", "bound": "count <= 23/58/60, not proved zero"},
+  "unmapped_regions": {
+    "counts_France_addr_tokens": {
+      "order": ["test_s1", "test_s2", "test_s3"],
+      "lorraine": [334, 825, 789], "alsace": [311, 744, 758], "bretagne": [222, 505, 535],
+      "normandie": [139, 288, 329], "bourgogne": [124, 273, 316], "auvergne": [89, 213, 218],
+      "picardie": [38, 79, 98], "champagne": [35, 82, 78],
+      "occitanie": [0, 0, 0], "corse": [0, 0, 0],
+      "grand": [704, 1710, 1848], "est": [76, 189, 204],
+      "provence": [56, 119, 116], "cote": [23, 157, 169], "azur": [0, 0, 0]
+    },
+    "row_upper_bound": {"test_s1": 2151, "test_s2": 5184, "test_s3": 5458},
+    "row_upper_bound_pct_of_france_rows": {"test_s1": 0.83, "test_s2": 0.74, "test_s3": 0.75},
+    "status_per_region": {
+      "CONFIRMED_nonzero": ["bretagne", "lorraine", "alsace", "normandie", "auvergne", "bourgogne", "champagne", "picardie"],
+      "unproven_at_or_below_truncation_floor": ["occitanie", "corse"],
+      "LIKELY_at_most": ["grand est"],
+      "SPECULATIVE": ["provence alpes cote d'azur"]
+    },
+    "grand_est_caveat": "grand=704 vs est=76 in s1 is 9:1; a co-occurring two-word region field would give ~1:1, so 'grand' is more likely street vocabulary (Grand Rue, Grande Place). Excluded from headline claims.",
+    "paca_caveat": "provence=56 and cote=23 in s1 are at/below the truncation floor of 23, so presence is not established in s1; s2/s3 provence=119/116 vs cote=157/169 does not establish co-occurrence either."
+  },
+  "accent_measurement_trap": {
+    "status": "measurement-instrument limitation, NOT a pipeline defect",
+    "mechanism": "build_profile.py:28 TOKEN_RE=[a-z0-9]+ never strips accents; normalize.py:317 calls strip_accents() BEFORE the component split",
+    "verified_tokenizer": {"'ile-de-france'": ["ile"], "'Ile-de-france'.lower()": ["le", "de", "france"], "'hauts-de-france'": ["hauts", "de", "france"]},
+    "pipeline_is_correct": "verified: normalize_address('2 Bd A, Paris, Ile-de-France','France') -> state='idf'",
+    "france_minus_hauts": {
+      "test_s1": {"france": 102319, "hauts": 101717, "excess": 602, "unaccented_ile": 303, "residual_ceiling": 299},
+      "test_s2": {"france": 89929, "hauts": 88519, "excess": 1410, "unaccented_ile": 817, "residual_ceiling": 593},
+      "test_s3": {"france": 100902, "hauts": 99419, "excess": 1483, "unaccented_ile": 794, "residual_ceiling": 689}
+    },
+    "le_counts": {"test_s1": 1992, "test_s2": 4882, "test_s3": 5050, "note": "dominated by the ordinary French article 'le'; unusable as IDF evidence"},
+    "process_rule": "Never use 'ile' or 'le' counts as evidence about Ile-de-France. Measure regions on whole components, which the profile does not record."
+  },
+  "profile_fields_used": ["by_country", "country_rows", "addr_tokens", "rows", "split", "source", "cols"],
+  "france_rows": {"test_s1": 259452, "test_s2": 703378, "test_s3": 731615},
+  "france_rows_zero_in_train": true,
+  "france_share_of_file_rows_pct": {"test_s1": 14.98, "test_s2": 14.39, "test_s3": 14.40},
+  "truncation_floor": {
+    "explanation": "addr_tokens capped at TOPN=4000 (build_profile.py:27,140); absence from the list proves count <= the last entry's count, NOT zero",
+    "france_last_entry_count": {"test_s1": 23, "test_s2": 58, "test_s3": 60},
+    "france_last_entry_token": {"test_s1": "casablanca", "test_s2": "campanules", "test_s3": "370"}
+  },
+  "already_checked_status": {
+    "REFUTED-1_france_postcode_loss": "not re-derived; out of scope for this task",
+    "REFUTED-2_fr_regions_too_thin": "AGREE, independently re-confirmed. The missing self-map has exactly zero measurable effect (0 occurrences of hdf/idf/naq/pdl in all three France addr_tokens). The conclusion that thinness is not the defect survives my measurements.",
+    "contradiction_found_in_already_checked": {
+      "severity": "flagged, NOT reconciled",
+      "assertions_in_conflict": ["HDF 101521 + NAQ 85197 + PDL 72734", "100.00% state resolution = 259452/259452 zero unmatched", "plus ~1,100 rows of legacy names"],
+      "arithmetic": "101521+85197+72734 = 259452 = by_country['France']['rows'] for test_s1; the identity holds exactly",
+      "problem": "the sum leaves a remainder of EXACTLY ZERO, which requires zero Ile-de-France-stated and zero legacy-stated s1 France rows, contradicting the '~1,100 legacy rows' claim in the same block",
+      "compounding_evidence": "the profile's own addr_tokens['France']['ile'] = 303 in s1 is an upper bound on IDF rows",
+      "not_affected": "the CONCLUSION of REFUTED-2 (state resolves for essentially all France rows; thinness is not the defect) survives - only the exact partition arithmetic and the legacy-row count are in conflict"
+    }
+  },
+  "gaps": [
+    "No state-resolution field exists in the profile. by_country collects rows, name_empty, addr_empty, name_chars, addr_chars, name_tokens, num_digits, has_digit_name, has_comma, prefix_bad, dig5, dig6, alpha_only_addr, len_hist (build_profile.py:85-91). The '100.00%' resolution figure CANNOT be re-derived from the profile at all; corroborated only indirectly.",
+    "The profile records tokens, not components (ADDR_SPLIT.split then TOKEN_RE.findall, build_profile.py:126-127). No co-occurrence, no multi-word row counts, no separation of the city 'calais' from the key 'pas de calais'. Every 'affected rows' figure in this report is a labelled token-count UPPER bound.",
+    "The already_checked contradiction above is unresolved and unresolvable from the profile.",
+    "No French ground truth: all three train files have zero France rows, so no label can confirm which of hdf/idf/naq/pdl is correct. The claim that 'paris -> idf' is semantically right is SPECULATIVE; only its behavioural destructiveness is claimed.",
+    "Single-run figures. No variance estimate possible; no second pass over the raw TSVs (prohibited by the 1 GB RAM constraint)."
+  ],
+  "recommendations_priority_ordered": [
+    {"p": 1, "action": "Do NOT delete the departement keys. s2/s3 are departement-stated at 0.3266/0.3175 tok/row, i.e. up to 32.66%/31.75% of France rows. Expected effect of thinning to 18 regions: LARGE REGRESSION on 2 of 3 test sources."},
+    {"p": 1, "action": "Add a precedence rule at normalize.py:334 so a matched component cannot overwrite an earlier match. Cheapest fix and the only one that fixes WRONG answers rather than missing ones. Measure before/after; bounded at <=388/952/923 France rows."},
+    {"p": 1, "action": "Add a component-level field to build_profile.py (comma-split components, or at minimum a per-country count of rows whose address contains 2+ state-map keys). Without it F4/F8/F12 stay unresolvable."},
+    {"p": 2, "action": "Move 'paris' out of the state map into a city list, so a city is never consumed at line 335 and never competes with a region for state. Behaviour change on ~0.13-0.15% of France rows; measure, do not assume."},
+    {"p": 2, "action": "Rename or re-document the dictionary as a mixed-level region+departement+city gazetteer. Cost: a comment. No behavioural change."},
+    {"p": 2, "action": "Add the CONFIRMED unmapped regions: bretagne, lorraine, alsace, normandie, auvergne, bourgogne, champagne, picardie. grand est is LIKELY at most, PACA is SPECULATIVE; both need the component-level field first."},
+    {"p": 3, "action": "Add the self-map loop entry (US_STATES, IN_STATES, FR_REGIONS). Expected effect: EXACTLY ZERO on this dataset. Symmetry only; do not claim a score change."},
+    {"p": 3, "action": "Leave 'aisne' and 'vendee' alone. They cost nothing measurable; they are the only forward-looking coverage for HDF/PDL."},
+    {"p": "process", "action": "Do not use 'ile' or 'le' counts as evidence about Ile-de-France, and do not cite the exact partition without citing the F12 contradiction."},
+    {"p": "out_of_scope", "action": "ADDR_CANON_FR:211 maps single-letter tokens b->bis, t->ter, r->rue, q/qu->quai, all/al->allee. Verified: '9 Rue T, HDF' yields toks ['9','rue','ter','hdf']. Plausible token-noise source, but it does NOT interact with FR_REGIONS (no FR_REGIONS key is a single letter). Flagged to the ADDR_CANON_FR owner, not claimed as a FR_REGIONS defect."}
+  ],
+  "provenance": {
+    "read_only_sources": [
+      "_upstream/src/normalize.py (lines 88-262, 314-353)",
+      "_upstream/src/prep.py",
+      "_upstream/src/features.py (lines 70-130)",
+      "_upstream/src/blocking.py",
+      "_upstream/src/run_blocking.py",
+      "_upstream/src/build_features.py",
+      "build_profile.py"
+    ],
+    "dataset_files_opened": "NONE",
+    "network_access": "NONE",
+    "upstream_pristine_verified": true,
+    "upstream_git_commit": "8445b7f11a6f23f2b6adec254ef1dc3bb45507ad",
+    "upstream_git_status_porcelain": "",
+    "bytecode_safety": "module inspected via importlib with stubbed polars and python -B; no __pycache__ written; 18 tracked src/__pycache__/*.cpython-310.pyc untouched",
+    "corrections_to_earlier_draft_of_this_file": [
+      "unmapped-region row bounds were 2,020/4,561/4,919; correct sums of the listed probe words are 2,151/5,184/5,458",
+      "region-tok/row for s1 was 2.006; correct figure on the stated token set (hauts+nouvelle+pays) is 1.0015 - the 2.006 implicitly counted france/aquitaine/loire too, double-counting pays de la loire because 'loire' also occurs in 'loire atlantique' (s2 loire=126216 vs atlantique=63697)",
+      "the earlier draft's pays/loire ratio claims were unsound for the same reason",
+      "earlier draft sections were out of order and its Gaps list was truncated mid-sentence"
+    ]
+  }
+}

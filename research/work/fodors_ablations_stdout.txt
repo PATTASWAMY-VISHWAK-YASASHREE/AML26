@@ -1,0 +1,120 @@
+{
+  "dataset": "Fodors-Zagats",
+  "methods": {
+    "address_exact": {
+      "candidate_rows": 54,
+      "cartesian_pairs": 176423,
+      "max_per_left": 3,
+      "mean_per_left": 0.10131332082551595,
+      "median_per_left": 0,
+      "p95_per_left": 1,
+      "positive_recall": 0.3482142857142857,
+      "positive_recalled": 39
+    },
+    "address_token": {
+      "candidate_rows": 70118,
+      "cartesian_pairs": 176423,
+      "max_per_left": 238,
+      "mean_per_left": 131.55347091932458,
+      "median_per_left": 146,
+      "p95_per_left": 215,
+      "positive_recall": 0.9910714285714286,
+      "positive_recalled": 111
+    },
+    "full_grams": {
+      "candidate_rows": 79868,
+      "cartesian_pairs": 176423,
+      "max_per_left": 254,
+      "mean_per_left": 149.84615384615384,
+      "median_per_left": 162,
+      "p95_per_left": 224,
+      "positive_recall": 1.0,
+      "positive_recalled": 112
+    },
+    "full_union": {
+      "candidate_rows": 79868,
+      "cartesian_pairs": 176423,
+      "max_per_left": 254,
+      "mean_per_left": 149.84615384615384,
+      "median_per_left": 162,
+      "p95_per_left": 224,
+      "positive_recall": 1.0,
+      "positive_recalled": 112
+    },
+    "name_exact": {
+      "candidate_rows": 84,
+      "cartesian_pairs": 176423,
+      "max_per_left": 1,
+      "mean_per_left": 0.1575984990619137,
+      "median_per_left": 0,
+      "p95_per_left": 1,
+      "positive_recall": 0.7410714285714286,
+      "positive_recalled": 83
+    },
+    "name_or_address_exact": {
+      "candidate_rows": 111,
+      "cartesian_pairs": 176423,
+      "max_per_left": 3,
+      "mean_per_left": 0.20825515947467166,
+      "median_per_left": 0,
+      "p95_per_left": 1,
+      "positive_recall": 0.8482142857142857,
+      "positive_recalled": 95
+    },
+    "name_token": {
+      "candidate_rows": 2637,
+      "cartesian_pairs": 176423,
+      "max_per_left": 56,
+      "mean_per_left": 4.947467166979362,
+      "median_per_left": 1,
+      "p95_per_left": 30,
+      "positive_recall": 1.0,
+      "positive_recalled": 112
+    },
+    "name_token_or_address_token": {
+      "candidate_rows": 71579,
+      "cartesian_pairs": 176423,
+      "max_per_left": 238,
+      "mean_per_left": 134.29455909943715,
+      "median_per_left": 146,
+      "p95_per_left": 215,
+      "positive_recall": 1.0,
+      "positive_recalled": 112
+    },
+    "rare_address_token": {
+      "candidate_rows": 2528,
+      "cartesian_pairs": 176423,
+      "max_per_left": 24,
+      "mean_per_left": 4.74296435272045,
+      "median_per_left": 2,
+      "p95_per_left": 17,
+      "positive_recall": 0.9642857142857143,
+      "positive_recalled": 108
+    },
+    "rare_name_or_address_token": {
+      "candidate_rows": 3570,
+      "cartesian_pairs": 176423,
+      "max_per_left": 32,
+      "mean_per_left": 6.697936210131332,
+      "median_per_left": 4,
+      "p95_per_left": 21,
+      "positive_recall": 1.0,
+      "positive_recalled": 112
+    },
+    "rare_name_token": {
+      "candidate_rows": 1186,
+      "cartesian_pairs": 176423,
+      "max_per_left": 29,
+      "mean_per_left": 2.225140712945591,
+      "median_per_left": 1,
+      "p95_per_left": 13,
+      "positive_recall": 1.0,
+      "positive_recalled": 112
+    }
+  },
+  "oracle_cartesian": {
+    "cartesian_pairs": 176423,
+    "positive_recall": 1.0
+  },
+  "positive_pairs": 112
+}

@@ -1,0 +1,551 @@
+[
+    {
+        "batch":  1,
+        "agents":  [
+                       "b01_01",
+                       "b01_02",
+                       "b01_03",
+                       "b01_04",
+                       "b01_05",
+                       "b01_06",
+                       "b01_07",
+                       "b01_08",
+                       "b01_09",
+                       "b01_10"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P034",
+                          "title":  "[France] test_s1: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P034_France_test_s1_numeric.md"
+                      },
+                      {
+                          "id":  "P035",
+                          "title":  "[France] test_s2: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P035_France_test_s2_numeric.md"
+                      },
+                      {
+                          "id":  "P036",
+                          "title":  "[France] test_s3: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P036_France_test_s3_numeric.md"
+                      },
+                      {
+                          "id":  "P037",
+                          "title":  "France digit forensics (train_s1): what the numbers are",
+                          "deliverable":  "analysis_out/findings/P037_fr_digits_train_s1.md"
+                      },
+                      {
+                          "id":  "P038",
+                          "title":  "France digit forensics (test_s1): what the numbers are",
+                          "deliverable":  "analysis_out/findings/P038_fr_digits_test_s1.md"
+                      },
+                      {
+                          "id":  "P039",
+                          "title":  "France digit forensics (test_s2): what the numbers are",
+                          "deliverable":  "analysis_out/findings/P039_fr_digits_test_s2.md"
+                      },
+                      {
+                          "id":  "P044",
+                          "title":  "[France] train_s1: address component vocabulary",
+                          "deliverable":  "analysis_out/findings/P044_France_train_s1_addr_vocab.md"
+                      },
+                      {
+                          "id":  "P045",
+                          "title":  "[France] test_s1: address component vocabulary",
+                          "deliverable":  "analysis_out/findings/P045_France_test_s1_addr_vocab.md"
+                      },
+                      {
+                          "id":  "P048",
+                          "title":  "[France] business-name vocabulary and structure",
+                          "deliverable":  "analysis_out/findings/P048_France_name_vocab.md"
+                      },
+                      {
+                          "id":  "P051",
+                          "title":  "[France] train vs test distribution shift",
+                          "deliverable":  "analysis_out/findings/P051_France_shift.md"
+                      }
+                  ]
+    },
+    {
+        "batch":  2,
+        "agents":  [
+                       "b02_01",
+                       "b02_02",
+                       "b02_03",
+                       "b02_04",
+                       "b02_05",
+                       "b02_06",
+                       "b02_07",
+                       "b02_08",
+                       "b02_09",
+                       "b02_10"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P066",
+                          "title":  "[France] name_tokens tail analysis (train_s1)",
+                          "deliverable":  "analysis_out/findings/P066_France_train_s1_name_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P067",
+                          "title":  "[France] name_tokens tail analysis (test_s1)",
+                          "deliverable":  "analysis_out/findings/P067_France_test_s1_name_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P068",
+                          "title":  "[France] addr_tokens tail analysis (train_s1)",
+                          "deliverable":  "analysis_out/findings/P068_France_train_s1_addr_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P069",
+                          "title":  "[France] addr_tokens tail analysis (test_s1)",
+                          "deliverable":  "analysis_out/findings/P069_France_test_s1_addr_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P104",
+                          "title":  "[France] train_s1: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P104_France_train_s1_balance.md"
+                      },
+                      {
+                          "id":  "P105",
+                          "title":  "[France] train_s2: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P105_France_train_s2_balance.md"
+                      },
+                      {
+                          "id":  "P106",
+                          "title":  "[France] train_s3: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P106_France_train_s3_balance.md"
+                      },
+                      {
+                          "id":  "P107",
+                          "title":  "[France] test_s1: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P107_France_test_s1_balance.md"
+                      },
+                      {
+                          "id":  "P108",
+                          "title":  "[France] test_s2: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P108_France_test_s2_balance.md"
+                      },
+                      {
+                          "id":  "P109",
+                          "title":  "[France] test_s3: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P109_France_test_s3_balance.md"
+                      }
+                  ]
+    },
+    {
+        "batch":  3,
+        "agents":  [
+                       "b03_01",
+                       "b03_02",
+                       "b03_03",
+                       "b03_04",
+                       "b03_05",
+                       "b03_06",
+                       "b03_07",
+                       "b03_08",
+                       "b03_09",
+                       "b03_10"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P114",
+                          "title":  "[France] train_s1: short-name and edge-case audit",
+                          "deliverable":  "analysis_out/findings/P114_France_train_s1_edge.md"
+                      },
+                      {
+                          "id":  "P115",
+                          "title":  "[France] test_s1: short-name and edge-case audit",
+                          "deliverable":  "analysis_out/findings/P115_France_test_s1_edge.md"
+                      },
+                      {
+                          "id":  "D085",
+                          "title":  "mine evidence to extend ADDR_CANON_COMMON for India",
+                          "deliverable":  "analysis_out/findings/D085_mine_ADDR_CANON_COMMON_India.md"
+                      },
+                      {
+                          "id":  "D089",
+                          "title":  "mine evidence to extend LEET for India",
+                          "deliverable":  "analysis_out/findings/D089_mine_LEET_India.md"
+                      },
+                      {
+                          "id":  "D096",
+                          "title":  "mine evidence to extend indic_token_dict for India",
+                          "deliverable":  "analysis_out/findings/D096_mine_indic_token_dict_India.md"
+                      },
+                      {
+                          "id":  "P007",
+                          "title":  "[India] train_s1: shape, null rates, length distribution",
+                          "deliverable":  "analysis_out/findings/P007_India_train_s1_shape.md"
+                      },
+                      {
+                          "id":  "P008",
+                          "title":  "[India] train_s2: shape, null rates, length distribution",
+                          "deliverable":  "analysis_out/findings/P008_India_train_s2_shape.md"
+                      },
+                      {
+                          "id":  "P009",
+                          "title":  "[India] train_s3: shape, null rates, length distribution",
+                          "deliverable":  "analysis_out/findings/P009_India_train_s3_shape.md"
+                      },
+                      {
+                          "id":  "P010",
+                          "title":  "[India] test_s1: shape, null rates, length distribution",
+                          "deliverable":  "analysis_out/findings/P010_India_test_s1_shape.md"
+                      },
+                      {
+                          "id":  "P011",
+                          "title":  "[India] test_s2: shape, null rates, length distribution",
+                          "deliverable":  "analysis_out/findings/P011_India_test_s2_shape.md"
+                      }
+                  ]
+    },
+    {
+        "batch":  4,
+        "agents":  [
+                       "b04_01",
+                       "b04_02",
+                       "b04_03",
+                       "b04_04",
+                       "b04_05",
+                       "b04_06",
+                       "b04_07",
+                       "b04_08",
+                       "b04_09",
+                       "b04_10"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P012",
+                          "title":  "[India] test_s3: shape, null rates, length distribution",
+                          "deliverable":  "analysis_out/findings/P012_India_test_s3_shape.md"
+                      },
+                      {
+                          "id":  "P019",
+                          "title":  "[US] train_s1: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P019_US_train_s1_numeric.md"
+                      },
+                      {
+                          "id":  "P020",
+                          "title":  "[US] train_s2: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P020_US_train_s2_numeric.md"
+                      },
+                      {
+                          "id":  "P021",
+                          "title":  "[US] train_s3: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P021_US_train_s3_numeric.md"
+                      },
+                      {
+                          "id":  "P022",
+                          "title":  "[US] test_s1: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P022_US_test_s1_numeric.md"
+                      },
+                      {
+                          "id":  "P023",
+                          "title":  "[US] test_s2: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P023_US_test_s2_numeric.md"
+                      },
+                      {
+                          "id":  "P024",
+                          "title":  "[US] test_s3: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P024_US_test_s3_numeric.md"
+                      },
+                      {
+                          "id":  "P025",
+                          "title":  "[India] train_s1: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P025_India_train_s1_numeric.md"
+                      },
+                      {
+                          "id":  "P026",
+                          "title":  "[India] train_s2: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P026_India_train_s2_numeric.md"
+                      },
+                      {
+                          "id":  "P027",
+                          "title":  "[India] train_s3: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P027_India_train_s3_numeric.md"
+                      }
+                  ]
+    },
+    {
+        "batch":  5,
+        "agents":  [
+                       "b05_01",
+                       "b05_02",
+                       "b05_03",
+                       "b05_04",
+                       "b05_05",
+                       "b05_06",
+                       "b05_07",
+                       "b05_08",
+                       "b05_09",
+                       "b05_10"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P028",
+                          "title":  "[India] test_s1: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P028_India_test_s1_numeric.md"
+                      },
+                      {
+                          "id":  "P029",
+                          "title":  "[India] test_s2: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P029_India_test_s2_numeric.md"
+                      },
+                      {
+                          "id":  "P030",
+                          "title":  "[India] test_s3: digit structure and address-number behaviour",
+                          "deliverable":  "analysis_out/findings/P030_India_test_s3_numeric.md"
+                      },
+                      {
+                          "id":  "P040",
+                          "title":  "[US] train_s1: address component vocabulary",
+                          "deliverable":  "analysis_out/findings/P040_US_train_s1_addr_vocab.md"
+                      },
+                      {
+                          "id":  "P041",
+                          "title":  "[US] test_s1: address component vocabulary",
+                          "deliverable":  "analysis_out/findings/P041_US_test_s1_addr_vocab.md"
+                      },
+                      {
+                          "id":  "P042",
+                          "title":  "[India] train_s1: address component vocabulary",
+                          "deliverable":  "analysis_out/findings/P042_India_train_s1_addr_vocab.md"
+                      },
+                      {
+                          "id":  "P043",
+                          "title":  "[India] test_s1: address component vocabulary",
+                          "deliverable":  "analysis_out/findings/P043_India_test_s1_addr_vocab.md"
+                      },
+                      {
+                          "id":  "P046",
+                          "title":  "[US] business-name vocabulary and structure",
+                          "deliverable":  "analysis_out/findings/P046_US_name_vocab.md"
+                      },
+                      {
+                          "id":  "P047",
+                          "title":  "[India] business-name vocabulary and structure",
+                          "deliverable":  "analysis_out/findings/P047_India_name_vocab.md"
+                      },
+                      {
+                          "id":  "P049",
+                          "title":  "[US] train vs test distribution shift",
+                          "deliverable":  "analysis_out/findings/P049_US_shift.md"
+                      }
+                  ]
+    },
+    {
+        "batch":  6,
+        "agents":  [
+                       "b06_01",
+                       "b06_02",
+                       "b06_03",
+                       "b06_04",
+                       "b06_05",
+                       "b06_06",
+                       "b06_07",
+                       "b06_08",
+                       "b06_09",
+                       "b06_10"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P050",
+                          "title":  "[India] train vs test distribution shift",
+                          "deliverable":  "analysis_out/findings/P050_India_shift.md"
+                      },
+                      {
+                          "id":  "P052",
+                          "title":  "cross-country shift: train_s1",
+                          "deliverable":  "analysis_out/findings/P052_train_s1_crosscountry.md"
+                      },
+                      {
+                          "id":  "P053",
+                          "title":  "cross-country shift: train_s2",
+                          "deliverable":  "analysis_out/findings/P053_train_s2_crosscountry.md"
+                      },
+                      {
+                          "id":  "P054",
+                          "title":  "cross-country shift: train_s3",
+                          "deliverable":  "analysis_out/findings/P054_train_s3_crosscountry.md"
+                      },
+                      {
+                          "id":  "P055",
+                          "title":  "cross-country shift: test_s1",
+                          "deliverable":  "analysis_out/findings/P055_test_s1_crosscountry.md"
+                      },
+                      {
+                          "id":  "P056",
+                          "title":  "cross-country shift: test_s2",
+                          "deliverable":  "analysis_out/findings/P056_test_s2_crosscountry.md"
+                      },
+                      {
+                          "id":  "P057",
+                          "title":  "cross-country shift: test_s3",
+                          "deliverable":  "analysis_out/findings/P057_test_s3_crosscountry.md"
+                      },
+                      {
+                          "id":  "P058",
+                          "title":  "[US] name_tokens tail analysis (train_s1)",
+                          "deliverable":  "analysis_out/findings/P058_US_train_s1_name_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P059",
+                          "title":  "[US] name_tokens tail analysis (test_s1)",
+                          "deliverable":  "analysis_out/findings/P059_US_test_s1_name_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P060",
+                          "title":  "[US] addr_tokens tail analysis (train_s1)",
+                          "deliverable":  "analysis_out/findings/P060_US_train_s1_addr_tokens_tail.md"
+                      }
+                  ]
+    },
+    {
+        "batch":  7,
+        "agents":  [
+                       "b07_01",
+                       "b07_02",
+                       "b07_03",
+                       "b07_04",
+                       "b07_05",
+                       "b07_06",
+                       "b07_07",
+                       "b07_08",
+                       "b07_09",
+                       "b07_10"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P061",
+                          "title":  "[US] addr_tokens tail analysis (test_s1)",
+                          "deliverable":  "analysis_out/findings/P061_US_test_s1_addr_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P062",
+                          "title":  "[India] name_tokens tail analysis (train_s1)",
+                          "deliverable":  "analysis_out/findings/P062_India_train_s1_name_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P063",
+                          "title":  "[India] name_tokens tail analysis (test_s1)",
+                          "deliverable":  "analysis_out/findings/P063_India_test_s1_name_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P064",
+                          "title":  "[India] addr_tokens tail analysis (train_s1)",
+                          "deliverable":  "analysis_out/findings/P064_India_train_s1_addr_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P065",
+                          "title":  "[India] addr_tokens tail analysis (test_s1)",
+                          "deliverable":  "analysis_out/findings/P065_India_test_s1_addr_tokens_tail.md"
+                      },
+                      {
+                          "id":  "P092",
+                          "title":  "[US] train_s1: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P092_US_train_s1_balance.md"
+                      },
+                      {
+                          "id":  "P093",
+                          "title":  "[US] train_s2: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P093_US_train_s2_balance.md"
+                      },
+                      {
+                          "id":  "P094",
+                          "title":  "[US] train_s3: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P094_US_train_s3_balance.md"
+                      },
+                      {
+                          "id":  "P095",
+                          "title":  "[US] test_s1: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P095_US_test_s1_balance.md"
+                      },
+                      {
+                          "id":  "P096",
+                          "title":  "[US] test_s2: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P096_US_test_s2_balance.md"
+                      }
+                  ]
+    },
+    {
+        "batch":  8,
+        "agents":  [
+                       "b08_01",
+                       "b08_02",
+                       "b08_03",
+                       "b08_04",
+                       "b08_05",
+                       "b08_06",
+                       "b08_07",
+                       "b08_08",
+                       "b08_09",
+                       "b08_10"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P097",
+                          "title":  "[US] test_s3: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P097_US_test_s3_balance.md"
+                      },
+                      {
+                          "id":  "P098",
+                          "title":  "[India] train_s1: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P098_India_train_s1_balance.md"
+                      },
+                      {
+                          "id":  "P099",
+                          "title":  "[India] train_s2: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P099_India_train_s2_balance.md"
+                      },
+                      {
+                          "id":  "P100",
+                          "title":  "[India] train_s3: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P100_India_train_s3_balance.md"
+                      },
+                      {
+                          "id":  "P101",
+                          "title":  "[India] test_s1: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P101_India_test_s1_balance.md"
+                      },
+                      {
+                          "id":  "P102",
+                          "title":  "[India] test_s2: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P102_India_test_s2_balance.md"
+                      },
+                      {
+                          "id":  "P103",
+                          "title":  "[India] test_s3: name-vs-address informativeness balance",
+                          "deliverable":  "analysis_out/findings/P103_India_test_s3_balance.md"
+                      },
+                      {
+                          "id":  "P110",
+                          "title":  "[US] train_s1: short-name and edge-case audit",
+                          "deliverable":  "analysis_out/findings/P110_US_train_s1_edge.md"
+                      },
+                      {
+                          "id":  "P111",
+                          "title":  "[US] test_s1: short-name and edge-case audit",
+                          "deliverable":  "analysis_out/findings/P111_US_test_s1_edge.md"
+                      },
+                      {
+                          "id":  "P112",
+                          "title":  "[India] train_s1: short-name and edge-case audit",
+                          "deliverable":  "analysis_out/findings/P112_India_train_s1_edge.md"
+                      }
+                  ]
+    },
+    {
+        "batch":  9,
+        "agents":  [
+                       "b09_01"
+                   ],
+        "tasks":  [
+                      {
+                          "id":  "P113",
+                          "title":  "[India] test_s1: short-name and edge-case audit",
+                          "deliverable":  "analysis_out/findings/P113_India_test_s1_edge.md"
+                      }
+                  ]
+    }
+]

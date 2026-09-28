@@ -1,0 +1,903 @@
+{
+ "task_id": "D078",
+ "family": "B-dictionary",
+ "title": "audit current IN_STATES",
+ "headline": "IN_STATES (normalize.py:230-242) is a 49-pair literal covering 37 distinct canonical values, expanded in place to 86 keys by the self-map loop at lines 252-254. Three structural defects confirmed, one hard and previously unrecorded: the key 'jammu & kashmir' is unreachable because the ck transform rewrites '&' to ' and ' before lookup. Otherwise the dictionary is sound: all 37 self-maps present, zero empty values, aliases internally consistent. SEPARATELY, and most importantly for the tasks that follow: the profile builder's tokenizer is NOT the pipeline's tokenizer (build_profile.py applies [a-z0-9]+ with no strip_accents, while normalize.py:317 strips accents first), so analysis_out/profile/ systematically mis-reports French address tokens -- 15 of 15 accented probes diverge, and the split is visible in the real data (fragment 'rignac' = 10,330 present, clean form 'perignac' ABSENT, France test_s1). The pipeline itself is accent-safe, so all five FR_REGIONS keys still resolve; the corruption is in the measurement instrument only.",
+ "source": "_upstream/src/normalize.py lines 230-242 (definition), 250-254 (STATE_MAPS + self-map loop), 318 and 331-335 (consumption in normalize_address)",
+ "method": "Parsed the dict literal with ast.literal_eval (no module import; polars is absent). Replayed the exact ck transform from normalize.py:331-332 over every key to test reachability. Scored all effective keys against addr_tokens['India'] in the six analysis_out/profile files using the per-key-minimum union bound, substituting the top-4000 cutoff for absent tokens.",
+ "counts": {
+  "literal_pairs": 49,
+  "distinct_canonical_values": 37,
+  "effective_keys_after_selfmap": 86,
+  "keys_equal_to_own_value": 0,
+  "empty_string_values": 0,
+  "empty_string_keys": 0,
+  "source_lines": "230-242",
+  "comparison_us_states_pairs": 52,
+  "comparison_us_states_effective_keys": 104,
+  "comparison_fr_regions_pairs": 14,
+  "comparison_fr_regions_effective_keys": 14
+ },
+ "self_map": {
+  "loop_source_lines": "252-254",
+  "in_states_included_in_loop": true,
+  "fr_regions_included_in_loop": false,
+  "keys_added_by_loop": [
+   "an",
+   "ap",
+   "ar",
+   "as",
+   "br",
+   "cg",
+   "ch",
+   "dd",
+   "dl",
+   "dn",
+   "ga",
+   "gj",
+   "hp",
+   "hr",
+   "jh",
+   "jk",
+   "ka",
+   "kl",
+   "la",
+   "ld",
+   "mh",
+   "ml",
+   "mn",
+   "mp",
+   "mz",
+   "nl",
+   "od",
+   "pb",
+   "py",
+   "rj",
+   "sk",
+   "tg",
+   "tn",
+   "tr",
+   "uk",
+   "up",
+   "wb"
+  ],
+  "defect": "none for IN_STATES",
+  "note": "The FR_REGIONS self-map omission alleged in AGENT_PROMPT.md line 28 does not apply to India."
+ },
+ "defects": [
+  {
+   "id": 1,
+   "severity": "hard (structural), latent (no measurable row impact)",
+   "title": "'jammu & kashmir' key is unreachable",
+   "key": "jammu & kashmir",
+   "canonical": "jk",
+   "source_line": 239,
+   "evidence": "normalize.py:331 does re.sub(r'[^a-z0-9& ]+',' ',c).replace('&',' and '). '&' is preserved by the character class then rewritten to the word 'and', so any component 'Jammu & Kashmir' yields ck == 'jammu and kashmir' and can only hit the sibling key. Replaying the transform over all 49 keys: 48 unchanged, this one is not.",
+   "row_impact": "unmeasurable - 'jammu and kashmir' is absent from top-4000 addr_tokens in all six files"
+  },
+  {
+   "id": 2,
+   "severity": "low, data-dependent",
+   "title": "alias keys that are ordinary English words",
+   "keys": [
+    {
+     "key": "or",
+     "canonical": "od",
+     "state": "Odisha",
+     "train_s1": 0,
+     "test_s1": 0,
+     "test_s2": 0,
+     "verdict": "measurably safe on this data"
+    },
+    {
+     "key": "ts",
+     "canonical": "tg",
+     "state": "Telangana",
+     "train_s1": 209,
+     "test_s1": 179,
+     "test_s2": 478,
+     "verdict": "live risk, ~0.02% of India rows"
+    },
+    {
+     "key": "ut",
+     "canonical": "uk",
+     "state": "Uttarakhand",
+     "train_s1": 0,
+     "test_s1": 0,
+     "test_s2": 0,
+     "verdict": "measurably safe on this data"
+    }
+   ],
+   "note": "Token counts are UPPER BOUNDS on matching rows; the ck match is whole-component. 'in' has 2107/1897/4862 occurrences but is NOT a key in IN_STATES, so it is harmless; it is a US code and STATE_MAPS scoping isolates it."
+  },
+  {
+   "id": 3,
+   "severity": "latent only",
+   "title": "cross-dictionary canonical-code collisions IN_STATES vs US_STATES",
+   "codes": [
+    {
+     "code": "ar",
+     "india": [
+      "arunachal pradesh"
+     ],
+     "us": [
+      "arkansas"
+     ]
+    },
+    {
+     "code": "ga",
+     "india": [
+      "goa"
+     ],
+     "us": [
+      "georgia"
+     ]
+    },
+    {
+     "code": "la",
+     "india": [
+      "ladakh"
+     ],
+     "us": [
+      "louisiana"
+     ]
+    },
+    {
+     "code": "mn",
+     "india": [
+      "manipur"
+     ],
+     "us": [
+      "minnesota"
+     ]
+    },
+    {
+     "code": "tn",
+     "india": [
+      "tamil nadu",
+      "tamilnadu"
+     ],
+     "us": [
+      "tennessee"
+     ]
+    }
+   ],
+   "verdict": "SAFE as written - separate dicts; normalize.py:318 selects exactly one via STATE_MAPS.get(country, {}). Live bug only if the maps are ever flattened."
+  },
+  {
+   "id": 4,
+   "severity": "cosmetic",
+   "title": "self-map loop leaks _m and _v into module namespace",
+   "source_line": "252-254",
+   "row_impact": 0
+  },
+  {
+   "id": 90,
+   "new": true,
+   "severity": "HIGH (measurement instrument, not pipeline)",
+   "title": "the profile tokenizer is not the pipeline tokenizer (accent-blind)",
+   "mechanism": "build_profile.py:28 sets TOKEN_RE=re.compile(r'[a-z0-9]+') and applies it to bal=ba.lower() (build_profile.py:113,127) with NO strip_accents. normalize.py:316-317 calls strip_accents(s).lower() BEFORE tokenising. [a-z0-9] does not match e-acute/e-grave/a-grave/c-cedilla, so the profile splits an accented word at the accent while the pipeline keeps it whole.",
+   "probes_diverging": 15,
+   "probes_total": 15,
+   "examples": [
+    {
+     "word": "Creteil",
+     "profile": [
+      "cr",
+      "teil"
+     ],
+     "pipeline": [
+      "creteil"
+     ]
+    },
+    {
+     "word": "Orleans",
+     "profile": [
+      "orl",
+      "ans"
+     ],
+     "pipeline": [
+      "orleans"
+     ]
+    },
+    {
+     "word": "Evreux",
+     "profile": [
+      "vreux"
+     ],
+     "pipeline": [
+      "evreux"
+     ]
+    },
+    {
+     "word": "Evry",
+     "profile": [
+      "vry"
+     ],
+     "pipeline": [
+      "evry"
+     ]
+    },
+    {
+     "word": "Perignac",
+     "profile": [
+      "p",
+      "rignac"
+     ],
+     "pipeline": [
+      "perignac"
+     ]
+    },
+    {
+     "word": "La Defense",
+     "profile": [
+      "la",
+      "d",
+      "fense"
+     ],
+     "pipeline": [
+      "la",
+      "defense"
+     ]
+    },
+    {
+     "word": "Ile-de-France",
+     "profile": [
+      "le",
+      "de",
+      "france"
+     ],
+     "pipeline": [
+      "ile",
+      "de",
+      "france"
+     ]
+    },
+    {
+     "word": "Montelimar",
+     "profile": [
+      "mont",
+      "limar"
+     ],
+     "pipeline": [
+      "montelimar"
+     ]
+    },
+    {
+     "word": "Saint-Etienne",
+     "profile": [
+      "saint",
+      "tienne"
+     ],
+     "pipeline": [
+      "saint",
+      "etienne"
+     ]
+    },
+    {
+     "word": "Besancon",
+     "profile": [
+      "besan",
+      "on"
+     ],
+     "pipeline": [
+      "besancon"
+     ]
+    },
+    {
+     "word": "Nimes",
+     "profile": [
+      "n",
+      "mes"
+     ],
+     "pipeline": [
+      "nimes"
+     ]
+    },
+    {
+     "word": "Alencon",
+     "profile": [
+      "alen",
+      "on"
+     ],
+     "pipeline": [
+      "alencon"
+     ]
+    },
+    {
+     "word": "Venissieux",
+     "profile": [
+      "v",
+      "nissieux"
+     ],
+     "pipeline": [
+      "venissieux"
+     ]
+    },
+    {
+     "word": "Aeroport",
+     "profile": [
+      "a",
+      "roport"
+     ],
+     "pipeline": [
+      "aeroport"
+     ]
+    }
+   ],
+   "real_profile_evidence": {
+    "file": "test_s1.json",
+    "france_rows": 259452,
+    "profile_fields_used": [
+     "addr_tokens.France",
+     "country_rows.France"
+    ],
+    "fragments_present": {
+     "rignac": 10330,
+     "ge": 8279,
+     "le": 1992,
+     "tienne": 135,
+     "orl": 107,
+     "ans": 56
+    },
+    "clean_forms_absent": [
+     "perignac",
+     "orleans",
+     "defense",
+     "creteil",
+     "montelimar",
+     "besancon",
+     "nimes",
+     "alencon",
+     "venissieux",
+     "aeroport",
+     "evry",
+     "evreux"
+    ],
+    "control_unaccented_present": {
+     "dunkerque": 17582,
+     "tourcoing": 18284,
+     "roubaix": 16827,
+     "calais": 15967,
+     "nantes": 37624,
+     "bordeaux": 43634,
+     "lille": 34931
+    },
+    "control_interpretation": "unaccented French tokens ARE present at high counts, so the absences are the accent split, not top-4000 truncation"
+   },
+   "truncation_floors": {
+    "France": [
+     23,
+     58,
+     60
+    ],
+    "India": [
+     166,
+     459,
+     416,
+     182,
+     394,
+     362
+    ],
+    "US": [
+     101,
+     258,
+     274,
+     201,
+     407,
+     440
+    ]
+   },
+   "breaks_pipeline": false,
+   "pipeline_still_correct": {
+    "Ile-de-France": "ile de france",
+    "Hauts-de-France": "hauts de france",
+    "Nouvelle-Aquitaine": "nouvelle aquitaine",
+    "Pays de la Loire": "pays de la loire",
+    "Pas-de-Calais": "pas de calais"
+   },
+   "all_fr_regions_still_match": true,
+   "relation_to_refuted_2": "Orthogonal to, and explanatory of, the already-refuted FR_REGIONS finding. The pipeline strips accents before matching and FR_REGIONS keys are accent-free, which is exactly why France state resolution measured 100%.",
+   "recommendation": "Fix build_profile.py to strip accents before tokenising (mirror normalize.py:317 at build_profile.py:127). This is the ONLY change actually recommended, and it targets the analysis harness, NOT _upstream/."
+  },
+  {
+   "id": 91,
+   "new": true,
+   "severity": "medium (measurement instrument, not pipeline)",
+   "title": "semicolon split divergence between profile and pipeline",
+   "mechanism": "build_profile.py:31 sets ADDR_SPLIT=re.compile(r'[,;]') which splits on comma AND semicolon. normalize.py:322 uses s.split(',') which splits on comma ONLY.",
+   "reproduced": "'andhra pradesh; 500001' is two components in the profile (so the unigram 'andhra', 215298 total, is counted) but ONE component in the pipeline, giving ck='andhra pradesh 500001', which is NOT a key.",
+   "consequence": "a profile unigram count for a multi-word state name can overstate real matchability",
+   "semicolon_prevalence": "UNMEASURED - no semicolon field exists in the profile (has_comma records ',' only)",
+   "recommendation": "align the two splitters; low priority because prevalence is unmeasured"
+  }
+ ],
+ "alias_groups": {
+  "note": "canonical values shared by >1 literal key; all internally consistent",
+  "groups": {
+   "cg": [
+    "chhattisgarh",
+    "chattisgarh"
+   ],
+   "dl": [
+    "delhi",
+    "new delhi",
+    "nct of delhi"
+   ],
+   "jk": [
+    "jammu and kashmir",
+    "jammu & kashmir"
+   ],
+   "kl": [
+    "kerala",
+    "keralam"
+   ],
+   "od": [
+    "orissa",
+    "odisha",
+    "or"
+   ],
+   "py": [
+    "puducherry",
+    "pondicherry"
+   ],
+   "tg": [
+    "telangana",
+    "ts"
+   ],
+   "tn": [
+    "tamil nadu",
+    "tamilnadu"
+   ],
+   "uk": [
+    "uttarakhand",
+    "uttaranchal",
+    "ut"
+   ]
+  }
+ },
+ "data_reachability": {
+  "india_rows_all_six_files": 10544085,
+  "top4000_cutoffs": {
+   "train_s1": 182,
+   "train_s2": 394,
+   "train_s3": 362,
+   "test_s1": 166,
+   "test_s2": 459,
+   "test_s3": 416
+  },
+  "cutoff_sum": 1979,
+  "cutoff_sum_caveat": "A key whose every token is absent from the top-4000 list yields this meaningless 1979. NOT a frequency; deliberately not reported as one.",
+  "top_measured_keys": [
+   {
+    "key": "delhi",
+    "origin": "literal",
+    "ub_rows": 2621031,
+    "pct_india": 24.858
+   },
+   {
+    "key": "maharashtra",
+    "origin": "literal",
+    "ub_rows": 1104757,
+    "pct_india": 10.478
+   },
+   {
+    "key": "new delhi",
+    "origin": "literal",
+    "ub_rows": 1034062,
+    "pct_india": 9.807
+   },
+   {
+    "key": "mh",
+    "origin": "self-map",
+    "ub_rows": 700244,
+    "pct_india": 6.641
+   },
+   {
+    "key": "uttar pradesh",
+    "origin": "literal",
+    "ub_rows": 443572,
+    "pct_india": 4.207
+   },
+   {
+    "key": "dl",
+    "origin": "self-map",
+    "ub_rows": 433906,
+    "pct_india": 4.115
+   },
+   {
+    "key": "karnataka",
+    "origin": "literal",
+    "ub_rows": 410672,
+    "pct_india": 3.895
+   },
+   {
+    "key": "tamil nadu",
+    "origin": "literal",
+    "ub_rows": 366795,
+    "pct_india": 3.479
+   },
+   {
+    "key": "gujarat",
+    "origin": "literal",
+    "ub_rows": 335446,
+    "pct_india": 3.181
+   },
+   {
+    "key": "west bengal",
+    "origin": "literal",
+    "ub_rows": 331662,
+    "pct_india": 3.145
+   },
+   {
+    "key": "telangana",
+    "origin": "literal",
+    "ub_rows": 283530,
+    "pct_india": 2.689
+   },
+   {
+    "key": "ka",
+    "origin": "self-map",
+    "ub_rows": 275043,
+    "pct_india": 2.609
+   },
+   {
+    "key": "up",
+    "origin": "self-map",
+    "ub_rows": 269710,
+    "pct_india": 2.558
+   },
+   {
+    "key": "tn",
+    "origin": "self-map",
+    "ub_rows": 227533,
+    "pct_india": 2.158
+   },
+   {
+    "key": "haryana",
+    "origin": "literal",
+    "ub_rows": 218443,
+    "pct_india": 2.072
+   },
+   {
+    "key": "andhra pradesh",
+    "origin": "literal",
+    "ub_rows": 215298,
+    "pct_india": 2.042
+   },
+   {
+    "key": "wb",
+    "origin": "self-map",
+    "ub_rows": 206407,
+    "pct_india": 1.958
+   },
+   {
+    "key": "gj",
+    "origin": "self-map",
+    "ub_rows": 206387,
+    "pct_india": 1.957
+   },
+   {
+    "key": "rajasthan",
+    "origin": "literal",
+    "ub_rows": 188237,
+    "pct_india": 1.785
+   },
+   {
+    "key": "kerala",
+    "origin": "literal",
+    "ub_rows": 181552,
+    "pct_india": 1.722
+   },
+   {
+    "key": "tg",
+    "origin": "self-map",
+    "ub_rows": 161393,
+    "pct_india": 1.531
+   },
+   {
+    "key": "bihar",
+    "origin": "literal",
+    "ub_rows": 141819,
+    "pct_india": 1.345
+   },
+   {
+    "key": "madhya pradesh",
+    "origin": "literal",
+    "ub_rows": 130403,
+    "pct_india": 1.237
+   },
+   {
+    "key": "hr",
+    "origin": "self-map",
+    "ub_rows": 129560,
+    "pct_india": 1.229
+   },
+   {
+    "key": "rj",
+    "origin": "self-map",
+    "ub_rows": 115512,
+    "pct_india": 1.096
+   },
+   {
+    "key": "kl",
+    "origin": "self-map",
+    "ub_rows": 102493,
+    "pct_india": 0.972
+   },
+   {
+    "key": "punjab",
+    "origin": "literal",
+    "ub_rows": 85621,
+    "pct_india": 0.812
+   },
+   {
+    "key": "mp",
+    "origin": "self-map",
+    "ub_rows": 85555,
+    "pct_india": 0.811
+   },
+   {
+    "key": "br",
+    "origin": "self-map",
+    "ub_rows": 83438,
+    "pct_india": 0.791
+   },
+   {
+    "key": "keralam",
+    "origin": "literal",
+    "ub_rows": 68030,
+    "pct_india": 0.645
+   },
+   {
+    "key": "ap",
+    "origin": "self-map",
+    "ub_rows": 67426,
+    "pct_india": 0.639
+   },
+   {
+    "key": "orissa",
+    "origin": "literal",
+    "ub_rows": 57491,
+    "pct_india": 0.545
+   },
+   {
+    "key": "pb",
+    "origin": "self-map",
+    "ub_rows": 47855,
+    "pct_india": 0.454
+   },
+   {
+    "key": "odisha",
+    "origin": "literal",
+    "ub_rows": 41917,
+    "pct_india": 0.398
+   },
+   {
+    "key": "od",
+    "origin": "self-map",
+    "ub_rows": 41257,
+    "pct_india": 0.391
+   },
+   {
+    "key": "ch",
+    "origin": "self-map",
+    "ub_rows": 8598,
+    "pct_india": 0.082
+   },
+   {
+    "key": "ar",
+    "origin": "self-map",
+    "ub_rows": 6730,
+    "pct_india": 0.064
+   },
+   {
+    "key": "sk",
+    "origin": "self-map",
+    "ub_rows": 5447,
+    "pct_india": 0.052
+   },
+   {
+    "key": "tamilnadu",
+    "origin": "literal",
+    "ub_rows": 4567,
+    "pct_india": 0.043
+   },
+   {
+    "key": "la",
+    "origin": "self-map",
+    "ub_rows": 4473,
+    "pct_india": 0.042
+   },
+   {
+    "key": "chandigarh",
+    "origin": "literal",
+    "ub_rows": 4436,
+    "pct_india": 0.042
+   },
+   {
+    "key": "ga",
+    "origin": "self-map",
+    "ub_rows": 4030,
+    "pct_india": 0.038
+   },
+   {
+    "key": "mn",
+    "origin": "self-map",
+    "ub_rows": 3750,
+    "pct_india": 0.036
+   },
+   {
+    "key": "an",
+    "origin": "self-map",
+    "ub_rows": 3647,
+    "pct_india": 0.035
+   },
+   {
+    "key": "dd",
+    "origin": "self-map",
+    "ub_rows": 3048,
+    "pct_india": 0.029
+   },
+   {
+    "key": "dn",
+    "origin": "self-map",
+    "ub_rows": 2879,
+    "pct_india": 0.027
+   },
+   {
+    "key": "as",
+    "origin": "self-map",
+    "ub_rows": 2743,
+    "pct_india": 0.026
+   },
+   {
+    "key": "hp",
+    "origin": "self-map",
+    "ub_rows": 2630,
+    "pct_india": 0.025
+   },
+   {
+    "key": "ts",
+    "origin": "literal",
+    "ub_rows": 2187,
+    "pct_india": 0.021
+   },
+   {
+    "key": "goa",
+    "origin": "literal",
+    "ub_rows": 2084,
+    "pct_india": 0.02
+   }
+  ],
+  "alias_asymmetry": {
+   "orissa_vs_odisha": "57491 vs 41917 = 1.37x; neither alias redundant",
+   "keralam_vs_kerala": "68030 vs 181552 = 0.37x; neither alias redundant"
+  },
+  "below_measurement_floor_count": 36,
+  "below_measurement_floor_keys": [
+   "arunachal pradesh",
+   "assam",
+   "chhattisgarh",
+   "chattisgarh",
+   "himachal pradesh",
+   "jharkhand",
+   "manipur",
+   "meghalaya",
+   "mizoram",
+   "nagaland",
+   "or",
+   "sikkim",
+   "tripura",
+   "uttarakhand",
+   "uttaranchal",
+   "ut",
+   "nct of delhi",
+   "jammu and kashmir",
+   "jammu & kashmir",
+   "puducherry",
+   "pondicherry",
+   "dadra and nagar haveli",
+   "daman and diu",
+   "ladakh",
+   "lakshadweep",
+   "andaman and nicobar islands",
+   "cg",
+   "jh",
+   "ml",
+   "mz",
+   "nl",
+   "tr",
+   "uk",
+   "jk",
+   "py",
+   "ld"
+  ],
+  "partially_absent_but_live": {
+   "keys": [
+    "br",
+    "dl",
+    "gj",
+    "hr",
+    "keralam",
+    "kl",
+    "od",
+    "odisha",
+    "pb",
+    "rj",
+    "tg",
+    "tn",
+    "wb"
+   ],
+   "note": "absent in 2-4 of 6 files but clear the floor overall"
+  }
+ },
+ "india_row_denominators": {
+  "train_s1": 883188,
+  "test_s1": 809986,
+  "test_s2": 2312565
+ },
+ "gaps": [
+  "No row-level counts for the 36 keys below the floor: profile truncates addr_tokens at 4000/file; raw TSVs prohibited (<1 GB RAM).",
+  "False-positive rate of any key is unmeasurable from marginal token counts; ts/la/ch/ga are upper bounds, not measured misfires.",
+  "The cutoff sum bounds a key absent in all six files in total, but not how that mass distributes.",
+  "Whether 'jammu and kashmir' is intended to cover the ampersand spelling is a design question, not a data question.",
+  "Indic-script text is invisible to all unigram analysis: name_tokens and addr_tokens contain 0 non-ASCII tokens across all six files.",
+  "Per-row component structure: the profile stores unigrams per component, not component strings, so HOW a key matches cannot be confirmed, only that its unigrams occur."
+ ],
+ "recommendations": [
+  {
+   "priority": 1,
+   "action": "Fix build_profile.py to strip accents before tokenising (mirror normalize.py:317 at build_profile.py:127)",
+   "target": "analysis harness, NOT _upstream/",
+   "effect": "French addr_tokens become the tokens the pipeline actually emits"
+  },
+  {
+   "priority": 2,
+   "action": "Guard every France dictionary recommendation against defect 90: re-derive evidence with accent stripping first",
+   "effect": "prevents proposing entries for fragment tokens (ge, rignac, orl) the pipeline can never emit, while missing real tokens (evreux, nimes, defense) that it can"
+  },
+  {
+   "priority": 3,
+   "action": "Align the two component splitters (defect 91)",
+   "effect": "makes multi-word key analysis trustworthy",
+   "note": "low priority, semicolon prevalence unmeasured"
+  },
+  "Cite IN_STATES as 49 pairs / 37 canonical values / 86 effective keys, not '49 states'.",
+  "The self-map loop is correct for IN_STATES; do not carry the FR_REGIONS self-map defect over to India.",
+  "'jammu & kashmir' (line 239) is dead code; first item a follow-up task should look at.",
+  "36 of 86 keys are below the profile's measurement floor; claims about them need row-level access.",
+  "Do not treat the 5 India/US shared codes as a live bug; STATE_MAPS scoping isolates them."
+ ],
+ "recommendation_posture": "Work order establishes ground truth and explicitly proposes no changes. Recommendations are recorded facts for follow-up tasks, not proposed edits.",
+ "constraints_respected": {
+  "dataset_read_only": true,
+  "upstream_read_only": true,
+  "raw_tsv_opened": false,
+  "profile_files_read": [
+   "train_s1",
+   "train_s2",
+   "train_s3",
+   "test_s1",
+   "test_s2",
+   "test_s3"
+  ],
+  "network_access": false,
+  "files_written": [
+   "analysis_out/findings/D078_audit_IN_STATES.md",
+   "analysis_out/findings/D078_audit_IN_STATES.json"
+  ]
+ },
+ "explicit_key_reachability_clarification": {
+  "note": "Two grains are both correct; cite the one that matches your claim. The count of EXPLICIT (pre-loop) keys with a required unigram absent from all six addr_tokens lists is 26 of 49. The count of EFFECTIVE (post-loop) keys below the measurement floor is 36 of 86, because that figure also counts bare self-mapped codes (cg, jh, ml, py, ...).",
+  "explicit_keys_unreachable": 26,
+  "explicit_keys_total": 49,
+  "effective_keys_below_floor": 36,
+  "effective_keys_total": 86,
+  "india_rows_total": 10544085,
+  "truncation_floor_sum": 1979,
+  "upper_bound_pct_of_india_rows": 0.0188,
+  "caveat": "a BOUND, not a measured zero: addr_tokens is truncated to top 4000 per file"
+ },
+ "citation_note": "Cite IN_STATES as 49 pairs / 37 canonical values / 86 effective keys, not '49 states'."
+}

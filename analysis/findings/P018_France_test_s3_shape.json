@@ -1,0 +1,123 @@
+{
+"task":"P018","title":"[France] test_s3: shape, null rates, length distribution","status":"COMPLETE",
+"deliverable":"analysis_out/findings/P018_France_test_s3_shape.md",
+"primary_field":"by_country[\"France\"] in analysis_out/profile/test_s3.json","denominator":731615,
+"denominator_integrity":{"sum_country_rows_s3":5082316,"rows_field_s3":5082316,"country_rows_France_s3":731615,"by_country_France_rows_s3":731615,"len_hist_total_s3_france":731615,"all_checks_pass":true},
+"cross_file":{
+"test_s1":{"file_rows":1732544,"france_rows":259452,"france_share_of_file_pct":14.974015},
+"test_s2":{"file_rows":4887273,"france_rows":703378,"france_share_of_file_pct":14.392007},
+"test_s3":{"file_rows":5082316,"france_rows":731615,"france_share_of_file_pct":14.395307},
+"all_three":{"file_rows":11702133,"france_rows":1694445,"france_share_of_file_pct":14.478399}},
+"slice_size":{
+"france_s3_share_of_all_france_test_rows_pct":43.177265,
+"s3_file_share_of_all_test_rows_pct":43.430681,
+"france_share_of_all_test_rows_pct":14.478399,
+"s3_over_s2_ratio":1.0401,"s3_over_s1_ratio":2.8198,"large_enough_to_conclude_from":true,
+"caveat":"43.18% is plurality not majority. Generalises to s2 with high confidence; does NOT generalise to s1, which has 0.000000% addr_empty and 100.000000% comma rate."},
+"null_rates":{
+"rows":{"value":731615},
+"name_empty":{"value":0,"rate_pct":0.0,"ci95_pct":[0.0,0.000524],"note":"exact total zero"},
+"addr_empty":{"value":21541,"rate_pct":2.944308,"ci95_halfwidth_pp":0.038736,"ci95_rows":[21258,21824]},
+"prefix_bad":{"value":0,"rate_pct":0.0,"ci95_pct":[0.0,0.000524],"note":"entity_id prefix validity 100.000000% for S3-"}},
+"lengths":{"name_chars_total":15466518,"mean_name_chars_per_row":21.1402,
+"addr_chars_total":29241603,"mean_addr_chars_per_row_all_rows":39.9686,
+"non_empty_addr_rows":710074,"mean_addr_chars_per_non_empty_row":41.1811,
+"name_tokens_total":2525838,"name_tokens_per_row":3.4524,
+"num_digits_total":1415333,"num_digits_per_row":1.9345,"num_digits_scope":"ADDRESS ONLY per build_profile.py:114"},
+"len_hist":{"bucket_rule":"len(name)//10*10","total":731615,"total_equals_rows":true,
+"buckets":[["0-9",35882,4.9045],["10-19",306044,41.8313],["20-29",277555,37.9373],["30-39",95665,13.0759],["40-49",15337,2.0963],["50-59",1082,0.1479],["60-69",48,0.0066],["70-79",2,0.0003]],
+"cumulative_pct":{"le_29":84.6731,"le_39":97.7490,"le_49":99.8453}},
+"digit_in_name_and_comma":{
+"has_digit_name":{"value":8094,"rate_pct":1.106320,"ci95_halfwidth_pp":0.023968,"ci95_rows":[7919,8269]},
+"has_comma":{"value":709921,"rate_pct":97.034779,"ci95_halfwidth_pp":0.038869},
+"has_comma_pct_of_non_empty_addr":99.978453,
+"alpha_only_addr":{"value":26857,"rate_pct":3.670920,"ci95_halfwidth_pp":0.043090},
+"dig5":{"value":3909,"per_row":0.005343,"note":"lookaround-guarded"},
+"dig6":{"value":115,"per_row":0.000157,"note":"lookaround-guarded"},
+"no_usable_addr_number":{"value":48398,"rate_pct":6.615228,"derivation":"addr_empty 21541 + alpha_only_addr 26857, disjoint by construction"}},
+"same_file_country_contrast":{
+"US":{"rows":1945701,"name_empty":0,"addr_empty_pct":2.8430,"prefix_bad":0,"has_digit_name_pct":6.0735,"has_comma_pct":97.1570},
+"India":{"rows":2405000,"name_empty":0,"addr_empty_pct":2.4632,"prefix_bad":0,"has_digit_name_pct":3.1686,"has_comma_pct":97.5368}},
+"france_three_file_null_comparison":{
+"s1":{"rows":259452,"addr_empty":0,"addr_empty_pct":0.0,"has_comma_pct":100.0,"dig5_per_row":0.004170,"dig6_per_row":0.000131,"alpha_only_addr":1089},
+"s2":{"rows":703378,"addr_empty":21537,"addr_empty_pct":3.061938,"has_comma_pct":96.912471,"dig5_per_row":0.005137,"dig6_per_row":0.000185,"alpha_only_addr":26656},
+"s3":{"rows":731615,"addr_empty":21541,"addr_empty_pct":2.944308,"has_comma_pct":97.034779,"dig5_per_row":0.005343,"dig6_per_row":0.000157,"alpha_only_addr":26857},
+"pooled_1694445":{"addr_empty":43078,"addr_empty_pct":2.542307,"has_comma":1651034,"has_comma_pct":97.438040}},
+  "s3_code_vs_name_check": {
+    "verdict": "NEGATIVE - France test_s3 does NOT encode geography as codes",
+    "confidence": "CONFIRMED (negative)",
+    "india_contrast_s3": {
+      "mh": {"s3": 371434, "per_1k": 154.442, "s1": 1855},
+      "maharashtra": {"s3": 22537, "per_1k": 9.371, "s1": 176366},
+      "ka": {"s3": 139927, "per_1k": 58.182, "s1": 2235},
+      "karnataka": {"s3": 9324, "per_1k": 3.877, "s1": 65298},
+      "up": {"s3": 142312, "per_1k": 59.173, "s1": 604},
+      "uttar": {"s3": 12618, "per_1k": 5.247, "s1": 69321},
+      "code_to_name_ratio_s3_mh": 16.5,
+      "name_to_code_ratio_s1_maharashtra": 95.1
+    },
+    "france_department_names": {
+      "gironde": {"s3": 75621, "per_1k": 103.362, "s2": 75104, "s1": 62},
+      "nord": {"s3": 76449, "per_1k": 104.493, "s2": 75362, "s1": 200},
+      "calais": {"s3": 57522, "per_1k": 78.623, "s2": 55273, "s1": 15967},
+      "atlantique": {"s3": 64398, "per_1k": 88.022, "s2": 63697, "s1": 253},
+      "hauts": {"s3": 99419, "per_1k": 135.890, "s2": 88519, "s1": 101717},
+      "france": {"s3": 100902, "per_1k": 137.917, "s2": 89929, "s1": 102319},
+      "nouvelle": {"s3": 83099, "per_1k": 113.583, "s2": 74392, "s1": 85311},
+      "aquitaine": {"s3": 82987, "per_1k": 113.430, "s2": 74276, "s1": 85268},
+      "loire": {"s3": 135367, "per_1k": 185.025, "s2": 126216, "s1": 72836}
+    },
+    "france_numeric_insee_codes_are_house_numbers": {
+      "conclusion": "2-digit token counts fall monotonically 10:14556 -> 99:1231, a house-number frequency curve. No department code carries geographic mass.",
+      "decisive_test": "gironde occurs 75621 as a word; if s3 also coded Gironde as 33, token 33 would be >=75000. It is 6359, exactly on the house-number curve between 32:6843 and 34:6404.",
+      "sample_code_counts": {"33": 6359, "59": 2910, "44": 4666, "62": 2787, "75": 2015, "69": 2121, "13": 12640, "34": 6404, "31": 7025, "92": 1365},
+      "zero_padded_low_band": {"01": 298, "02": 279, "03": 313, "04": 251, "05": 283, "06": 284, "07": 227, "08": 251, "09": 225},
+      "not_truncation_artefact": "these tokens ARE present in the top-4000 list, at low values; the argument does not rely on absence"
+    },
+    "implication": "France has no FR_REGIONS self-map loop entry (normalize.py:252) and does not need one. No France-specific s3 geographic-resolution defect. Does NOT address the open s2/s3 department-name-vs-region-name coverage gap (D128, 28.90% vs 2.5620% contradiction still unresolved)."
+  },
+  "secondary_token_tail_analysis": {
+    "france_addr_tokens_absent_from_s1": 340,
+    "shared_with_s2": 261,
+    "shared_s3_mass": 61441,
+    "shared_s3_pct_of_listed_mass": 1.230478,
+    "listed_france_s3_addr_token_mass": 4993261,
+    "unique_to_s3": 79,
+    "unique_to_s3_max_count": 122,
+    "top_s1_absent": [
+      {"tok": "ave", "s3": 10822, "per_1k": 14.792, "s2": 10792},
+      {"tok": "merignac", "s3": 7267, "per_1k": 9.933, "s2": 7149},
+      {"tok": "lege", "s3": 5603, "per_1k": 7.658, "s2": 5658},
+      {"tok": "blvd", "s3": 3046, "per_1k": 4.163, "s2": 3000},
+      {"tok": "crs", "s3": 2260, "per_1k": 3.089, "s2": 2260}
+    ],
+    "inference_marked": "s2 and s3 are near-clones using street-type abbreviations; s3 is not a new encoding regime, it is s2 with a different row sample. s2-to-s3 divergence (79 tokens, max 122) is an order of magnitude below s1-to-s3 (340 tokens, max 10822).",
+    "avenue_typo_tail": {
+      "note": "OCR/transcription tail, not a code channel. Not actionable.",
+      "tokens": {"avenue": 49582, "av": 27570, "bd": 11714, "ave": 10822, "aveue": 277, "aveneu": 260, "avnue": 259, "aveune": 258, "avneue": 254, "avene": 240, "aevnue": 237},
+      "typo_occurrences": 1785,
+      "pct_of_listed_addr_token_mass": 0.036
+    }
+  },
+  "france_s3_name_tokens_top": [
+    {"tok": "sarl", "n": 144483}, {"tok": "sas", "n": 101750}, {"tok": "france", "n": 68936},
+    {"tok": "s", "n": 68074}, {"tok": "club", "n": 50682}, {"tok": "eurl", "n": 42295},
+    {"tok": "de", "n": 41992}, {"tok": "d", "n": 39524}, {"tok": "sa", "n": 35111}, {"tok": "a", "n": 34649}
+  ],
+  "new_defect_found": false,
+  "recommendations": [],
+  "gaps": [
+    "No cross-tabs: overlap of addr_empty/alpha_only_addr with has_digit_name or has_comma is unmeasurable from marginals.",
+    "name_tokens/addr_tokens are top-4000 per country per file; absence is not proof of non-occurrence. No non-occurrence claim is made from truncation.",
+    "No per-row entity_id values; prefix validity is a profile-level aggregate and cannot be decomposed further.",
+    "No city field; cities appear only as addr_tokens, so city-as-a-feature questions remain open.",
+    "French region/department resolution rates NOT re-derived; D128's 28.90% vs 2.5620% contradiction is unresolved and unaffected by this work."
+  ],
+  "provenance": {
+    "measured_on": "2026-09-27",
+    "tools": "PowerShell only; no Python, no network, no raw TSV access",
+    "semantics_verified_against": "build_profile.py:29-31, 84-118",
+    "read_only_respected": ["_upstream/", "amazon_ml_2026_research/"],
+    "files_written": 2
+  }
+}

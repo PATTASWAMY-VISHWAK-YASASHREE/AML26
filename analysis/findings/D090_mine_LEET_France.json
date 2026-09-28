@@ -1,0 +1,640 @@
+{
+ "task_id": "D090",
+ "family": "B-dictionary",
+ "title": "mine evidence to extend LEET for France",
+ "profile_files": [
+  "analysis_out/profile/train_s1.json",
+  "analysis_out/profile/train_s2.json",
+  "analysis_out/profile/train_s3.json",
+  "analysis_out/profile/test_s1.json",
+  "analysis_out/profile/test_s2.json",
+  "analysis_out/profile/test_s3.json"
+ ],
+ "upstream_files_read": [
+  "_upstream/src/normalize.py"
+ ],
+ "headline": "LEET is complete and correct for the 18 genuine French leetspeak token types (2253 occurrences) but actively CORRUPTS the 5 French ordinal/etage abbreviation types (3eme, 1er, 3e, 1ere, 7eme = 1111 occurrences) into non-words. No new LEET digit keys are warranted; an ordinal guard plus a NAME_CANON ordinal dictionary is the fix. Separately, a clean NEGATIVE: the s2/s3 department gap is NOT supported for the top-3 department tokens - nord, gironde and loire atlantique are all already FR_REGIONS keys.",
+ "new_defect_found": true,
+ "most_important_number": {
+  "value": 1111,
+  "meaning": "French name-token occurrences that LEET actively corrupts into non-words (20.93% of the 5307 mixed-digit France name tokens)",
+  "arithmetic": "748 (3eme) + 131 (1er) + 121 (3e) + 102 (1ere) + 9 (7eme) = 1111",
+  "source": "name_tokens[France] in test_s1/test_s2/test_s3"
+ },
+ "invariants": {
+  "country_rows_sum_equals_rows_all_6_files": true,
+  "france_test_rows_total": 1694445,
+  "france_test_rows_arithmetic": "259452 + 703378 + 731615 = 1694445",
+  "france_rows_in_train_files": 0,
+  "name_token_listed_coverage_pct": {
+   "test_s1_France": 91.98,
+   "test_s2_France": 90.23,
+   "test_s3_France": 89.61,
+   "test_s2_US": 83.33,
+   "test_s2_India": 83.93
+  }
+ },
+ "leet_semantics_pinned": {
+  "source": "_upstream/src/normalize.py:256 and :272-282",
+  "mapping": {
+   "0": "o",
+   "1": "l",
+   "3": "e",
+   "4": "a",
+   "5": "s",
+   "6": "g",
+   "7": "t",
+   "8": "b",
+   "@": "a",
+   "$": "s"
+  },
+  "applies_to": "NAME tokens only, and only when a token contains both a letter and a digit",
+  "not_applied_to": "normalize_address (line 342-349) - address tokens go straight to canon.get(t,t)",
+  "order": "t.translate(LEET) THEN NAME_CANON.get(t,t); NAME_STOP applied after"
+ },
+ "france_has_digit_name": {
+  "test_s1": {
+   "has_digit_name": 2002,
+   "rows": 259452,
+   "rate_pct": 0.7716
+  },
+  "test_s2": {
+   "has_digit_name": 7818,
+   "rows": 703378,
+   "rate_pct": 1.1115
+  },
+  "test_s3": {
+   "has_digit_name": 8094,
+   "rows": 731615,
+   "rate_pct": 1.1063
+  },
+  "total": {
+   "has_digit_name": 17914,
+   "rows": 1694445,
+   "rate_pct": 1.0572
+  },
+  "contrast_test_s2": {
+   "US": 6.1783,
+   "India": 2.8788,
+   "France": 1.1115
+  }
+ },
+ "name_column_mixed_tokens": {
+  "total_occurrences": 5307,
+  "total_types": 24,
+  "class_split": {
+   "leet_correct": 2253,
+   "leet_corrupting": 1111,
+   "unresolved": 1943
+  },
+  "class_split_arithmetic": "2253 + 1111 + 1943 = 5307",
+  "leet_correct_types": {
+   "5arl": 637,
+   "5as": 417,
+   "c1ub": 190,
+   "amica1e": 136,
+   "5a": 129,
+   "mais0n": 118,
+   "uni0n": 87,
+   "5asu": 85,
+   "c0mite": 75,
+   "ass0ciation": 75,
+   "rati0n": 61,
+   "tab1issements": 56,
+   "li1le": 54,
+   "c0mit": 29,
+   "5ci": 27,
+   "5portive": 26,
+   "fi1s": 26,
+   "sp0rtive": 25
+  },
+  "leet_correct_plain_form": {
+   "5arl": "sarl",
+   "5as": "sas",
+   "c1ub": "club",
+   "amica1e": "amicale",
+   "5a": "sa",
+   "mais0n": "maison",
+   "uni0n": "union",
+   "5asu": "sasu",
+   "c0mite": "comite",
+   "ass0ciation": "association",
+   "rati0n": "ration",
+   "tab1issements": "tablissements",
+   "li1le": "lille",
+   "c0mit": "comit",
+   "5ci": "sci",
+   "5portive": "sportive",
+   "fi1s": "fils",
+   "sp0rtive": "sportive"
+  },
+  "leet_correct_plain_counts": {
+   "sarl": 358676,
+   "sas": 252882,
+   "club": 122195,
+   "amicale": 79613,
+   "sa": 82278,
+   "maison": 61373,
+   "union": 49247,
+   "sasu": 73614,
+   "comite": 53381,
+   "association": 24164,
+   "ration": 23548,
+   "tablissements": 31387,
+   "lille": 25716,
+   "comit": 23582,
+   "sci": 63630,
+   "sportive": 43661,
+   "fils": 46583
+  },
+  "leet_correct_ratio_range": [
+   0.0,
+   0.003
+  ],
+  "leet_correct_digits_used": [
+   0,
+   1,
+   3,
+   4,
+   5
+  ],
+  "leet_corrupting_types": {
+   "3eme": 748,
+   "1er": 131,
+   "3e": 121,
+   "1ere": 102,
+   "7eme": 9
+  },
+  "leet_corrupting_outputs": {
+   "3eme": "eeme",
+   "1er": "ler",
+   "3e": "ee",
+   "1ere": "lere",
+   "7eme": "teme"
+  },
+  "leet_corrupting_correct_expansion_and_count": {
+   "3eme": [
+    "troisieme",
+    218
+   ],
+   "1er": [
+    "premier",
+    128
+   ],
+   "3e": [
+    "troisieme",
+    218
+   ],
+   "1ere": [
+    "premiere",
+    114
+   ],
+   "7eme": [
+    "septieme",
+    0
+   ]
+  },
+  "unresolved": {
+   "token": "4l",
+   "count": 1943,
+   "leet_target": "al",
+   "target_count": 645,
+   "ratio": 3.012,
+   "per_file": {
+    "test_s1": 311,
+    "test_s2": 835,
+    "test_s3": 797
+   },
+   "note": "mixed form OUTNUMBERS its LEET target 3x, inverse of all 18 genuine leet pairs; 0 occurrences in addr_tokens[France]; confidence SPECULATIVE"
+  },
+  "digit_coverage_verdict": "NO new LEET digit key warranted - 0 of 5307 French mixed name occurrences use digit 2 or 9"
+ },
+ "addr_column_mixed_tokens": {
+  "total_occurrences": 13580,
+  "total_types": 46,
+  "would_change_under_leet": {
+   "types": 37,
+   "occurrences": 8099,
+   "pct": 59.64
+  },
+  "unchanged_by_leet": {
+   "types": 9,
+   "occurrences": 5481,
+   "pct": 40.36
+  },
+  "corruption_examples": {
+   "1er": [
+    1963,
+    "ler"
+   ],
+   "chem1": [
+    1102,
+    "cheml"
+   ],
+   "3eme": [
+    350,
+    "eeme"
+   ],
+   "espl1": [
+    311,
+    "espll"
+   ],
+   "1b": [
+    221,
+    "lb"
+   ],
+   "1bis": [
+    181,
+    "lbis"
+   ],
+   "80b": [
+    179,
+    "bob"
+   ],
+   "6b": [
+    175,
+    "gb"
+   ],
+   "5b": [
+    164,
+    "sb"
+   ],
+   "12b": [
+    164,
+    "l2b"
+   ],
+   "11b": [
+    162,
+    "llb"
+   ],
+   "13bis": [
+    159,
+    "lebis"
+   ],
+   "7b": [
+    156,
+    "tb"
+   ],
+   "3b": [
+    154,
+    "eb"
+   ]
+  },
+  "verdict": "DO NOT extend LEET to the address path; extend ADDR_CANON_FR instead",
+  "note": "unlike names, French ADDRESS mixed tokens DO use digits 2 and 9 (2b 237, 2bis 196, 9b 166, 2eme 697, cour2 3872)"
+ },
+ "abbreviation_table_candidates": {
+  "CONFIRMED": [
+   {
+    "token": "cour",
+    "count_3files": 9403,
+    "sibling_counts": {
+     "cours": 8761,
+     "crs": 4520
+    },
+    "finding": "ADDR_CANON_FR has cours->crs and crs->crs but NOT cour, so one French street type yields three different tokens",
+    "proposed_entry": "\"cour\": \"crs\""
+   }
+  ],
+  "LIKELY": [
+   {
+    "token": "cour2",
+    "count_3files": 3872,
+    "note": "fused cour+house number"
+   },
+   {
+    "token": "chem1",
+    "count_3files": 1102,
+    "note": "fused chemin+number; chem=0 occurrences"
+   },
+   {
+    "token": "esplanade",
+    "count_3files": 878,
+    "note": "street type entirely absent from ADDR_CANON_FR"
+   },
+   {
+    "token": "chaussee",
+    "count_3files": 1125,
+    "note": "absent; inflated by accent split, see profile_defect"
+   },
+   {
+    "token": "cite",
+    "count_3files": 2546,
+    "note": "absent; inflated by accent split"
+   }
+  ],
+  "CONFIRMED_present_no_entry": [
+   {
+    "token": "1er",
+    "count_3files": 1963
+   },
+   {
+    "token": "2eme",
+    "count_3files": 697
+   },
+   {
+    "token": "3eme",
+    "count_3files": 350
+   },
+   {
+    "token": "2e",
+    "count_3files": 162
+   }
+  ],
+  "CONFIRMED_tokenisation_inconsistency": {
+   "description": "ADDR_CANON_FR has b->bis and ter->ter but no digit-fused forms, so '2 b' tokenises to [2,bis] while '2b' tokenises to [2b]",
+   "examples": [
+    "1b",
+    "2b",
+    "3b",
+    "5b",
+    "6b",
+    "7b",
+    "9b",
+    "10b",
+    "11b",
+    "12b",
+    "13b",
+    "14b",
+    "15b",
+    "16b",
+    "17b",
+    "18b",
+    "19b",
+    "20b",
+    "24b",
+    "25b",
+    "28b",
+    "33b",
+    "1bis",
+    "2bis",
+    "3bis",
+    "4bis",
+    "5bis",
+    "6bis",
+    "13bis",
+    "15bis"
+   ],
+   "combined_occurrences_approx": 2600
+  },
+  "SPECULATIVE": [
+   {
+    "token": "ge",
+    "count_3files": 41120,
+    "sibling_counts": {
+     "general": 4826,
+     "gen": 1227,
+     "gal": 25,
+     "georges": 10957
+    },
+    "note": "8.5x more 'ge' than 'general'; UNRESOLVED what it abbreviates"
+   }
+  ]
+ },
+ "region_state_tables": {
+  "fr_regions_key_count": 14,
+  "single_word_keys_measurable": 8,
+  "multi_word_key_caveat": "6 keys are multi-word and can NEVER appear as a single profile token; a count of 0 for them is a tokenisation artefact, not evidence of absence",
+  "single_word_key_rates_pct": {
+   "nord": {
+    "s1": 0.0771,
+    "s2": 10.7143,
+    "s3": 10.4493
+   },
+   "gironde": {
+    "s1": 0.0239,
+    "s2": 10.6776,
+    "s3": 10.3362
+   },
+   "somme": {
+    "s1": 0.1283,
+    "s2": 0.1147,
+    "s3": 0.1139
+   },
+   "paris": {
+    "s1": 0.1495,
+    "s2": 0.1353,
+    "s3": 0.1262
+   },
+   "landes": {
+    "s1": 0.0447,
+    "s2": 0.0415,
+    "s3": 0.0428
+   },
+   "oise": {
+    "s1": 0.0285,
+    "s2": 0.021,
+    "s3": 0.019
+   },
+   "aisne": {
+    "s1": 0.0,
+    "s2": 0.0,
+    "s3": 0.0
+   },
+   "vendee": {
+    "s1": 0.0,
+    "s2": 0.0,
+    "s3": 0.0
+   },
+   "atlantique": {
+    "s1": 0.0975,
+    "s2": 9.0559,
+    "s3": 8.8022
+   }
+  },
+  "discriminator": "token is an s2/s3-only geographic label iff rate_s1 < 0.5% and (rate_s2 >= 2% or rate_s3 >= 2%)",
+  "class_a_complete": [
+   {
+    "token": "nord",
+    "totN": 152011,
+    "in_fr_regions": "YES-key"
+   },
+   {
+    "token": "gironde",
+    "totN": 150787,
+    "in_fr_regions": "YES-key"
+   },
+   {
+    "token": "atlantique",
+    "totN": 128348,
+    "in_fr_regions": "part of key loire atlantique"
+   },
+   {
+    "token": "no",
+    "totN": 72021,
+    "in_fr_regions": "no -> '' in ADDR_CANON_FR:213"
+   },
+   {
+    "token": "pas",
+    "totN": 29032,
+    "in_fr_regions": "part of key pas de calais"
+   }
+  ],
+  "clean_negative": "NO high-mass currently-unhandled department token exists. The three tokens carrying the s2/s3 department encoding (nord, gironde, loire atlantique) are ALL already FR_REGIONS keys. already_checked offers exactly these three as examples of the gap; on the profile they are examples of the opposite.",
+  "state_resolution_upper_bound": {
+   "criterion": "a France row can only resolve state if its address contains a token that is the distinctive proxy of one of the 14 FR_REGIONS keys; summing those proxy counts is a valid upper bound because a row matching k keys is counted k times, so sum >= union",
+   "test_s1": {
+    "sum_proxies": 261569,
+    "capped_ub": 259452,
+    "rows": 259452,
+    "ub_pct": 100.0
+   },
+   "test_s2": {
+    "sum_proxies": 443176,
+    "capped_ub": 443176,
+    "rows": 703378,
+    "ub_pct": 63.01
+   },
+   "test_s3": {
+    "sum_proxies": 473486,
+    "capped_ub": 473486,
+    "rows": 731615,
+    "ub_pct": 64.72
+   },
+   "total": {
+    "ub": 1176114,
+    "rows": 1694445,
+    "ub_pct": 69.41
+   },
+   "arithmetic": "1176114 / 1694445 = 69.41%",
+   "comparison": {
+    "this_task": 69.41,
+    "already_checked_union_bound": 71.1,
+    "D077_looser_criterion": 97.44
+   },
+   "interpretation": "corroborates the ~70% band and contradicts D077's 97.44% under an independently stated criterion. Does NOT settle the D073/D077 dispute.",
+   "actionable": {
+    "rows_with_no_region_token": {
+     "test_s2": 260202,
+     "test_s3": 258129
+    },
+    "pct_of_france_test_rows": 30.59,
+    "note": "these rows are unreachable by ANY FR_REGIONS extension because the string is not in the data - the gap is a missing field, not a thin dictionary"
+   }
+  }
+ },
+ "profile_defect_found": {
+  "id": "accent-stripping absent in build_profile.py",
+  "source": "build_profile.py:28 TOKEN_RE = [a-z0-9]+ applied at :111 and :127 to the raw lowercased string",
+  "mechanism": "[a-z0-9] does not match e-acute, so every accented French word is chopped at its first accent",
+  "evidence": {
+   "chaussee": [
+    "chauss 2372",
+    "chaussee 1125"
+   ],
+   "cite": [
+    "cit 5580",
+    "cite 2546"
+   ],
+   "general": [
+    "g 12539 + n 106424 + ral 10251",
+    "general 4826"
+   ]
+  },
+  "contrast": "_upstream/src/normalize.py:264-266 strip_accents (NFKD) DOES rejoin these, so the pipeline sees one token where the profile shows two",
+  "consequence": "all counts involving accented French candidates are floors and may be split across tokens; the single biggest reason to re-measure against raw data before editing ADDR_CANON_FR",
+  "also_affects": [
+   "1er",
+   "1ere",
+   "2eme",
+   "3eme"
+  ]
+ },
+ "gaps": [
+  "@ and $ LEET keys are UNTESTABLE: build_profile.py TOKEN_RE [a-z0-9]+ discards every non-alphanumeric character, so the profile contains no symbol-leetspeak information",
+  "~9-10% of French name-token mass lies outside the top-4000 cut, so additional mixed-token types may exist",
+  "no co-occurrence data: addr_tokens flattens all comma-components into one counter (build_profile.py:126-127), so every state-resolution figure here is a union bound, not a direct count",
+  "4l (1943) unresolved - needs a raw-data check",
+  "ge (41120) unresolved - could not determine what it abbreviates"
+ ],
+ "recommendations": [
+  {
+   "priority": 1,
+   "action": "Add a French-ordinal regex guard (^\\d+(er|ere|e|eme|ieme)$) BEFORE translate(LEET) in _name_tokens",
+   "effect": "diverts 1111 occurrences (20.93% of French mixed name tokens) out of garbage tokens",
+   "confidence": "CONFIRMED"
+  },
+  {
+   "priority": 2,
+   "action": "Add French ordinals to NAME_CANON: 1er->premier, 1ere->premiere, 2e/2eme->deuxieme, 3e/3eme->troisieme, 7eme->septieme",
+   "effect": "aligns 1111 leet-mangled occurrences with 460+ already-written plain forms (troisieme 218, premier 128, premiere 114, deuxieme 102, cinquieme 9)",
+   "confidence": "CONFIRMED for 3eme/1er/1ere; LIKELY for 2e and 7eme"
+  },
+  {
+   "priority": 3,
+   "action": "Add \"cour\": \"crs\" to ADDR_CANON_FR",
+   "effect": "unifies 9403 occurrences currently split across cour/cours/crs",
+   "confidence": "CONFIRMED"
+  },
+  {
+   "priority": 4,
+   "action": "DO NOT add any digit key to LEET",
+   "effect": "none - 0 of 5307 French mixed name occurrences use digit 2 or 9. Deliberate no-change recommendation.",
+   "confidence": "CONFIRMED"
+  },
+  {
+   "priority": 5,
+   "action": "DO NOT apply LEET in normalize_address",
+   "effect": "59.64% of French mixed address tokens would change and every change is a corruption",
+   "confidence": "CONFIRMED"
+  },
+  {
+   "priority": 6,
+   "action": "Re-measure the ADDR_CANON_FR candidate table against raw data before editing",
+   "effect": "the profile's missing accent stripping makes esplanade/chaussee/cite/ge counts unreliable",
+   "confidence": "CONFIRMED"
+  },
+  {
+   "priority": 7,
+   "action": "Stop sizing fixes from the 71.10/97.44 dispute; independent union bound is 69.41% and the residual ~30% has no region token in the data at all",
+   "effect": "prevents a dictionary fix being sized against an unreachable population",
+   "confidence": "CONFIRMED"
+  }
+ ],
+ "not_rederived": [
+  "REFUTED-1 France postcode loss (dig5 France test_s1 = 1082 / 259452 = 0.417% of rows)",
+  "the test_source1-only 100% denominator error",
+  "ADDR_CANON_FR function-word mass (de/la/du/des) - already established",
+  "the missing FR_REGIONS self-map loop at normalize.py:252 - zero measurable effect, all 14 canonical values occur 0 times as input tokens"
+ ],
+ "name_address_leet_asymmetry": {
+  "finding": "LEET is applied ONLY to business_name (_name_tokens, normalize.py:280) and NEVER to business_address (normalize_address, normalize.py:328-352). A repo-wide search for 'LEET|translate' returns exactly two hits, both inside _name_tokens.",
+  "status": "CONFIRMED",
+  "same_literal_two_outputs": {
+   "3eme": {
+    "name_mass": 748,
+    "name_output": "eeme",
+    "addr_mass": 350,
+    "addr_output": "3eme"
+   },
+   "1er": {
+    "name_mass": 131,
+    "name_output": "ler",
+    "addr_mass": 1963,
+    "addr_output": "1er"
+   }
+  },
+  "combined_literal_mass": 3192,
+  "combined_arithmetic": "879 (name, corrupted) + 2313 (address, preserved) = 3192 occurrences of the same two literals forced into two output spaces by field alone",
+  "addr_over_name_ratio": {
+   "value": 2.56,
+   "arithmetic": "13580 / 5307 = 2.56x"
+  },
+  "per_row": {
+   "name_leet_condition_mass": 5307,
+   "name_per_row": 0.003132,
+   "addr_leet_condition_mass": 13580,
+   "addr_per_row": 0.008014,
+   "denominator": "1694445 France test rows (259452+703378+731615)"
+  },
+  "why_it_costs_a_match": {
+   "blocking": "keys.py:33-34 builds nt from ncore (LEET-processed); keys.py:39-43 builds alph from atoks (RAW). The kind-0 NA key at keys.py:60 is an XOR of a name-token hash and an address-token hash, so it needs both sides to agree on a string. 'eeme' != '3eme' so the key cannot form.",
+   "features": "features.py:128-129 computes wn and wa against SEPARATE idf tables (name_idf, addr_idf), so a corrupted name token cannot be rescued by the address column."
+  },
+  "reverification": "All F2/F3 figures recomputed independently from analysis_out/profile/test_s{1,2,3}.json: 2253 + 1111 + 1943 = 5307 confirmed; 13580 confirmed."
+ },
+ "corrections_on_reverification": [
+  "REMOVED an earlier assertion of '~10% of address-token mass' is not visible. It is NOT computable: by_country stores name_tokens (a true token total) but no address-token total. Only addr_chars/addr_empty/num_digits/dig5/dig6/alpha_only_addr/has_comma/len_hist exist. Replaced with an explicit gap rather than restated.",
+  "RETAINED and independently reproduced: 2253 / 1111 / 1943 = 5307 (name), 13580 (address), 1,111 ordinal corruption, nord/gironde/atlantique already FR_REGIONS keys, cour=9403, esplanade=878, chaussee=1125, cite=2546, ge=41120."
+ ]
+}

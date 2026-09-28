@@ -1,0 +1,175 @@
+{
+ "task_id": "P031",
+ "title": "[France] train_s1: digit structure and address-number behaviour",
+ "agent": "b10",
+ "family": "A-profile",
+ "status": "COMPLETE_NEGATIVE_FOR_PREMISE_PIN_THREAD_CLOSED",
+ "deliverable": "analysis_out/findings/P031_France_train_s1_digits.md",
+ "filename_discrepancy": "tasks/P031.json names P031_France_train_s1_numeric.md; the work order mandates P031_France_train_s1_digits.md. Followed the work order.",
+ "profile_input": "analysis_out/profile/train_s1.json (+ train_s2, train_s3, test_s1, test_s2, test_s3 for cross-source contrast)",
+ "raw_tsv_opened": false,
+ "upstream_modified": false,
+
+ "headline": "The France slice of train_s1 is EMPTY: country_rows has no France key, France share is exactly 0 of 2,206,821, and every France rate in this work order is UNDEFINED (0/0), not 0%. The real substance is the PIN question, and it now CLOSES: pin is dead code in EVERY country because nums.append() at normalize.py:340 runs outside the guard, so every number already reaches anums and the kind-2 blocking keys regardless of pin.",
+
+ "france_train_s1": {
+  "country_rows_key_present": false,
+  "by_country_key_present": false,
+  "name_tokens_key_present": false,
+  "addr_tokens_key_present": false,
+  "france_rows": 0,
+  "france_share_of_train_s1_pct": 0.0,
+  "arithmetic": "country_rows holds only US=1323633 and India=883188; 1323633+883188 = 2206821 = rows exactly, so the breakdown is complete and France is absent, not zero-valued.",
+  "mechanism": "build_profile.py:62 builds country_rows as a Counter; line 142 emits dict(country_rows). A country with zero rows produces NO KEY AT ALL, not a zero entry."
+ },
+
+ "all_requested_france_train_stats": {
+  "digit_in_name_rate": null,
+  "standalone_5_digit_count": null,
+  "standalone_6_digit_count": null,
+  "digit_distribution": null,
+  "what_the_numbers_represent": null,
+  "share_of_addresses_beginning_with_house_number": null,
+  "house_number_position_relative_to_street_word": null,
+  "status": "UNDEFINED_OVER_ZERO_DENOMINATOR",
+  "reason": "Each is f(France)/rows(France) with rows(France)=0. 0/0 is undefined. Publishing any as 0% would assert that 0 France rows lacked the feature, when the truth is that no France rows were observed. Reading a zero-denominator artifact as a rate is the exact error behind the retracted '100% of France rows resolve a state' figure."
+ },
+
+ "country_rows_all_files": {
+  "train_s1": {"rows": 2206821, "US": 1323633, "India": 883188, "France": null, "sum_equals_rows": true},
+  "train_s2": {"rows": 5034616, "US": 3016817, "India": 2017799, "France": null, "sum_equals_rows": true},
+  "train_s3": {"rows": 5285603, "US": 3170056, "India": 2115547, "France": null, "sum_equals_rows": true},
+  "test_s1": {"rows": 1732544, "US": 663106, "India": 809986, "France": 259452, "sum_equals_rows": true},
+  "test_s2": {"rows": 4887273, "US": 1871330, "India": 2312565, "France": 703378, "sum_equals_rows": true},
+  "test_s3": {"rows": 5082316, "US": 1945701, "India": 2405000, "France": 731615, "sum_equals_rows": true}
+ },
+
+ "pin_verdict": {
+  "verdict": "DEAD CODE IN EVERY COUNTRY. Not a lost signal anywhere. The entire pin thread should be closed; leave the guard alone.",
+  "confidence": "CONFIRMED",
+  "argument_a_never_populated_for_US_or_France": "normalize.py:337 requires country == 'India', so pin == '' by construction for 100% of US and France rows.",
+  "argument_b_essentially_never_populated_for_India": "pin fires only on a standalone 6-digit number. Total India dig6 across ALL SIX files = 2237 occurrences in 10,544,085 India rows = 0.000212/row (0.0212%). Indian PINs are 6 digits, yet essentially no Indian address in this dataset carries one.",
+  "argument_c_redundant_even_when_it_fires": "normalize.py:340 nums.append(n2) sits OUTSIDE the len==6/country=='India' guard, so EVERY number of EVERY length in EVERY country is appended to nums. That flows to (i) prep.py:16 anums -> features.py:98-99 qm/sm/qm1/sm1 -> num1_eq, m_inter, m_cont; and (ii) atoks (normalize.py:345-346 t.isdigit()) -> keys.py:39-41 nums = tokens matching ^\\d+$ -> kind-2 (AA) blocking keys at keys.py:63,65. So a 5- or 6-digit number is already a model feature AND already a blocking key, with or without pin.",
+  "pin_consumers_exactly_two": [
+   "prep.py:17 -> pin column -> keys.py:44,58 : string 'pin'+pin becomes one extra kind-0 (name x address) blocking key",
+   "features.py:100,114 -> pin_eq : one ternary feature, already established at 0.0% of rows by the fleet brief"
+  ]
+ },
+
+ "india_dig6_all_files": {
+  "note": "The total population that can ever set pin != ''. dig6 is lookaround-guarded.",
+  "train_s1": {"rows": 883188, "dig6": 182, "per_row": 0.000206},
+  "train_s2": {"rows": 2017799, "dig6": 459, "per_row": 0.000227},
+  "train_s3": {"rows": 2115547, "dig6": 410, "per_row": 0.000194},
+  "test_s1": {"rows": 809986, "dig6": 159, "per_row": 0.000196},
+  "test_s2": {"rows": 2312565, "dig6": 500, "per_row": 0.000216},
+  "test_s3": {"rows": 2405000, "dig6": 527, "per_row": 0.000219},
+  "TOTAL": {"rows": 10544085, "dig6": 2237, "per_row": 0.000212, "pct": 0.02122}
+ },
+
+ "us_dig6_source_asymmetry": {
+  "note": "Quantified per source file as instructed. The ASYMMETRY IS REAL; its 'pin' INTERPRETATION is wrong.",
+  "train_s1": {"rows": 1323633, "dig6": 1656, "per_row": 0.001251},
+  "train_s2": {"rows": 3016817, "dig6": 42026, "per_row": 0.013931},
+  "train_s3": {"rows": 3170056, "dig6": 42321, "per_row": 0.013350},
+  "test_s1": {"rows": 663106, "dig6": 793, "per_row": 0.001196},
+  "test_s2": {"rows": 1871330, "dig6": 26757, "per_row": 0.014298},
+  "test_s3": {"rows": 1945701, "dig6": 26760, "per_row": 0.013753},
+  "s2_over_s1_ratio_train": 11.13,
+  "s2_over_s1_ratio_test": 11.96,
+  "reproduced_in_both_train_and_test": true,
+  "us_dig5_per_row_is_flat": {
+   "train": [0.10984, 0.10734, 0.10780],
+   "test": [0.10979, 0.10971, 0.11014],
+   "conclusion": "The source-1/2-3 asymmetry is ISOLATED TO 6 DIGITS and does not touch 5 digits. pin is the only consumer keyed on 6-digit length and it is redundant anyway, so the asymmetry costs nothing."
+  }
+ },
+
+ "are_us_5_digit_values_house_numbers_or_zips": {
+  "verdict": "HOUSE NUMBERS, NOT ZIPs. CONFIRMED by a counting argument that needs no positional data.",
+  "claim_being_verified": "The earlier finding said US 5-digit values are house numbers, not ZIPs.",
+  "method": "addr_tokens is the top 4000 per country. Read the actual rank-4000 cutoff, then count how many pure 5-digit and 6-digit tokens reach it. A ZIP field would be present in essentially every address and is strongly concentrated, so it would saturate the top-4000 list.",
+  "five_digit_tokens_at_or_above_cutoff": {
+   "train_s1_US": {"cutoff": 201, "n_5digit": 0, "n_6digit": 0},
+   "train_s2_US": {"cutoff": 407, "n_5digit": 0, "n_6digit": 0},
+   "train_s3_US": {"cutoff": 440, "n_5digit": 0, "n_6digit": 0},
+   "test_s1_US": {"cutoff": 101, "n_5digit": 0, "n_6digit": 0},
+   "test_s2_US": {"cutoff": 258, "n_5digit": 0, "n_6digit": 0},
+   "test_s3_US": {"cutoff": 274, "n_5digit": 0, "n_6digit": 0},
+   "all_India_files": {"cutoff_range": [166, 459], "n_5digit": 0, "n_6digit": 0},
+   "France_test_s1": {"cutoff": 23, "n_5digit": 10},
+   "France_test_s2": {"cutoff": 58, "n_5digit": 10},
+   "France_test_s3": {"cutoff": 60, "n_5digit": 10}
+  },
+  "key_arithmetic": "US train_s1 has 145393 standalone 5-digit numbers (dig5) and ZERO 5-digit tokens reach 201 occurrences. 145393/201 = 723.3, so at least ceil(145393/201) = 724 distinct values are required: a long tail, the signature of house numbers, not a bounded postal vocabulary (~41k US ZIPs in use, heavily concentrated at the top).",
+  "consistent_with_already_settled": "Consistent with the fleet brief's settled finding that no country has a postal field."
+ },
+
+ "digit_ladder_train_s1": {
+  "semantics": "Occurrences of pure-digit address tokens WITHIN the top-4000 addr_tokens bag. TOKEN_RE = [a-z0-9]+. These are TOKEN OCCURRENCES, not rows.",
+  "caveat": "Lower bounds only: top 4000 per country AND periodically pruned (prune() drops count<=1 every 8 chunks). The 5/6-digit zeros mean 'no value reached the cutoff', NOT 'no value exists'.",
+  "US": {"L1": {"distinct": 10, "occ": 98826}, "L2": {"distinct": 92, "occ": 173412}, "L3": {"distinct": 647, "occ": 484247}, "L4": {"distinct": 553, "occ": 182654}, "L5": {"distinct": 0, "occ": 0}, "L6": {"distinct": 0, "occ": 0}},
+  "India": {"L1": {"distinct": 10, "occ": 438791}, "L2": {"distinct": 100, "occ": 486462}, "L3": {"distinct": 522, "occ": 372735}, "L4": {"distinct": 35, "occ": 11746}, "L5": {"distinct": 0, "occ": 0}, "L6": {"distinct": 0, "occ": 0}},
+  "shape": "Smooth decay past 4 digits and a hard cliff at 5, in both countries: the shape of a house/street-number field, not a postcode. India's 4-digit band collapses to 35 distinct values (11746 occ) while US keeps 553 (182654 occ)."
+ },
+
+ "derived_rates_train_s1": {
+  "note": "rate = field / by_country[c].rows, per build_profile.py. num_digits counts the ADDRESS only, not the name.",
+  "US": {"rows": 1323633, "dig5": 145393, "dig5_per_row": 0.109838, "dig6": 1656, "dig6_per_row": 0.001251, "num_digits_per_row": 4.1667, "alpha_only_addr": 1, "no_digit_pct": 0.0001, "has_digit_name": 34494, "digit_in_name_pct": 2.6060},
+  "India": {"rows": 883188, "dig5": 2668, "dig5_per_row": 0.003020, "dig6": 182, "dig6_per_row": 0.000206, "num_digits_per_row": 3.8571, "alpha_only_addr": 77036, "no_digit_pct": 8.7225, "has_digit_name": 1091, "digit_in_name_pct": 0.1235},
+  "France": null
+ },
+
+
+
+ "new_defect_found": true,
+ "new_defect": {
+  "title": "US source-1 vs source-2/3 digit-free address asymmetry is ~60,000x, five orders of magnitude larger than the dig6 gap, and is undocumented",
+  "is_a_france_finding": false,
+  "is_the_pin_thread": false,
+  "measured": {
+   "metric": "alpha_only_addr / rows (addresses containing no digit at all)",
+   "train_s1_US": {"rows": 1323633, "alpha_only_addr": 1, "pct": 0.0001},
+   "train_s2_US": {"rows": 3016817, "alpha_only_addr": 184605, "pct": 6.1192},
+   "train_s3_US": {"rows": 3170056, "alpha_only_addr": 164957, "pct": 5.2036},
+   "test_s1_US": {"rows": 663106, "alpha_only_addr": 1, "pct": 0.0002},
+   "test_s2_US": {"rows": 1871330, "alpha_only_addr": 93584, "pct": 5.0009},
+   "test_s3_US": {"rows": 1945701, "alpha_only_addr": 82467, "pct": 4.2384},
+   "headline": "Exactly ONE digit-free US address in source-1, versus ~5-6% in sources 2/3. Reproduced independently in train and test.",
+   "not_confined_to_6_digits": "num_digits/row is 4.1667 (train_s1) vs 3.7514 (train_s2), so unlike the dig6 gap this is a whole-address difference."
+  },
+  "why_it_matters_INFERENCE": "run_blocking.py:31 makes {split}_s1.parquet the blocking INDEX and s2+s3 the queries. A row with no address number generates no kind-2 (AA) key at all (keys.py:63 explodes nums, which is empty). At 0.0001% that is a non-issue for the index side, but the 5-6% of source-2/3 rows that are digit-free cannot be retrieved by an address-number key and depend entirely on the name-only key families (kinds 1, 3, 4). Direction of impact is query-side RECALL, not precision.",
+  "status": "DESCRIPTION, NOT A RECOMMENDED CHANGE",
+  "why_no_recommendation": "The brief's evidence standard forbids manufacturing a recommendation to look productive. I have NOT measured whether CAPS_NOADDR (keys.py:25) already covers these rows adequately. Flagged as measured and unexplained: source-1 and source-2/3 US addresses were apparently built by different pipelines, and nothing in the code or the profile documents that."
+ },
+
+ "gaps": [
+  "NOT MEASURABLE: how many France addresses BEGIN with a house number. build_profile.py:126-127 splits components then TOKEN_RE.findall each and Counter.update them, DESTROYING POSITION. addr_tokens is an unordered multiset. There is no positional field in the profile. GAP, not estimated.",
+  "NOT MEASURABLE: whether the house number sits in a consistent position relative to the street word. Same reason.",
+  "Consequence: the earlier \"'STATE 5-digit' pattern occurs zero times\" claim is POSITIONAL and therefore not reproducible from the profile. I do not repeat it as evidence; the counting argument in the .md section 4 replaces it and needs no position.",
+  "France train digit structure of any kind: data gap, unfixable from the provided files.",
+  "alpha_only_addr and num_digits were not queried for France test_s2/s3; only France test_s1 was needed for the 5-digit question."
+ ],
+
+ "field_semantics_from_build_profile_py": {
+  "num_digits": "digits in the ADDRESS only (line 114, sum over ba). Raw digit COUNT, not rows, not a name measure.",
+  "dig5_dig6": "lookaround-guarded regex (?<!\\d)\\d{5}(?!\\d) and (?<!\\d)\\d{6}(?!\\d), lines 29-30. A digit inside a longer digit run does NOT count.",
+  "has_digit_name": "separate ROW count, any digit in business_name (line 106). This is the digit-in-NAME field.",
+  "alpha_only_addr": "rows where the address is non-empty and contains no digit at all (lines 117-118).",
+  "per_country_stats": "totals across the whole slice; all rates derived by dividing by that country's rows.",
+  "name_tokens_addr_tokens": "top 4000 per country AND periodically pruned (prune(), PRUNE_EVERY=8), so counts are lower bounds. Absence means 'did not reach the top 4000', never 'does not occur'.",
+  "flattening": "ADDR_SPLIT=[,;] then TOKEN_RE per component (lines 126-127), so a token count is not automatically a pipeline-visible quantity AND position is lost.",
+  "token_counts": "token OCCURRENCES, never rows."
+ },
+
+ "not_rederived": [
+  "no-country-has-a-postal-field / pin guard left alone",
+  "pin_eq and alt_tset dead",
+  "US_STATES / IN_STATES / FR_REGIONS need no dictionary expansion",
+  "France blocking caps healthy",
+  "address component order",
+  "RETRACTED French function-word 15.41 percent finding (real 10.25, mechanism self-cancelling)"
+ ],
+
+ "denominator_warning": "ANY France rate computed against a train-file France denominator is meaningless. This is the exact error that produced the retracted '100% of France rows resolve a state' figure. Check the denominator before accepting any France train statistic."
+}

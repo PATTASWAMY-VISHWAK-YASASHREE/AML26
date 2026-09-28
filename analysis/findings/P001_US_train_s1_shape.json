@@ -1,0 +1,172 @@
+{
+  "task_id": "P001",
+  "family": "A-profile",
+  "title": "[US] train_s1: shape, null rates, length distribution",
+  "source_profile": "analysis_out/profile/train_s1.json",
+  "dataset_touched": false,
+  "network_used": false,
+  "upstream_modified": false,
+  "headline": "US slice of train_source1 is 1,323,633 rows (59.9792% of the 2,206,821-row file) and is immaculate on every integrity axis: name_empty=0, addr_empty=0, prefix_bad=0, len_hist sums exactly to rows. NEW corpus-level finding: addr_empty is IDENTICALLY ZERO for every country in both source-1 files (5 country-slices, 3,939,365 rows) and non-zero in all 10 source-2/3 slices - source 1 is not a random sample but a null-free template. A second independent field shows the same boundary: US dig6/row is 0.00125 here vs 0.01335-0.01430 in sources 2/3 (~11x collapse) while US dig5/row is flat, and US alpha_only_addr is exactly 1. This independently confirms the already_checked note that the pin gap bites US source-1, on a file that note did not cite.",
+  "most_important_number": {
+    "value": 11.0,
+    "unit": "x",
+    "meaning": "US dig6/row collapse in source 1: 0.01393/0.00125 ~ 11x (train), 0.01335/0.00120 ~ 11x (test). The pin gate's country=='India' condition discards US 6-digit runs precisely in the source where they nearly vanish.",
+    "arithmetic": "0.01393 / 0.00125 = 11.1 (train_s2 vs train_s1); 0.00120 test_s1 vs 0.01335 train_s3",
+    "caveat": "dig5/dig6 are OCCURRENCE counts, not row counts, so these are occurrences/row."
+  },
+  "shape": {
+    "file_rows": 2206821,
+    "file_rows_field": "rows",
+    "us_rows": 1323633,
+    "india_rows": 883188,
+    "country_sum_check": "1323633 + 883188 = 2206821 (100% of rows, no hidden third country)",
+    "us_share_pct": 59.9792,
+    "us_share_arithmetic": "1323633 / 2206821 = 0.599792",
+    "india_share_pct": 40.0208,
+    "countries_present": ["US", "India"],
+    "france_present": false,
+    "cols": ["entity_id", "business_name", "business_address", "country"],
+    "us_to_india_row_ratio": 1.4985
+  },
+  "null_rates_us": {
+    "rows": 1323633,
+    "name_empty": 0,
+    "name_empty_pct": 0.0,
+    "addr_empty": 0,
+    "addr_empty_pct": 0.0,
+    "prefix_bad": 0,
+    "prefix_bad_pct": 0.0,
+    "has_comma": 1323633,
+    "has_comma_pct": 100.0,
+    "has_digit_name": 34494,
+    "has_digit_name_pct": 2.606,
+    "has_digit_name_arithmetic": "34494 / 1323633 = 0.026060",
+    "alpha_only_addr": 1,
+    "alpha_only_addr_pct": 0.00008,
+    "dig5": 145393,
+    "dig5_per_row": 0.109844,
+    "dig6": 1656,
+    "dig6_per_row": 0.001251,
+    "assessment": "IMMACULATE. All three null/integrity fields are exact zeros. prefix_bad=0 is non-vacuous: build_profile.py:94 evaluates eid.startswith('S1-') per row, so 0/1323633 means the S1- prefix is a valid partition key for 100% of US rows. No prefix repair needed. has_digit_name at 2.606% is 2.4x lower than train_s3 (6.2981%), another source-dependent quantity."
+  },
+  "new_finding_source1_partition": {
+    "summary": "addr_empty and dig6/row recomputed by this agent across ALL SIX profile files reveal an exact partition on the `source` field.",
+    "corpus_table": {
+      "train_s1": {"US": {"rows": 1323633, "addr_empty": 0, "dig6_per_row": 0.00125}, "India": {"rows": 883188, "addr_empty": 0, "dig6_per_row": 0.00021}},
+      "test_s1": {"US": {"rows": 663106, "addr_empty": 0, "dig6_per_row": 0.0012}, "India": {"rows": 809986, "addr_empty": 0, "dig6_per_row": 0.0002}, "France": {"rows": 259452, "addr_empty": 0, "dig6_per_row": 0.00013}},
+      "train_s2": {"US": {"rows": 3016817, "addr_empty": 111121, "dig6_per_row": 0.01393}, "India": {"rows": 2017799, "addr_empty": 57846, "dig6_per_row": 0.00023}},
+      "train_s3": {"US": {"rows": 3170056, "addr_empty": 110968, "dig6_per_row": 0.01335}, "India": {"rows": 2115547, "addr_empty": 64948, "dig6_per_row": 0.00019}},
+      "test_s2": {"US": {"rows": 1871330, "addr_empty": 55107, "dig6_per_row": 0.0143}, "India": {"rows": 2312565, "addr_empty": 52764, "dig6_per_row": 0.00022}, "France": {"rows": 703378, "addr_empty": 21537, "dig6_per_row": 0.00018}},
+      "test_s3": {"US": {"rows": 1945701, "addr_empty": 55317, "dig6_per_row": 0.01375}, "India": {"rows": 2405000, "addr_empty": 59240, "dig6_per_row": 0.00022}, "France": {"rows": 731615, "addr_empty": 21541, "dig6_per_row": 0.00016}}
+    },
+    "invariant_1": {
+      "claim": "addr_empty == 0 in EVERY source-1 country-slice, including France, and non-zero in ALL 10 source-2/3 country-slices.",
+      "source1_slices": 5,
+      "source1_rows": 3939365,
+      "source1_empty_addresses": 0,
+      "marker": "CONFIRMED"
+    },
+    "invariant_2": {
+      "claim": "US dig6/row collapses ~11x in source 1 while US dig5/row stays flat, and India is flat on both. The collapse is US-and-6-digit specific, not general source-1 sparseness.",
+      "us_dig6_source1": [0.00125, 0.0012],
+      "us_dig6_source23": [0.01393, 0.01335, 0.0143, 0.01375],
+      "us_dig5_source1": [0.109844, 0.109789],
+      "us_dig5_source23": [0.107802, 0.10971],
+      "marker": "CONFIRMED"
+    },
+    "corroboration_alpha_only_addr": {
+      "claim": "US alpha_only_addr is exactly 1 row in each source-1 file vs 82467-184605 (4.2-6.1% of rows) in sources 2/3, while India is HIGH in source 1 (77036 = 8.7225%) and comparable throughout.",
+      "us_source1": 1,
+      "us_source23_range": [82467, 184605],
+      "india_train_s1": 77036,
+      "india_train_s1_pct": 8.7225,
+      "reading": "Against build_profile.py:117 (if ba and not any(ch.isdigit() for ch in ba)), essentially every US source-1 address contains a digit and essentially no Indian one does - a generator difference consistent with the dig5/dig6 split.",
+      "marker": "CONFIRMED"
+    }
+  },
+  "lengths_us": {
+    "name_chars": 29735558,
+    "mean_name_chars": 22.4651,
+    "mean_name_arithmetic": "29735558 / 1323633 = 22.4651",
+    "addr_chars": 46277429,
+    "mean_addr_chars": 34.9624,
+    "mean_addr_arithmetic": "46277429 / 1323633 = 34.9624",
+    "name_tokens": 4617935,
+    "name_tokens_per_name": 3.4888,
+    "num_digits": 5515205,
+    "num_digits_per_row": 4.1667,
+    "address_digit_share_pct": 11.9177,
+    "address_digit_share_arithmetic": "5515205 / 46277429 = 0.119177",
+    "dual_denominator_note": "Because addr_empty = 0 here, the all-rows and non-empty denominators are IDENTICAL, so no dual-denominator caveat is needed (unlike P003/P005).",
+    "contrast": "US addresses are shorter here than in train_s3 (34.96 vs 38.45 chars), US names too (22.47 vs 23.98). India is longer on both (26.39 name, 77.70 addr chars)."
+  },
+  "name_length_histogram_us": {
+    "field": "by_country.US.len_hist",
+    "buckets": {
+      "0-9": {"count": 37180, "pct": 2.8089, "cum_pct": 2.8089},
+      "10-19": {"count": 454546, "pct": 34.3408, "cum_pct": 37.1497},
+      "20-29": {"count": 601278, "pct": 45.4263, "cum_pct": 82.5761, "modal": true},
+      "30-39": {"count": 208949, "pct": 15.786, "cum_pct": 98.3621},
+      "40-49": {"count": 20636, "pct": 1.559, "cum_pct": 99.9211},
+      "50-59": {"count": 1015, "pct": 0.0767, "cum_pct": 99.9978},
+      "60-69": {"count": 29, "pct": 0.0022, "cum_pct": 100.0}
+    },
+    "bucket_sum": 1323633,
+    "bucket_sum_equals_rows": true,
+    "ge_50_count": 1044,
+    "ge_50_arithmetic": "1015 + 29 = 1044 ; 1044 / 1323633 = 0.000789",
+    "le_39_pct": 98.3621,
+    "shape": "Sharply unimodal - 45.4% in a single bucket - with a hard ceiling at 60-69. US train_s3 reached 80-89, so this file's US names are shorter-tailed.",
+    "consistency_check": "Per-bucket min/max possible name_chars bound the total to [23717420, 35630117]; measured name_chars = 29735558 falls inside. Histogram and character total are mutually consistent."
+  },
+  "sample_size": {
+    "n": 1323633,
+    "verdict": "YES, decisively. Differences above ~0.2pp are real. The 11x dig6 gap is orders of magnitude beyond any sampling concern.",
+    "moe_half_width_pp_at_p_0.5": 0.0852,
+    "moe_arithmetic": "1.96*sqrt(0.25/1323633) = 0.000852 = 0.0852pp",
+    "scope_caveat": "This file contains no France rows, so nothing here speaks to the only scored country."
+  },
+  "interpretation": [
+    {"claim": "Source 1 comes from a stricter generator than sources 2/3.", "marker": "INFERENCE (high confidence)", "basis": "Four independent fields move together at the source boundary: addr_empty (0 vs 55k-111k), US dig6/row (~11x), US alpha_only_addr (1 vs 82k-185k), US has_digit_name (2.61% vs 6.30%). INFERENCE from the pattern: the source-1 template always emits a street number and a ZIP and never emits a missing field. The profile contains no generator information, so only the consequences are observable, not the template."},
+    {"claim": "The pin gate is confirmed to bite US source-1, on a second file.", "marker": "CONFIRMED", "basis": "already_checked records dig6/row 0.001 for US source-1. I measure 0.00125 (train_s1) and 0.00120 (test_s1) vs 0.01335-0.01430 in US sources 2/3. What the note did NOT say, and this task adds, is that the effect is source-specific AND confined to the US: dig5 is unaffected and India is unaffected on both fields. The defect is precisely 'US source-1 addresses carry 5-digit ZIPs the India-only gate discards'."},
+    {"claim": "The US comma invariant is exact here for a trivial reason.", "marker": "CONFIRMED", "basis": "has_comma = 1323633 = 100% because addr_empty = 0. The identity has_comma == rows - addr_empty therefore holds VACUOUSLY in source 1 - unlike in sources 2/3, it is not independent evidence of a fixed address template."},
+    {"claim": "Do not extrapolate any null rate from this file to the corpus.", "marker": "CONFIRMED (practical consequence)", "basis": "An agent profiling only source 1 would conclude the dataset has no missing addresses. It does not: 610,389 empty addresses exist across sources 2/3 (recomputed as the sum of addr_empty over all 10 source-2/3 country-slices; source-1 slices sum to exactly 0)."}
+  ],
+  "gaps": [
+    {"gap": "Which source-1 rows lack a ZIP.", "impact": "dig5/dig6 are OCCURRENCE counts (len(findall(...)), build_profile.py:115-116), not row counts. 1656 is an upper bound on US source-1 rows carrying a standalone 6-digit run; 145393 an upper bound on 5-digit runs. Reported as occurrences/row, never row rates."},
+    {"gap": "No row-level has_5digit / has_6digit boolean.", "impact": "Distinct-row rates unavailable. Same gap P003 and P005 flagged; now the THIRD task to hit it, which is itself worth recording."},
+    {"gap": "The identity of the single alpha_only_addr US row.", "impact": "Can state that exactly one US address in this file contains no digit at all; cannot say what it is. Almost certainly a data-quality curiosity, not a defect."},
+    {"gap": "No pin field.", "impact": "normalize_address's output is never captured, so this speaks to the INPUT the gate would admit, not to rows that actually received a pin."},
+    {"gap": "No state / city / region field, and no component-count or component-position field.", "impact": "The component-order question raised in already_checked is unreachable from this profile."},
+    {"gap": "Whether the source-1 vs source-2/3 boundary has a nameable cause.", "impact": "The partition is provable; the attribution is not. Marked as inference rather than asserted."},
+    {"gap": "No duplicate-row or unique-entity count.", "impact": "The number of distinct businesses behind 1323633 rows is not derivable, nor the achievable ER target rate."}
+  ],
+  "recommendations": [
+    {"priority": "HIGH", "action": "Treat `source` as a stratification variable; never pool across it when reporting rates.", "expected_effect": "Purely analytical. Prevents the most likely class of wrong conclusion from this dataset, namely reporting a corpus-level null rate that is really a sources-2/3 rate. No pipeline change.", "basis": "addr_empty, US dig6/row, US alpha_only_addr and US has_digit_name all change discontinuously at the source-1 boundary."},
+    {"priority": "MEDIUM", "action": "The pin gate defect now has two independent file-level measurements (train_s1 0.00125, test_s1 0.00120 vs 0.01335-0.01430).", "expected_effect": "Raises confidence the fix belongs in the gate condition (normalize.py:337), not per-file special-casing. If widened to len(n) in (5,6), US rows in THIS file eligible for a pin blocking key rise from 1656 to at most 147049 (dig5 145393 + dig6 1656) - an upper bound on distinct rows, not a row rate. The commonly quoted 1656 -> 42321 comparison belongs to train_s3, not train_s1. Note the direction: source 1 is where the India-only gate discards the LEAST, so widening the gate helps sources 2/3 far more than source 1. The recall/precision tradeoff remains SPECULATIVE - no profile field measures the false-positive cost."},
+    {"priority": "NO CHANGE", "action": "No null handling, prefix repair, or name handling is warranted for US train_s1.", "expected_effect": "None warranted. name_empty, addr_empty and prefix_bad are all exact zeros. Manufacturing a fix would be noise."},
+    {"priority": "NO CHANGE", "action": "No dictionary entry is warranted from this slice.", "expected_effect": "None. This work order produced evidence about HOW ADDRESSES ARE GENERATED, not a missing normalisation token. No CONFIRMED/LIKELY/SPECULATIVE entries proposed."},
+    {"priority": "LOW (informational)", "action": "Record the vacuous-invariance trap.", "expected_effect": "P003 and P005 both treat has_comma == rows - addr_empty as evidence of a fixed address template. In source 1 it holds BECAUSE addr_empty = 0, so it proves nothing there."}
+  ],
+  "refuted_findings": {
+    "REFUTED-1_french_postcodes": "Not re-derived, and my evidence does NOT support it. This file has no France rows. US dig5/row = 0.109844, consistent with the 0.110 quoted for the US, and the France figures in already_checked (0.004 in test_s1) stand unchallenged. What I add is the US source-1 correction the note flagged as already-covered, now measured on train_s1 as well.",
+    "REFUTED-2_fr_regions_thin": "Out of scope. train_source1 contains only US and India. No claim made.",
+    "supports_either_refuted_finding": false
+  },
+  "confidence_markers": [
+    {"claim": "US train_s1 = 1323633 rows, 59.9792% of file", "marker": "CONFIRMED", "basis": "rows, by_country.US.rows, arithmetic shown"},
+    {"claim": "name_empty = addr_empty = prefix_bad = 0", "marker": "CONFIRMED", "basis": "exact zeros, build_profile.py:94,98,100"},
+    {"claim": "len_hist sums exactly to rows", "marker": "CONFIRMED", "basis": "exact integer identity"},
+    {"claim": "country_rows sums exactly to rows", "marker": "CONFIRMED", "basis": "exact integer identity"},
+    {"claim": "addr_empty = 0 in all 5 source-1 country-slices", "marker": "CONFIRMED", "basis": "recomputed from all six profile files"},
+    {"claim": "US dig6/row ~11x lower in source 1", "marker": "CONFIRMED", "basis": "0.00125/0.00120 vs 0.01335-0.01430"},
+    {"claim": "US alpha_only_addr = 1 in each source-1 file", "marker": "CONFIRMED", "basis": "direct field value"},
+    {"claim": "Source 1 uses a stricter generator template", "marker": "INFERENCE (high confidence)", "basis": "four fields move together; no generator data exists"},
+    {"claim": "has_comma identity is vacuous in source 1", "marker": "CONFIRMED", "basis": "follows from addr_empty = 0"},
+    {"claim": "The pin fix should target the gate condition", "marker": "LIKELY", "basis": "two files agree; defect is source-specific"},
+    {"claim": "Recall/precision cost of widening the pin gate", "marker": "SPECULATIVE", "basis": "not measured by any profile field"},
+    {"claim": "Component-order / city analysis", "marker": "SPECULATIVE (abandoned)", "basis": "fields not collected in this profile"}
+  ],
+  "deliverable": "analysis_out/findings/P001_US_train_s1_shape.md"
+}
+

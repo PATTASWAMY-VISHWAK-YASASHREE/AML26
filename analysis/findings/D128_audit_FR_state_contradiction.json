@@ -1,0 +1,193 @@
+{
+  "task_id": "D128",
+  "family": "B-dictionary",
+  "title": "audit the France state-resolution contradiction: 71.10% vs 97.44%",
+  "headline": "NOT A CONTRADICTION - the two figures are not the same quantity. D073 measured a dictionary bound (union bound over the 14 FR_REGIONS keys); D077 measured an address-parseability ceiling (empty-address rate) and never consulted FR_REGIONS. They are nested lower bounds on the same unknown and D073's is the tighter. Under one criterion: at most 1,213,296 of 1,694,445 France test rows (71.60%) can resolve a state; at least 481,149 (28.40%) provably cannot. D077's 2.5620% should be retired, not averaged. VERDICT: do not extend FR_REGIONS.",
+  "new_defect_found": false,
+  "most_important_number": 481149,
+  "most_important_number_meaning": "France test rows that PROVABLY carry no FR_REGIONS-resolvable state = 28.40% of 1,694,445. This is a lower bound (sound direction), reproduced exactly from D073's corrected .md.",
+
+  "criterion": {
+    "one_sentence": "A France test row counts as state-resolved if and only if at least one comma-delimited component of business_address, after translit_text + strip_accents + lowercasing + punctuation-to-space folding, is exactly equal to one of the 14 FR_REGIONS keys.",
+    "code_anchor": "_upstream/src/normalize.py:314-335",
+    "quoted_lines": [
+      "316: s = translit_text(raw or \"\")",
+      "317: s = strip_accents(s).lower()",
+      "318: smap = STATE_MAPS.get(country, {})",
+      "322: comps = [c.strip() for c in s.split(\",\")]",
+      "331: ck = re.sub(r\"[^a-z0-9& ]+\", \" \", c).replace(\"&\", \" and \")",
+      "332: ck = \" \".join(ck.split())",
+      "333: if ck in smap:",
+      "334:     state = smap[ck]",
+      "335:     continue"
+    ],
+    "decisive_properties": [
+      "line 333 is a WHOLE-COMPONENT exact match; '12 rue de lorraine' != key 'lorraine'",
+      "line 335 `continue` means a matching component contributes no tokens",
+      "line 317 strips accents BEFORE matching, but build_profile.py does NOT - so the profile UNDERCOUNTS accented keys"
+    ],
+    "criterion_does_NOT_contain": [
+      "any requirement of a comma",
+      "any assumption about component count",
+      "any use of by_country.has_comma (D077 imported this; it is not in the code)"
+    ]
+  },
+
+  "fr_regions": {
+    "n_keys": 14,
+    "n_canonical_values": 4,
+    "lines": "normalize.py:243-249",
+    "keys": {
+      "hdf": ["hauts de france","nord","pas de calais","somme","aisne","oise"],
+      "naq": ["nouvelle aquitaine","gironde","landes"],
+      "pdl": ["pays de la loire","loire atlantique","vendee"],
+      "idf": ["ile de france","paris"]
+    }
+  },
+
+  "france_rows": {
+    "test_s1": 259452,
+    "test_s2": 703378,
+    "test_s3": 731615,
+    "total": 1694445,
+    "s1_share_pct": 15.31,
+    "s2_s3_share_pct": 84.69,
+    "scope": "France is test-only; country_rows in train_s1..s3 contains only US and India"
+  },
+
+  "the_contradiction_resolved": {
+    "verdict": "NOT a contradiction - criterion mismatch, different quantities",
+    "d073": {
+      "question": "How many rows can contain a FR_REGIONS key?",
+      "test": "union bound: per-key min of constituent token counts, summed over 14 keys, clamped per file to min(UB, rows)",
+      "produces": "upper bound on RESOLVABLE",
+      "direction_of_error": "conservative - overlap inflates the union bound",
+      "correct_figure_md": {"max_resolvable": 1213296, "pct": 71.60, "unresolved": 481149, "unresolved_pct": 28.40},
+      "stale_figure_json_sidecar": {"max_resolvable": 1204739, "pct": 71.10, "unresolved": 489706, "unresolved_pct": 28.90},
+      "artefact_inconsistency_found": "D073's JSON sidecar carries the PRE-fix numbers (1,204,739/71.10%/28.90%); its .md carries the CORRECTED 1,213,296/71.60%/28.40%. The task brief quotes the stale JSON figure. Cite the .md.",
+      "reproduced_by_me": true
+    },
+    "d077": {
+      "question": "How many rows are not structurally dead?",
+      "test": "rows - addr_empty - non-empty-comma-free",
+      "produces": "ceiling on anything state-like, NOT a resolvability rate",
+      "never_consulted_fr_regions": true,
+      "direction_of_error": "ANTI-conservative - assumes every non-empty comma-bearing row resolves",
+      "result": {"hard_no_state": 43411, "hard_no_state_pct": 2.5620, "ceiling": 97.4380},
+      "self_falsifying_control": "D077's own invariant is near country-invariant: US test_s2 97.0552%, US test_s3 97.1570%, India 97.5368%, France 97.4380%. A coverage figure near-identical across disjoint state tables measures ADDRESS FORMAT, not coverage.",
+      "recommendation": "RETIRE the 2.5620% figure - do not average it with D073's"
+    },
+    "why_both_can_be_true": "D077 says >=97.44% of rows are NOT RULED OUT. D073 says <=71.60% of rows are CAPABLE. These are nested lower bounds on the unknown unresolvable fraction and are simultaneously satisfiable.",
+    "interval_i_can_defend": {
+      "resolvable_pct": [0.0, 71.60],
+      "unresolvable_pct": [28.40, 97.44],
+      "is_a_bound_not_a_point_estimate": true,
+      "reason": "profile discards component identity, so token counts cannot be converted to resolved-row counts in either direction"
+    }
+  },
+
+  "per_key_minima": {
+    "note": "union-bound ingredient; absent tokens substituted with the rank-4000 cutoff (23/58/60); `ile` substituted with max(count(ile), count(le)) to absorb profile accent loss",
+    "hauts de france": [101717, 88519, 99419],
+    "nord": [200, 75362, 76449],
+    "pas de calais": [179, 14325, 14528],
+    "somme": [333, 807, 833],
+    "aisne": [23, 58, 60],
+    "oise": [74, 148, 139],
+    "nouvelle aquitaine": [85268, 74276, 82987],
+    "gironde": [62, 75104, 75621],
+    "landes": [116, 292, 313],
+    "pays de la loire": [72812, 63086, 71498],
+    "loire atlantique": [253, 63697, 64398],
+    "vendee": [23, 58, 60],
+    "ile de france": [1992, 4882, 5050],
+    "paris": [388, 952, 923],
+    "union_bound_raw": [263440, 461566, 492278],
+    "union_bound_clamped_to_rows": [259452, 461566, 492278],
+    "clamp_note": "s1 UB 263440 > rows 259452, so s1's bound is VACUOUS - it cannot detect anything. This is exactly why the inherited s1-only 100% figure looked fine."
+  },
+
+  "per_source_admin_level": {
+    "field": "addr_tokens['France']",
+    "definition": "density = token occurrences / France rows. EXCEEDS 100% for s1 because a region name contributes 2-3 tokens per row. Density is a concentration indicator, NOT a row count and NOT coverage.",
+    "table": [
+      {"file": "test_s1", "france_rows": 259452, "region_tokens": 261165, "region_density_pct": 100.7, "dept_tokens": 17625, "dept_density_pct": 6.8, "encodes": "REGIONS"},
+      {"file": "test_s2", "france_rows": 703378, "region_tokens": 229083, "region_density_pct": 32.6, "dept_tokens": 272145, "dept_density_pct": 38.7, "encodes": "DEPARTMENTS"},
+      {"file": "test_s3", "france_rows": 731615, "region_tokens": 257250, "region_density_pct": 35.2, "dept_tokens": 276832, "dept_density_pct": 37.8, "encodes": "DEPARTMENTS"},
+      {"file": "TOTAL", "france_rows": 1694445, "region_tokens": 747498, "region_density_pct": 44.1, "dept_tokens": 566602, "dept_density_pct": 33.4, "encodes": null}
+    ],
+    "region_discriminators": {"hauts": 289655, "nouvelle": 242802, "pays": 207396, "bretagne": 1262, "alsace": 1813, "lorraine": 1948, "normandie": 756, "auvergne": 520, "comte": 418, "picardie": 215, "bourgogne": 713},
+    "top3_region_share_of_region_mass_pct": 89.7,
+    "dept_discriminators": {"nord": 152011, "gironde": 150787, "calais": 128762, "atlantique": 128348, "marne": 2478, "somme": 1973, "landes": 721, "gard": 760, "vosges": 348, "martinique": 414},
+    "top4_dept_share_of_dept_mass_pct": 98.9,
+    "not_in_top4000_any_test_file": ["occitanie","limousin","languedoc","corse","rhone","herault","lozere","finistere","morbihan","var","tarn","essonne","yvelines","isere","loiret","manche","dordogne","charente","creuse","mayenne","pyrenees","cotes","azur","ardenne","franche","seine"],
+    "absence_caveat": "not in the top 4000 means count <= 23/58/60, NOT proven absent",
+    "city_tokens": {"bordeaux": 277474, "nantes": 238748, "lille": 221585, "tourcoing": 115914, "dunkerque": 111538, "roubaix": 107111, "paris": 2263},
+    "top3_city_share_of_france_rows_pct": 43.7,
+    "interpretation": "s1 encodes REGIONS (hence vacuous bound and the inherited s1-only 100% figure); s2/s3 encode DEPARTMENTS whose names (gironde, nord, calais, loire atlantique) are ALREADY keys in FR_REGIONS; the residual is CITY-ONLY addresses carrying no administrative token at all, which no gazetteer can reach."
+  },
+
+  "gazetteer_test": {
+    "method": "identical per-key-minimum union bound, clamped per file to min(UB, rows); token-disjoint subset excludes any key sharing a token with the 20 tokens FR_REGIONS already uses",
+    "results": [
+      {"key_set": "FR_REGIONS as-is", "n_keys": 14, "max_resolvable": 1213296, "pct": 71.60, "unresolved": 481149, "unresolved_pct": 28.40},
+      {"key_set": "+ token-disjoint candidates", "n_keys": 43, "max_resolvable": 1226859, "pct": 72.40, "unresolved": 467586, "unresolved_pct": 27.60},
+      {"key_set": "all 49, overlaps undeducted", "n_keys": 49, "max_resolvable": 1257967, "pct": 74.24, "unresolved": 436478, "unresolved_pct": 25.76}
+    ],
+    "max_gain_pp": 2.64,
+    "max_gain_rows": 44671,
+    "provably_incremental_gain_pp": 0.80,
+    "provably_incremental_gain_rows": 13563,
+    "disjoint_keys": ["lorraine","alsace","bretagne","gard","basse normandie","normandie","haute normandie","haute marne","grand est","martinique","cote d or","vosges","haute garonne","picardie","vienne","jura","guyane","limousin","corse","sarthe","auvergne","rhone alpes","bourgogne","franche comte","poitou charentes","champagne ardenne","midi pyrenees","languedoc roussillon","provence alpes cote d azur"],
+    "precision_risk": "lorraine/alsace are common French street names, grand est/centre/gard are ordinary nouns. Whole-component matching (line 333) limits but does not eliminate this. Precision is UNMEASURABLE from the profile - gap."
+  },
+
+  "gaps": [
+    "NO COMPONENT STRUCTURE: build_profile.py:126-127 splits on [,;] then updates a FLATTENED counter. Component identity and order are destroyed. Token counts cannot be converted to resolved-row counts in either direction. THIS is why a bound is the correct output, not a failure.",
+    "NO ACCENT STRIPPING in profile: TOKEN_RE = [a-z0-9]+ (build_profile.py:28) on the lowercased address, no strip_accents. ile 303/817/794 vs le 1992/4882/5050. Corrected only for `ile`; vendee->vend (53/80/97), cote d or, rhone alpes remain undercounted, so the true UB may be slightly HIGHER than 1,213,296. Direction: 71.60% is conservative.",
+    "SEMICOLON MISMATCH: profile splits on [,;], normalize_address splits on ',' only (line 322). Direction of error not cleanly determined.",
+    "NO PER-ROW DATA: every figure is a token-occurrence sum. Raw TSVs prohibited on this box.",
+    "PRECISION of any candidate key is unmeasurable - can bound rows that COULD resolve, never rows that would FALSELY resolve.",
+    "CITY->REGION MAPPING NOT DERIVABLE: addr_tokens holds marginal counts, not co-occurrence. Not estimated. This is the correct next scraping job: re-scan France with component identity preserved, keyed on city."
+  ],
+
+  "structural_context": {
+    "field": "by_country['France']",
+    "addr_empty": [0, 21537, 21541],
+    "has_comma": [259452, 681661, 709921],
+    "nonempty_comma_free": [0, 180, 153],
+    "alpha_only_addr": [1089, 26656, 26857],
+    "dig5": [1082, 3613, 3909],
+    "note": "D077's 2.5620% is derived from addr_empty + nonempty_comma_free = 43,411. It is a DATA property, not a dictionary property."
+  },
+
+  "inherited_claim_reassessment": {
+    "claim": "state resolves for 100.00% of France rows (259,452 / 259,452)",
+    "verdict": "REFUTED - true for test_s1 only, which is 15.31% of French rows",
+    "prior_agent_arithmetic": "101,521 + 85,197 + 72,734 = 259,452 = s1 France rows exactly",
+    "my_measured_s1": {"hauts": 101717, "nouvelle": 85311, "pays": 72812, "sum": 259840, "delta_vs_rows": 388},
+    "note": "Close to the prior agent's triple but NOT reproducible from the profile. Conclusion survives regardless: s1 is 15.31% of French rows and the untouched 84.69% drives the whole disagreement."
+  },
+
+  "engineering_verdict": {
+    "decision": "DO NOT EXTEND FR_REGIONS",
+    "confirms": "the fleet brief's existing settled entry - FR_REGIONS needs no dictionary expansion - now with the MECHANISM explained rather than merely asserted",
+    "reasoning_criterion": "whole-comma-component exact match against the 14 FR_REGIONS keys after translit + strip_accents + lowercase + punctuation fold",
+    "reasons": [
+      "the 3 region tokens carrying 89.7% of region mass (hauts/nouvelle/pays) are ALREADY mapped",
+      "the 4 department tokens carrying 98.9% of dept mass (nord/gironde/calais/atlantique), which dominate s2/s3, are ALSO already mapped - s2/s3 DO resolve, via the department half of the table",
+      "the >=25.76% residual is address-shaped 'number + street + city' with no administrative component, unreachable by any gazetteer; a maximal 49-key gazetteer buys <=2.64 pp on paper and 0.80 pp provably-incremental"
+    ],
+    "real_fix": "a city->region table (bordeaux/nantes/lille alone are ~43.7% of every French test file) - but NOT derivable from this profile. Gap, not a number.",
+    "process_recommendation": "Any future 'state resolves for X% of rows' claim must state (a) the component-match criterion and (b) the denominator file."
+  },
+
+  "provenance": {
+    "state_rule": "_upstream/src/normalize.py:314-335, :250, :243-249",
+    "token_semantics": "build_profile.py:28 (TOKEN_RE), :126-127 (component split + flatten), :139 (top-4000)",
+    "profile_files": ["analysis_out/profile/test_s1.json","analysis_out/profile/test_s2.json","analysis_out/profile/test_s3.json"],
+    "cutoffs": [23, 58, 60],
+    "cutoff_basis": "min value in each file's France addr_tokens list",
+    "tooling": "PowerShell ConvertFrom-Json; Python broken on this box; no raw TSV opened; no network; _upstream and dataset untouched"
+  }
+}

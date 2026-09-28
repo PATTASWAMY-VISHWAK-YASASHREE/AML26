@@ -1,0 +1,145 @@
+{
+  "dataset": "Fodors-Zagats",
+  "feature_names": [
+    "address_exact",
+    "address_jaccard",
+    "address_ngram",
+    "address_ratio",
+    "address_token_set",
+    "address_token_sort",
+    "name_address_mean",
+    "name_address_min",
+    "name_exact",
+    "name_jaccard",
+    "name_ngram",
+    "name_ratio",
+    "name_token_set",
+    "name_token_sort",
+    "retrieval_score"
+  ],
+  "labels": {
+    "positive_total": 112,
+    "test": 66,
+    "train": 466,
+    "valid": 134
+  },
+  "models": {
+    "hist_gbdt": {
+      "test_pair": {
+        "ap": 1.0,
+        "f05": 1.0,
+        "f1": 1.0,
+        "n": 66,
+        "positives": 11,
+        "precision": 1.0,
+        "recall": 1.0,
+        "threshold": 0.9792371472305356
+      },
+      "threshold": 0.9792371472305356,
+      "train_pair": {
+        "ap": 0.9998377150275884,
+        "f05": 0.9893048128342246,
+        "f1": 0.9736842105263158,
+        "n": 466,
+        "positives": 78,
+        "precision": 1.0,
+        "recall": 0.9487179487179487,
+        "threshold": 0.9792371472305356
+      },
+      "valid_pair": {
+        "ap": 0.9981884057971013,
+        "f05": 0.990990990990991,
+        "f1": 0.9777777777777777,
+        "n": 134,
+        "positives": 23,
+        "precision": 1.0,
+        "recall": 0.9565217391304348,
+        "threshold": 0.9792371472305356
+      },
+      "valid_selected": {
+        "ap": 0.9981884057971013,
+        "f05": 0.990990990990991,
+        "f1": 0.9777777777777777,
+        "n": 134,
+        "positives": 23,
+        "precision": 1.0,
+        "recall": 0.9565217391304348,
+        "threshold": 0.9792371472305356
+      }
+    },
+    "logistic": {
+      "test_pair": {
+        "ap": 1.0,
+        "f05": 1.0,
+        "f1": 1.0,
+        "n": 66,
+        "positives": 11,
+        "precision": 1.0,
+        "recall": 1.0,
+        "threshold": 0.9756635201088504
+      },
+      "threshold": 0.9756635201088504,
+      "train_pair": {
+        "ap": 0.9988487859390591,
+        "f05": 0.9864864864864865,
+        "f1": 0.9668874172185431,
+        "n": 466,
+        "positives": 78,
+        "precision": 1.0,
+        "recall": 0.9358974358974359,
+        "threshold": 0.9756635201088504
+      },
+      "valid_pair": {
+        "ap": 0.9981884057971016,
+        "f05": 0.990990990990991,
+        "f1": 0.9777777777777777,
+        "n": 134,
+        "positives": 23,
+        "precision": 1.0,
+        "recall": 0.9565217391304348,
+        "threshold": 0.9756635201088504
+      },
+      "valid_selected": {
+        "ap": 0.9981884057971016,
+        "f05": 0.990990990990991,
+        "f1": 0.9777777777777777,
+        "n": 134,
+        "positives": 23,
+        "precision": 1.0,
+        "recall": 0.9565217391304348,
+        "threshold": 0.9756635201088504
+      }
+    }
+  },
+  "retrieval": {
+    "candidate_rows": 26491,
+    "cartesian_pairs": 176423,
+    "left_rows": 533,
+    "mean_per_left": 49.70168855534709,
+    "right_rows": 331,
+    "route_counts": {
+      "address_exact,address_token": 12,
+      "address_exact,address_token,name_exact,name_ngram,name_token": 27,
+      "address_exact,address_token,name_ngram": 1,
+      "address_exact,address_token,name_ngram,name_token": 14,
+      "address_token": 17673,
+      "address_token,name_exact,name_ngram,name_token": 56,
+      "address_token,name_ngram": 3440,
+      "address_token,name_ngram,name_token": 1006,
+      "address_token,name_token": 24,
+      "name_exact,name_ngram,name_token": 1,
+      "name_ngram": 3031,
+      "name_ngram,name_token": 1190,
+      "name_token": 16
+    },
+    "test_positive_recall": 1.0,
+    "test_positives": 11,
+    "test_recalled": 11,
+    "train_positive_recall": 1.0,
+    "train_positives": 78,
+    "train_recalled": 78,
+    "valid_positive_recall": 1.0,
+    "valid_positives": 23,
+    "valid_recalled": 23
+  }
+}

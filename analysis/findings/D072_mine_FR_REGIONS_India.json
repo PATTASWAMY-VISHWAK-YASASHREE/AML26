@@ -1,0 +1,204 @@
+{
+ "task_id": "D072",
+ "family": "B-dictionary",
+ "title": "mine evidence to extend FR_REGIONS for India",
+ "scope_note": "FR_REGIONS is the FRANCE table (normalize.py:243). India's table is IN_STATES (normalize.py:230), wired via STATE_MAPS at normalize.py:250. Audited IN_STATES, ADDR_CANON_COMMON, ADDR_CANON_FR, NAME_CANON and LEET against the India slice.",
+ "headline": "IN_STATES needs NO extension - every state present in the data is already a key. The real defect is in ADDR_CANON_COMMON's drop family: 'hno' is deleted but its 7.5x more common sibling 'hn' is not (146,010 occurrences). NEW defect, live-confirmed against the real normalize_address.",
+ "most_important_number": 146010,
+ "new_defect_found": true,
+ "most_important_number_meaning": "occurrences of the address token 'hn' in addr_tokens[India], which ADDR_CANON_COMMON does not delete although it deletes 'h', 'hno' and 'house'",
+ "inputs": ["train_s1.json", "train_s2.json", "train_s3.json", "test_s1.json", "test_s2.json", "test_s3.json"],
+ "profile_fields_used": [
+  "by_country[India].rows",
+  "country_rows[India]",
+  "addr_tokens[India]",
+  "name_tokens[India]",
+  "addr_tokens[France]",
+  "name_tokens[France]",
+  "name_tokens[US]"
+ ],
+ "denominators": {
+  "india_rows_6files": 10544085,
+  "france_rows_6files": 1694445,
+  "france_rows_per_file": {"test_s1": 259452, "test_s2": 703378, "test_s3": 731615, "train_s1": 0, "train_s2": 0, "train_s3": 0},
+  "india_addr_token_occurrences_top4000_union": 97463176,
+  "india_distinct_addr_tokens_union": 4574,
+  "france_distinct_addr_tokens_union": 4441,
+  "derivation": "sum of by_country[country].rows / addr_tokens[country] over the six profile files; note France appears only in the three test files"
+ },
+ "findings": [
+  {
+   "id": "F1",
+   "title": "'hn' unhandled while 'hno' is deleted - drop family inconsistent",
+   "confidence": "CONFIRMED",
+   "gloss_confidence": "LIKELY ('hn' = house number is the author's own knowledge, not a profile field)",
+   "status": "defect",
+   "profile_field": "addr_tokens[India]",
+   "counts": {"hn": 146010, "hno": 19527, "house": 372704},
+   "per_file_hn": {"train_s1": 502, "train_s2": 35024, "train_s3": 34004, "test_s1": 446, "test_s2": 38111, "test_s3": 37923},
+   "arithmetic": "146010 / 10544085 * 1000 = 13.848 per 1k India rows; 146010 / 19527 = 7.48x more frequent than the handled spelling",
+   "files_present": "6 of 6",
+   "in_addr_canon_common": false,
+   "live_confirmation": {
+    "method": "imported real _upstream/src/normalize.py with stubbed polars, called normalize_address(addr, 'India')",
+    "Hn_12_Model_Town_Pune_Maharashtra": "toks=['hn','12','model','town','pune'] state='mh'",
+    "H_No_12_Model_Town_Pune_Maharashtra": "toks=['12','model','town','pune'] state='mh'"
+   },
+   "drop_family_keys_mapping_to_empty": ["door", "flat", "h", "hno", "house", "na", "nil", "no", "none", "nos", "null", "num", "number", "plot", "shop"],
+   "unhandled_drop_family_total": 163357,
+   "unhandled_drop_family_members": [
+    {"token": "hn", "count": 146010, "handled_long_form": "hno", "long_count": 19527},
+    {"token": "flt", "count": 9038, "handled_long_form": "flat", "long_count": 470374},
+    {"token": "plt", "count": 7276, "handled_long_form": "plot", "long_count": 909864},
+    {"token": "shp", "count": 1033, "handled_long_form": "shop", "long_count": 234082}
+   ],
+   "arithmetic_share": "146010 / 163357 = 89.4% of all unhandled drop-family short forms",
+   "recommended_entry": {"hn": ""}
+  },
+  {
+   "id": "F2",
+   "title": "block/blk - neither form is a key in ADDR_CANON_COMMON",
+   "confidence": "CONFIRMED",
+   "status": "defect",
+   "profile_field": "addr_tokens[India]",
+   "counts": {"block": 511622, "blk": 28265, "sum": 539887},
+   "per_file_block": {"train_s1": 39081, "train_s2": 109932, "train_s3": 95008, "test_s1": 35657, "test_s2": 125323, "test_s3": 106621},
+   "per_file_blk": {"train_s1": 2896, "train_s2": 5866, "train_s3": 4948, "test_s1": 2642, "test_s2": 6633, "test_s3": 5280},
+   "arithmetic": "539887 / 10544085 * 1000 = 51.20 per 1k India rows",
+   "files_present": "6 of 6",
+   "in_addr_canon_common": false,
+   "in_addr_canon_fr": false,
+   "key_evidence": "Of the address-structure noun families in the India vocabulary, 14 of 15 have BOTH long and short form as keys (street/st, road/rd, avenue/ave, lane/ln, drive/dr, sector/sec, colony/col, nagar/ngr, village/vill, building/bldg, floor/fl, apartment/apt, phase/ph, district/dist, taluk/tq). block/blk is the sole family where NEITHER is present.",
+   "recommended_entry": {"block": "block", "blk": "block"},
+   "fold_direction_confidence": "SPECULATIVE (profile cannot show which spelling the other source prefers)"
+  },
+  {
+   "id": "F3",
+   "title": "society/soc (+ chs) - second fully unhandled address-structure family",
+   "confidence": "CONFIRMED (frequency) / LIKELY (that the three are synonyms)",
+   "status": "defect",
+   "profile_field": "addr_tokens[India]",
+   "counts": {"society": 115572, "soc": 51842, "chs": 104022, "society_plus_soc": 167414, "all_three": 271436},
+   "arithmetic": "167414 / 10544085 * 1000 = 15.878 per 1k; 271436 / 10544085 * 1000 = 25.74 per 1k",
+   "in_addr_canon_common": false,
+   "gloss": "soc/chs = co-operative housing society (LIKELY, author's own knowledge)"
+  },
+  {
+   "id": "F4",
+   "title": "distt unhandled while dist is handled",
+   "confidence": "CONFIRMED (frequency) / LIKELY (gloss)",
+   "status": "defect",
+   "profile_field": "addr_tokens[India]",
+   "counts": {"dist": 56836, "distt": 10743},
+   "in_addr_canon_common_dist": true,
+   "in_addr_canon_common_distt": false,
+   "recommended_entry": {"distt": "dist"}
+  },
+  {
+   "id": "F5",
+   "title": "IN_STATES needs no extension",
+   "confidence": "CONFIRMED non-defect",
+   "status": "no_change_needed",
+   "measured": {
+    "in_states_keys_as_written": 49,
+    "distinct_canonical_codes": 37,
+    "in_states_keys_after_selfmap_loop": 86,
+    "selfmap_loop_line": "normalize.py:252-254, INCLUDES IN_STATES"
+   },
+   "states_present_in_data_all_are_keys": [
+    {"state": "maharashtra", "code": "mh", "tokens": 1104757},
+    {"state": "delhi", "code": "dl", "tokens": 2621031},
+    {"state": "uttar pradesh", "code": "up", "tokens": [443572, 783159]},
+    {"state": "karnataka", "code": "ka", "tokens": 410672},
+    {"state": "tamil nadu", "code": "tn", "tokens": [366913, 366795]},
+    {"state": "gujarat", "code": "gj", "tokens": 335446},
+    {"state": "telangana", "code": "tg", "tokens": 283530},
+    {"state": "haryana", "code": "hr", "tokens": 218443},
+    {"state": "rajasthan", "code": "rj", "tokens": 188237},
+    {"state": "kerala", "code": "kl", "tokens": 181552},
+    {"state": "bihar", "code": "br", "tokens": 141819},
+    {"state": "madhya pradesh", "code": "mp", "tokens": [130403, 783159]},
+    {"state": "andhra pradesh", "code": "ap", "tokens": [215298, 783159]},
+    {"state": "west bengal", "code": "wb", "tokens": [921804, 331662]},
+    {"state": "punjab", "code": "pb", "tokens": 85621},
+    {"state": "odisha", "code": "od", "tokens": 40791},
+    {"state": "orissa", "code": "od", "tokens": 57491}
+   ],
+   "codes_with_zero_occurrences": ["cg", "jh", "jk", "ld", "ml", "mz", "nl", "py", "tr", "uk"],
+   "full_names_with_zero_occurrences": ["chhattisgarh", "jharkhand", "uttarakhand", "assam", "tripura"],
+   "arithmetic": "10 of 37 codes absent, and their full names absent too -> those states do not appear in this dataset"
+  },
+  {
+   "id": "F6",
+   "title": "LEET omits digits 2 and 9",
+   "confidence": "CONFIRMED (code fact) / LIKELY (as a defect)",
+   "status": "real_defect_negligible_impact",
+   "profile_field": "name_tokens[country]",
+   "leet_line": "normalize.py:256",
+   "leet_pairs": {"0": "o", "1": "l", "3": "e", "4": "a", "5": "s", "6": "g", "7": "t", "8": "b", "@": "a", "$": "s"},
+   "digits_covered": ["0", "1", "3", "4", "5", "6", "7", "8"],
+   "digits_missing": ["2", "9"],
+   "per_country": {
+    "India": {"leet_eligible_distinct": 127, "leet_eligible_occ": 80735, "with_2_or_9_distinct": 1, "with_2_or_9_occ": 253, "pct_of_eligible": 0.313, "token": "2nd"},
+    "US": {"leet_eligible_distinct": 133, "leet_eligible_occ": 90100, "with_2_or_9_distinct": 1, "with_2_or_9_occ": 3657, "pct_of_eligible": 4.059, "token": "24hr"},
+    "France": {"leet_eligible_distinct": 24, "leet_eligible_occ": 5307, "with_2_or_9_distinct": 0, "with_2_or_9_occ": 0, "pct_of_eligible": 0.0, "token": null}
+   },
+   "leet_working_examples_india_name_tokens": {"5ervices->services": 5407, "c0m->com": 2873, "8rothers->brothers": 2386, "de1hi->delhi": 1674}
+  },
+  {
+   "id": "F7",
+   "title": "ADDR_CANON_COMMON covers 29.45% of India address token occurrences",
+   "confidence": "CONFIRMED context, NOT a defect claim",
+   "status": "context",
+   "profile_field": "addr_tokens[India]",
+   "arithmetic": "28704311 / 97463176 = 29.45%",
+   "occurrences_covered": 28704311,
+   "occurrences_total": 97463176,
+   "distinct_tokens_total": 4574,
+   "distinct_tokens_that_are_keys": 126,
+   "caveat": "The uncovered 70% are proper nouns (street/colony/person/place names) that a structural dictionary should not touch. Not a quality score."
+  }
+ ],
+ "france_impact": {
+  "summary": "None of F1-F4 touch a single French row. France is the only scored country, so the expected score effect of every recommendation here is ZERO.",
+  "france_token_counts_all_zero": ["hn", "blk", "block", "flt", "plt", "shp", "soc", "chs", "distt", "rm", "room", "marg", "gali", "mohalla", "layout", "enclave", "vihar"],
+  "france_effective_canon_keys": 219,
+  "france_effective_canon_definition": "normalize.py:320-321 = ADDR_CANON_COMMON minus {st,ste,dr,n,s,e,w}, overlaid with ADDR_CANON_FR",
+  "france_leet_2_9_occurrences": 0
+ },
+ "gaps": [
+  {"id": "G1", "severity": "high", "text": "The profile does not record per-component tokens. build_profile.py:126-127 splits on [,;] but updates ONE flat Counter, discarding component identity, while normalize_address:333 tests `if ck in smap` on a WHOLE component. So 'hn' = 146,010 is a TOKEN count; how many are the standalone component 'Hn 12' is NOT measurable. This is why F1's frequency is strong while its match-rate effect is an estimate.", "fix": "add a profile field recording the token list of each comma-component"},
+  {"id": "G2", "severity": "medium", "text": "No field records the mapping actually applied, so 'unhandled' claims are established by evaluating the dictionary literal against the profile (sound, indirect) rather than observing pipeline output. I did execute the real normalize_address on 7 constructed India strings to confirm the mechanism, but that is a demonstration, not a corpus measurement."},
+  {"id": "G3", "severity": "medium", "text": "Semantic glosses are the author's own knowledge, not profile fields: 'hn'=house number, 'soc'/'chs'=co-operative housing society, 'distt'=district, and the Hindi/Urdu words marg/gali/vihar/enclave/mohalla/peth/haveli/wadi/layout/kunj. Marked LIKELY. The F1-F4 defects do not depend on them."},
+  {"id": "G4", "severity": "medium", "text": "No n-gram or co-occurrence field. Cannot tell whether 'marg' and 'road' ever co-occur in the same address, the condition under which folding marg->rd would merge anything. This is why the Hindi/Urdu vocabulary is NOT in the recommendations."},
+  {"id": "G5", "severity": "low", "text": "The 253 '2nd' and 3657 '24hr' occurrences cannot be classified as leet vs legitimate from token bags alone, hence F6 is CONFIRMED as a code fact but only LIKELY as a defect."},
+  {"id": "G6", "severity": "medium", "text": "build_profile.py prunes hapax tokens (prune(), every 8 chunks, drops count<=1) and keeps only the TOP 4000 per country per file. A token that is rare or falls outside the top 4000 is invisible. ABSENCE of a token from these tables is NOT proof it never occurs; all figures are LOWER BOUNDS."},
+  {"id": "G7", "severity": "info", "text": "No file under amazon_ml_2026_research/student_resource/dataset/ was opened. Only the six profile JSONs (575-865 KB, parsed one at a time) and _upstream/src/normalize.py were read."}
+ ],
+ "recommendations": [
+  {"rank": 1, "action": "Add \"hn\": \"\" to ADDR_CANON_COMMON", "confidence": "CONFIRMED", "expected_effect": "146,010 India address tokens deleted, aligning 'Hn 12' with the already-handled 'H.No 12'", "priority": "do first"},
+  {"rank": 2, "action": "Add flt, plt, shp to the same drop family", "confidence": "CONFIRMED", "expected_effect": "17,347 further tokens deleted", "priority": "low, bundle with 1"},
+  {"rank": 3, "action": "Add block/blk to ADDR_CANON_COMMON as a single canonical", "confidence": "CONFIRMED (fold direction SPECULATIVE)", "expected_effect": "539,887 tokens fold; 'Block 4' and 'Blk 4' begin to agree", "priority": "second"},
+  {"rank": 4, "action": "Add soc/society/chs", "confidence": "CONFIRMED (frequency) / LIKELY (as a group)", "expected_effect": "271,436 tokens fold", "priority": "third"},
+  {"rank": 5, "action": "Add distt -> dist", "confidence": "CONFIRMED (frequency) / LIKELY (gloss)", "expected_effect": "10,743 tokens fold", "priority": "low"},
+  {"rank": 6, "action": "Do NOT extend IN_STATES", "confidence": "CONFIRMED non-defect", "expected_effect": "none; every state present in the data is already a key, 10 codes and their names have zero occurrences", "priority": "none, documented to prevent speculative completion"},
+  {"rank": 7, "action": "Do NOT extend LEET to addresses", "confidence": "CONFIRMED non-defect", "expected_effect": "prevents corruption of 2nd/1st/b3/1a/2b (2,042,847 alpha+digit India address tokens)", "priority": "guard"},
+  {"rank": 8, "action": "Treat LEET's missing 2/9 as documentation only, no code change", "confidence": "CONFIRMED", "expected_effect": "253 India + 3657 US occurrences, 0 in France; not worth an experiment", "priority": "none"},
+  {"rank": 9, "action": "Open a profile-schema ticket for per-component tokens (G1)", "confidence": "CONFIRMED", "expected_effect": "unlocks every state/region component-resolution question for all three countries", "priority": "highest-leverage non-code change"},
+  {"rank": 10, "action": "State the France caveat in the PR: expected score effect is zero", "confidence": "CONFIRMED", "expected_effect": "prevents this work being read as a leaderboard improvement", "priority": "process"}
+ ],
+ "refuted_findings_respected": {
+  "REFUTED-1_france_pin": "not re-derived. F6 touches LEET, not the pin guard. F1-F5 are address-token dictionary issues unrelated to postal codes.",
+  "REFUTED-2_fr_regions_thin": "not re-derived. F5 is an independent measurement of IN_STATES (the India table) and REACHES THE SAME CONCLUSION as REFUTED-2 reached for France: the region table is not the problem, and the evidence does not contradict it. France state resolution was not re-measured."
+ },
+ "constraints_respected": {
+  "dataset_readonly": true,
+  "upstream_readonly": true,
+  "upstream_git_head": "8445b7f11a6f23f2b6adec254ef1dc3bb45507ad",
+  "upstream_git_status_clean": true,
+  "raw_tsv_never_opened": true,
+  "no_network": true,
+  "no_bytecode_written": true,
+  "files_written": 2
+ }
+}

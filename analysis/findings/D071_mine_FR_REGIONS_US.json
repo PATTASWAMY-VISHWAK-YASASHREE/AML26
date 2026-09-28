@@ -1,0 +1,176 @@
+{
+  "id": "D071",
+  "family": "B-dictionary",
+  "title": "mine evidence to extend FR_REGIONS for US",
+  "headline": "US_STATES needs no extension: zero new entries are justified (45/45 postal codes already canonical; 38 of 40 single-word state names present; the only 2 absent states, hawaii and mississippi, are genuinely absent from the corpus). The real defect is one dictionary downstream: the sub-national civic designators county, township, town, columbia, state, canton, borough, ward are handled by NO dictionary in _upstream/src/ and reach the blocking-key alph list 679,393 times = 1.240% of all 54,780,019 listed US address-token occurrences.",
+  "most_important_number": 679393,
+  "most_important_number_meaning": "US address-token occurrences of 8 civic designators (county 281125 + township 157227 + town 104576 + columbia 58751 + state 38177 + canton 18546 + borough 17520 + ward 3471) that are not US_STATES keys, not ADDR_CANON_COMMON keys, not in keys.ADDR_GENERIC, and have len>=3, so all 8 pass every filter at keys.py:39-43 and occupy alph slots. 679393/54780019 = 1.240%.",
+  "new_defect_found": true,
+  "new_defects": [
+    "NEW, largest: 8 US civic designators (county, township, town, columbia, state, canton, borough, ward) are handled by no dictionary anywhere in _upstream/src/ and reach the alph blocking list 679,393 times (1.240% of listed US address-token mass). US-only; the France equivalent scan returns commune=502 and nothing else.",
+    "keys.ADDR_GENERIC (62 entries) is out of sync with ADDR_CANON_COMMON (80 distinct outputs): 9 outputs of len>=3 are unhandled, mass 223,154 US occurrences = 0.407% -- hts 62420, mtn 54177, ctr 42930, rte 24537, xing 14167, jct 14061, plz 8286, fwy 2174, expy 402",
+    "France is 6x noisier than the US on the same defect: 16 leaking outputs, mass 337,590 = 2.815% of the 11,992,918 listed French address tokens -- saint 166818 (saint 141364 + st 25454), bis 69757, rte 29927, crs 13281, res 13088, quai 13004, sainte 8077, gen 6078, mal 4730, bat 3745, fbg 3046, prof 2485, pres 2380, ctr 967, lieu 181, zone 26",
+    "normalize.py:321 excludes 'st' from the ''-suppression set for France, then ADDR_CANON_FR:207 maps st->saint (len 5), so the French token 'st' (25,454 occurrences) becomes a 5-char token that DOES reach alph, unlike the US where ADDR_GENERIC suppresses 'st'",
+    "ADDR_GENERIC covers only the five ordinal literals 1st-5th: 132 distinct unsupported US ordinal tokens (6th+) worth 419,608 occurrences = 0.766% of listed US. France has ZERO ordinal tokens, so this is US-only.",
+    "LEET (normalize.py:256) is applied only in _name_tokens (name channel); normalize_address contains no translate call, so the 519,989 US address occurrences of digits-inside-words are never de-leeted. Digits 2 and 9 are unmapped, producing residual-digit outputs: 24hr->2ahr 3,657 (US), 2nd 253 (India).",
+    "LEET produces phantom tokens occurring 0 times in the same country raw name vocabulary: 1st->lst 679 (US) + 381 (India); 3eme->eeme 748, 1er->ler 131, 7eme->teme 9 (France, 888 total). France 1er/3eme/7eme are correct French input that LEET corrupts.",
+    "4 token collisions between ADDR_CANON_COMMON outputs and US_STATES keys (ct/fl/mt/ne), 521,426 raw US occurrences. Recorded as a NON-defect: normalize.py:333 checks ck in smap on the whole comma-component before tokenising, so the two code paths never meet."
+  ],
+  "corrections_to_prior_draft_of_this_file": [
+    "WITHDRAWN 241,653 occurrences of the 11 counted French boilerplate tokens. The 11 listed tokens sum to 237,968. The 3,685 discrepancy is EXACTLY the count of 'les', a 12th token added to the sum but never listed.",
+    "WITHDRAWN 138,508 occurrences reach the alph blocking list for 14 ADDR_CANON_COMMON outputs (mt, ne, ft, rte, pt, xing, ctr, n, s, e, w, sw, nw, se). Only rte, xing, ctr survive the len_chars()>=3 filter at keys.py:42; the other 11 are 1-2 chars and are discarded BEFORE the alph head(9), so they never occupy a slot. True mass = 24,537 + 14,167 + 42,930 = 81,634, overstating by 57,874.",
+    "REPRODUCES EXACTLY: ordinal 419,608 over 132 distinct tokens; denominator 54,780,019; US_STATES 2-of-40 as-written vs 9-of-92 post-selfmap framing."
+  ],
+  "sources": {
+    "profile_files": ["train_s1.json","train_s2.json","train_s3.json","test_s1.json","test_s2.json","test_s3.json"],
+    "code_files_read": ["_upstream/src/normalize.py (lines 88-353)","_upstream/src/keys.py","build_profile.py"],
+    "raw_tsv_opened": false,
+    "network_used": false,
+    "upstream_pristine_commit": "8445b7f11a6f23f2b6adec254ef1dc3bb45507ad",
+    "note_on_toolchain": "No Python interpreter is installed on this machine (py -3 resolves to a missing Python314 path). All analysis was executed in Node.js against the same read-only profile JSON files. No claim in this report depends on the language used."
+  },
+  "invariants": {
+    "checks_run": 66,
+    "checks_failed": 0,
+    "rows_eq_sum_country_rows": "6/6 files pass",
+    "by_country_rows_eq_country_rows": "18/18 pass",
+    "sum_len_hist_eq_rows": "18/18 pass",
+    "num_digits_ge_rows_minus_addr_empty_minus_alpha_only_addr": "18/18 pass; this identity defines rows containing >=1 digit",
+    "five_dig5_plus_six_dig6_le_num_digits": "18/18 pass",
+    "derived_rows_with_a_digit": {"US_train_s1": "1323632 of 1323633", "US_test_s1": "663105 of 663106"}
+  },
+  "denominators": {
+    "US_listed_addr_token_occurrences": 54780019,
+    "France_listed_addr_token_occurrences": 11992918,
+    "US_listed_name_token_occurrences": 36110533,
+    "India_listed_name_token_occurrences": 29151826,
+    "France_listed_name_token_occurrences": 5210495,
+    "caveat": "LOWER BOUNDS. build_profile.py:127-141 keeps only most_common(4000) per country per file after pruning hapaxes every 8 chunks."
+  },
+  "us_states": {
+    "entries_as_written": 52,
+    "distinct_canonical_values": 52,
+    "entries_after_selfmap_loop": 104,
+    "single_word_keys_as_written": 40,
+    "single_word_keys_present": 38,
+    "single_word_keys_zero_count": ["hawaii","mississippi"],
+    "multi_word_keys": 12,
+    "multi_word_keys_list": ["district of columbia","new hampshire","new jersey","new mexico","new york","north carolina","north dakota","puerto rico","rhode island","south carolina","south dakota","west virginia"],
+    "post_selfmap_single_word_zero_count": ["hawaii","mississippi","hi","mi","ms","nv","nh","nj","pr"],
+    "two_letter_alpha_tokens_in_us_vocab": 78,
+    "two_letter_tokens_that_are_postal_codes": 45,
+    "two_letter_postal_codes_already_canonical": 45,
+    "new_entries_justified": 0,
+    "conclusion": "CONFIRMED negative result. The table is already wider than this dataset needs. Do not extend."
+  },
+  "civic_designators_NEW_DEFECT": {
+    "reach_alph_predicate": "not a US_STATES key AND not a key of ADDR_CANON_COMMON/ADDR_CANON_FR AND not in keys.ADDR_GENERIC AND len>=3 (keys.py:39-43)",
+    "US": {"county": 281125, "township": 157227, "town": 104576, "columbia": 58751, "state": 38177, "canton": 18546, "borough": 17520, "ward": 3471, "total": 679393, "pct_of_listed_us": 1.24, "zero_count_probes": {"parish": 0, "municipality": 0, "precinct": 0, "suburb": 0}},
+    "France": {"commune": 502, "total": 502, "pct_of_listed_fr": 0.004},
+    "note": "US-only defect. Every token is len>=3 so all pass the keys.py:42 filter; county(6), township(9), columbia(8) are long enough to win alph slots under the sort_by(len, descending=True) rule at keys.py:43.",
+    "confidence": "CONFIRMED counts and CONFIRMED absence from all three tables; LIKELY that all are non-identifying in a blocking key."
+  },
+  "canon_output_leak_into_alph": {
+    "predicate": "canon output v leaks iff len(v)>=3 AND not all-digits AND v not in ADDR_GENERIC",
+    "addr_generic_size": 62,
+    "addr_canon_common_distinct_outputs": 80,
+    "addr_canon_fr_distinct_outputs": 29,
+    "US": {"outputs": {"hts": 62420, "mtn": 54177, "ctr": 42930, "rte": 24537, "xing": 14167, "jct": 14061, "plz": 8286, "fwy": 2174, "expy": 402}, "total": 223154, "pct_of_listed_us": 0.407},
+    "France": {
+      "effective_canon": "ADDR_CANON_COMMON minus {st,ste,dr,n,s,e,w} (normalize.py:321), then ** ADDR_CANON_FR",
+      "outputs": {"saint": 166818, "bis": 69757, "rte": 29927, "crs": 13281, "res": 13088, "quai": 13004, "sainte": 8077, "gen": 6078, "mal": 4730, "bat": 3745, "fbg": 3046, "prof": 2485, "pres": 2380, "ctr": 967, "lieu": 181, "zone": 26},
+      "total": 337590,
+      "pct_of_listed_fr": 2.815,
+      "st_to_saint_note": "st occurs 25,454 times in French addresses; normalize.py:321 excludes st from the empty-string suppression set for France and ADDR_CANON_FR:207 maps st->saint (len 5), so it reaches alph. In the US, ADDR_GENERIC suppresses st."
+    }
+  },
+  "ordinals": {
+    "regex": "^\\d{1,3}(st|nd|rd|th)$",
+    "US_distinct_tokens": 137,
+    "US_occurrences": 511112,
+    "US_unsupported_distinct_tokens": 132,
+    "US_unsupported_occurrences": 419608,
+    "US_unsupported_pct_of_listed": 0.766,
+    "France_distinct_tokens": 0,
+    "France_occurrences": 0,
+    "top_unsupported_US": {"6th": 14645, "7th": 13907, "8th": 12129, "9th": 11051, "16th": 10722, "10th": 10460, "12th": 9299, "11th": 9185, "17th": 8833},
+    "note": "US-only. France has zero ordinals, so this fix does not move the scored-country score."
+  },
+  "leetspeak": {
+    "leet_table_is_ordinal_keyed_maketrans": true,
+    "leet_mapping": {"0": "o", "1": "l", "3": "e", "4": "a", "5": "s", "6": "g", "7": "t", "8": "b", "@": "a", "$": "s"},
+    "applied_in_name_channel_only": true,
+    "normalize_address_contains_translate": false,
+    "name_channel": {"US": {"mixed_tokens": 133, "occurrences": 90100, "pct_of_listed": 0.2495}, "India": {"mixed_tokens": 127, "occurrences": 80735, "pct_of_listed": 0.2769}, "France": {"mixed_tokens": 24, "occurrences": 5307, "pct_of_listed": 0.1019}},
+    "address_channel_never_de_leeted": {"US": {"mixed_tokens": 145, "occurrences": 519989}, "India": {"mixed_tokens": 160, "occurrences": 2087204}, "France": {"mixed_tokens": 46, "occurrences": 13580}},
+    "residual_digit_outputs_unmapped_2_and_9": {"24hr->2ahr_US": 3657, "2nd_India": 253},
+    "phantom_outputs_occurring_zero_times_in_same_country_vocab": {"US": {"1st->lst": 679}, "India": {"1st->lst": 381}, "France": {"3eme->eeme": 748, "1er->ler": 131, "7eme->teme": 9, "total": 888}},
+    "total_phantom_occurrences": 5606,
+    "conclusion": "Leetspeak is NOT a French problem (0.10% of French name tokens vs 0.25% US). The real digit-inside-word signal is in the ADDRESS channel (519,989 US occurrences), exactly where LEET is not applied."
+  },
+  "abbreviation_mining": {
+    "method": "pairs (a,b) where a is a strict prefix of a known dictionary concept b, both frequent, excluding pairs where canon(a)==canon(b) or canon(a)==b",
+    "US_candidates_returned": 118,
+    "FR_candidates_returned": 133,
+    "state_related_pairs_all_false_positives": [
+      {"pair": "oh~ohio", "counts": [445297, 307283], "handled": true, "why": "oh is a US_STATES key after the :252 self-map"},
+      {"pair": "il~illinois", "counts": [396078, 273325], "handled": true, "why": "same"},
+      {"pair": "ma~maine|maryland|massachusetts", "counts": [297168, "43709-206116"], "handled": true, "why": "same"},
+      {"pair": "in~indiana", "counts": [260594, 181306], "handled": true, "why": "same"},
+      {"pair": "wa~washington", "counts": [222793, 267075], "handled": true, "why": "same"},
+      {"pair": "ca~california", "counts": [196583, 139681], "handled": true, "why": "same"},
+      {"pair": "wi~wisconsin", "counts": [165081, 118034], "handled": true, "why": "same"}
+    ],
+    "non_abbreviation_false_positives": [
+      {"pair": "st~ste", "counts": [1054366, 11831], "why": "st->st (street) and ste->ste (suite) are distinct concepts, not an abbreviation pair"},
+      {"pair": "ct~ctr", "counts": [324465, 0], "why": "ctr (centre) never appears as a raw US token"},
+      {"pair": "park~parkway", "counts": [183782, 34378], "why": "both are real words, not an abbreviation"}
+    ],
+    "abbreviation_entries_justified": 0,
+    "conclusion": "CONFIRMED negative result. No abbreviation entry is justified by this data."
+  },
+  "collisions_canon_vs_us_states": {
+    "tokens": ["ct", "fl", "mt", "ne"],
+    "detail": {
+      "ct": {"us": 324465, "fr": 0, "meaning": "court->ct and connecticut->ct"},
+      "fl": {"us": 89108, "fr": 0, "meaning": "floor->fl and florida->fl"},
+      "mt": {"us": 74552, "fr": 0, "meaning": "mount->mt and montana->mt"},
+      "ne": {"us": 33301, "fr": 6465, "meaning": "northeast->ne and nebraska->ne"}
+    },
+    "total_raw_us_occurrences": 521426,
+    "is_defect": false,
+    "why": "normalize.py:333 tests ck in smap on the whole comma-component BEFORE tokenising, so a component CT resolves to Connecticut while 12 Court Ct tokenises court->ct normally. The two paths never meet.",
+    "recommendation": "No change. Recorded to stop a future cleanup from breaking it."
+  },
+  "dead_addr_generic_entries": {
+    "count": 15,
+    "of_total": 62,
+    "entries": ["and","block","des","floor","lane","ltd","off","office","plaza","pvt","road","street","the","tower","wing"],
+    "is_defect": false,
+    "why": "All are ADDR_CANON_COMMON keys whose value differs (street->st, road->rd, lane->ln, floor->fl, plaza->plz), or noise words never produced as canon outputs. canon.get(t,t) is the identity, so they cannot appear in atoks.",
+    "recommendation": "No change."
+  },
+  "gaps": [
+    "All token counts are LOWER BOUNDS: build_profile.py:127-141 keeps only most_common(4000) per country per file, after pruning hapaxes every 8 chunks. This is why hts, mtn, ctr, jct, plz, fwy, expy show raw count 0 in the US vocabulary while their canon OUTPUTS are huge (heights 62420, mountain 54177 are present; hts, mtn are not).",
+    "Multi-word state keys are UNTESTABLE: build_profile.py:126-127 flattens comma components via at.update(TOKEN_RE.findall(comp)), discarding component structure. No state-resolution rate can be computed for US, France or India. Same structural gap that blocks the D070 follow-ups. This is a profile limitation, not a claim about the pipeline.",
+    "The alph head(9) damage is unquantified: 679,393 is an ELIGIBILITY count, not a damage count. Measuring damage needs per-row token order, which the profile does not retain.",
+    "has_digit_name is a row count, not a histogram, so leetspeak volume could not be cross-checked against it numerically.",
+    "France has 0 rows in all three train files, so no French figure can be validated on held-out French data.",
+    "Token identity within a row is unknown: county 281,125 occurrences do not reveal how many distinct rows contain it (a row County Road 12 contributes 2)."
+  ],
+  "relation_to_already_checked_findings": {
+    "REFUTED_1_french_postcodes": "not re-derived and not contradicted. I did not attempt a French pin analysis.",
+    "REFUTED_2_fr_regions_too_thin": "not re-derived and NOT contradicted. I could not attempt the test at all (no component-level strings in the profile, Gaps 2). My US-side result is a strictly negative result about US_STATES and adds no France claim.",
+    "new_evidence_on_france": "The 337,590-occurrence France canon-output leak (2.815%, six times the US rate) and the st->saint path (25,454 occurrences) are new France evidence that the two refuted findings were standing in the way of. Notably this is an ADDR_GENERIC/ADDR_CANON_FR defect, NOT an FR_REGIONS defect, which is consistent with the brief statement that France region handling is fine."
+  },
+  "recommendations": [
+    {"priority": 1, "action": "add civic designators to keys.ADDR_GENERIC: county, township, town, columbia, state, canton, borough, ward", "measured_occurrences": 679393, "pct_of_listed_us": 1.24, "confidence": "CONFIRMED counts and CONFIRMED absence from all three tables; LIKELY non-identifying", "expected_effect": "frees alph slots that currently go to length-sorted administrative boilerplate in the largest country"},
+    {"priority": 2, "action": "add the 16 leaking French outputs to keys.ADDR_GENERIC: saint, sainte, bis, rte, crs, res, quai, gen, mal, bat, fbg, prof, pres, ctr, lieu, zone", "measured_occurrences": 337590, "pct_of_listed_fr": 2.815, "confidence": "CONFIRMED counts and CONFIRMED absence; LIKELY non-identifying", "expected_effect": "highest-value change for the actual score - France is the only scored country and leaks 6x more than the US"},
+    {"priority": 3, "action": "add the 9 leaking US outputs to keys.ADDR_GENERIC: hts, mtn, ctr, rte, xing, jct, plz, fwy, expy", "measured_occurrences": 223154, "pct_of_listed_us": 0.407, "confidence": "CONFIRMED", "expected_effect": "hts (62420) and mtn (54177) are the two largest and are absent from the raw vocab, so enumerating canon OUTPUTS rather than raw tokens is the only way to find them"},
+    {"priority": 4, "action": "replace the five ordinal literals in ADDR_GENERIC with an ordinal-regex membership test", "measured_occurrences": 419608, "distinct_tokens": 132, "confidence": "CONFIRMED", "expected_effect": "US-only; France has 0 ordinals so this will not move the French score"},
+    {"priority": 5, "action": "do NOT extend US_STATES and do NOT add abbreviation entries", "measured_occurrences": 0, "confidence": "CONFIRMED negative result", "expected_effect": "avoids an unevidenced change; the table is already wider than the data needs"},
+    {"priority": 6, "action": "exempt LEET from the two shapes it breaks: skip translation when the leading character is unmapped (2, 9), and exempt French ordinal suffixes; separately decide whether name-side 1st should canonicalise to 1st rather than lst", "measured_occurrences": 5606, "confidence": "CONFIRMED counts; fix design is a judgement call", "expected_effect": "lower priority than P1-P3 because the name channel is a smaller share of the blocking key than the address channel"},
+    {"priority": 7, "action": "no change to the 15 dead ADDR_GENERIC entries or the 4 ADDR_CANON/US_STATES collisions", "measured_occurrences": 0, "confidence": "CONFIRMED harmless by construction", "expected_effect": "prevents a future cleanup from breaking working code"},
+    {"priority": 8, "action": "add a component-level field to the next profile build, alongside build_profile.py:126-127", "confidence": "CONFIRMED gap", "expected_effect": "one-line change that unblocks the entire state-resolution question for all three countries"}
+  ]
+}

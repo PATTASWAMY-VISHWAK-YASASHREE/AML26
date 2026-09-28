@@ -1,0 +1,223 @@
+{
+  "id": "D095",
+  "title": "audit current indic_token_dict",
+  "family": "B-dictionary",
+  "author": "a05",
+  "deliverable_md": "analysis_out/findings/D095_audit_indic_token_dict.md",
+  "authoritative": "The .md is the authoritative artefact. Every number in this sidecar is duplicated from it and matches it as of this write. If the two ever disagree, the .md supersedes this file.",
+  "ground_truth": {
+    "path_in_work_order": "_upstream/src/resources/indic_token_dict.json",
+    "path_exists": true,
+    "path_verified_by": "Test-Path '_upstream\\src\\resources\\indic_token_dict.json' -> True",
+    "path_correct": true,
+    "size_bytes": 47788,
+    "raw_json_lines": 1365,
+    "trailing_newline": false,
+    "is_only_file_in_src_resources": true,
+    "upstream_modified": false
+  },
+  "entry_counts": {
+    "entries": 1363,
+    "distinct_keys": 1363,
+    "duplicate_keys": 0,
+    "distinct_values": 167,
+    "distinct_value_atoms_after_splitting_on_space": 169,
+    "why_169_not_167": "4 values are two-word and contribute 2 atoms each instead of 1 (so +4); 2 of those atoms (andhra, pradesh) were already counted as standalone values elsewhere, and 2 (new, delhi) were not. Net 167 + 2 = 169."
+  },
+  "structural_defects": {
+    "empty_or_null_values": 0,
+    "self_maps": 0,
+    "self_map_class_is_vacuous": true,
+    "self_map_why": "Keys are drawn from U+0900-U+0D7F; all values match the regex ^[a-z ]+$. The two sets are disjoint by construction, so a self-map cannot be written. The measured 0 is correct by design and is NOT a gap. Do not raise it.",
+    "values_with_uppercase": 0,
+    "values_not_matching_lowercase_az_space": 0,
+    "values_containing_space": 4,
+    "keys_containing_latin_letter": 0,
+    "keys_containing_digit": 0,
+    "keys_containing_zwnj_u200c_or_zwj_u200d": 0,
+    "dead_code_from_zero_zwnj_keys": "normalize.py:99-101 second lookup with the raw (ZWNJ/ZWJ-bearing) form can never hit, because 0 of 1363 keys contain ZWNJ/ZWJ. Unreachable, not a defect."
+  },
+  "key_script_blocks": {
+    "note": "The single most important structural fact: the table is not 1363 independent translations but ONE 167-word closed vocabulary expressed in 9 scripts.",
+    "block_sum_check": "161+158+152+152+150+149+148+147+146 = 1363",
+    "blocks": [
+      { "block": "Devanagari", "range": "U+0900-U+097F", "keys": 161, "distinct_values_covered": 156, "of": 167 },
+      { "block": "Gurmukhi", "range": "U+0A00-U+0A7F", "keys": 158, "distinct_values_covered": 150, "of": 167 },
+      { "block": "Gujarati", "range": "U+0A80-U+0AFF", "keys": 152, "distinct_values_covered": 148, "of": 167 },
+      { "block": "Telugu", "range": "U+0C00-U+0C7F", "keys": 152, "distinct_values_covered": 148, "of": 167 },
+      { "block": "Malayalam", "range": "U+0D00-U+0D7F", "keys": 150, "distinct_values_covered": 147, "of": 167 },
+      { "block": "Kannada", "range": "U+0C80-U+0CFF", "keys": 149, "distinct_values_covered": 148, "of": 167 },
+      { "block": "Tamil", "range": "U+0B80-U+0BFF", "keys": 148, "distinct_values_covered": 148, "of": 167 },
+      { "block": "Oriya", "range": "U+0B00-U+0B7F", "keys": 147, "distinct_values_covered": 145, "of": 167 },
+      { "block": "Bengali", "range": "U+0980-U+09FF", "keys": 146, "distinct_values_covered": 146, "of": 167 }
+    ],
+    "all_keys_within_U0900_U0D7F": true
+  },  "new_defects_found": [
+    {
+      "id": "D095-N1",
+      "title": "affix-fragment keys",
+      "severity": "minor",
+      "behaviourally_benign": true,
+      "entries": [
+        { "key": "लि", "value": "ltd" },
+        { "key": "લિ", "value": "ltd" },
+        { "key": "ਲਿ", "value": "ltd" },
+        { "key": "प्रा", "value": "pvt" },
+        { "key": "પ્રા", "value": "pvt" },
+        { "key": "੍ਪ੍ਰા", "value": "pvt" }
+      ],
+      "explanation": "Bare word-fragments, not words. लि is a prefix of लिमिटेड (limited); प्रा is a prefix of प्राइवेट (private). These are positional-alignment artefacts of the learner (learn_translit.py:45 'if len(a) == len(b)', lines 41-48), where a wrong pair that recurs twice wins the n>=2 threshold at learn_translit.py:71.",
+      "why_benign": "ltd and pvt are both fixed points downstream: NAME_CANON:111 maps ltd to ltd and NAME_CANON:110 maps pvt to pvt. The full forms limited -> NAME_CANON -> ltd and private -> NAME_CANON -> pvt reach the same tokens, so the fragments cannot desynchronise the name stream.",
+      "recommendation": "log only; should not generate a change on its own"
+    },
+    {
+      "id": "D095-N2",
+      "title": "inconsistent multi-word decomposition of state names",
+      "severity": "cosmetic",
+      "behaviourally_benign": true,
+      "explanation": "Whole-name single-token entries exist (पश्चिम बंगाल -> west bengal, தமிழ்நாடு -> tamil nadu, ఆంధ్రప్రదేశ్ -> andhra pradesh, दिल्ली -> new delhi) alongside split per-token entries (मध्य -> madhya and प्रदेश -> pradesh as two separate frequency-1 entries rather than one madhya pradesh entry; same for उत्तर -> uttar / प्रदेश -> pradesh).",
+      "why_benign": "INDIC_TOKEN_RE breaks on whitespace, so a space-separated native state name is matched token-by-token and reassembles correctly: madhya + space + pradesh = madhya pradesh, which IN_STATES:234 matches -> mp.",
+      "recommendation": "log only"
+    }
+  ],
+  "overlaps": {
+    "with_NAME_CANON": "no conflict; every intersection converges on the same canonical token",
+    "with_ADDR_CANON_COMMON": "no conflict",
+    "with_IN_STATES": "no conflict",
+    "evidence": [
+      "shiv -> shiva; NAME_CANON:135 has both shiv->shiva and shiva->shiva. Same.",
+      "jay -> jai; NAME_CANON:133 has both jay->jai and jai->jai. Same.",
+      "lakshmi -> laxmi; NAME_CANON:134 has both. Same.",
+      "gujarat -> gujarat; IN_STATES:232 gujarat->gj. Same.",
+      "bombay -> bombay; ADDR_CANON_COMMON:190 bombay->mumbai. Same (Latin Bombay takes the identical path)."
+    ],
+    "redundancy_not_a_defect": "About 6 of the 167 values duplicate work NAME_CANON already does (shiv, jay, lakshmi, shree, sree, jai). The dict output is more surface-specific, so it dominates correctly.",
+    "within_table_many_to_one": "deliberate script fan-out, not a defect: om <- 14 keys (one per script), ss <- 9, llp <- 9, ltd <- 3, pvt <- 3"
+  },
+  "ordering": {
+    "verdict": "correct, no defect",
+    "name_path": "normalize_name:287 transliterates first, then _name_tokens:281 applies NAME_CANON. The table emits a surface Latin word which NAME_CANON then canonicalises. e.g. table limited->limited plus NAME_CANON:111 limited->ltd both land on ltd; private->private plus NAME_CANON:110 private->pvt both land on pvt.",
+    "address_path": "normalize_address:333 tests the whole component against STATE_MAPS BEFORE per-token canonicalisation at line 347, so the table's state outputs (gujarat, maharashtra, west bengal) match IN_STATES directly. normalize.py:190-192 then rewrites ADDR_CANON_COMMON aliases (bombay->mumbai, calcutta->kolkata, madras->chennai, odisha->orissa) only if the component is not a bare state. Right order."
+  },
+  "country_scoping": {
+    "scoped": false,
+    "evidence": "normalize.py:250 STATE_MAPS = {US: US_STATES, India: IN_STATES, France: FR_REGIONS} IS country-scoped, but translit_text is not. It is called with no country argument from normalize_name:287 and normalize_address:316. normalize_address receives country at line 314 and does not pass it to translit_text.",
+    "consequence": "the table is loaded once and evaluated on every row of every country, while all 1363 keys are India-specific transliterations learned only from India train S2/S3 pairs (learn_translit.py:11 IND = r[U+0900-U+0D7F]; line 37 filters S2/S3 on IND).",
+    "is_live_defect_for_france": false,
+    "why": "INDIC_RE.search at normalize.py:91 cannot fire on Latin French text, so the cost is one regex scan per row and nothing else. It is a genuine design gap and the reason the table sits on the scored country's hot path at all.",
+    "france_rows_in_train": 0,
+    "france_rows_in_train_evidence": "analysis_out/profile/train_s1.json, train_s2.json and train_s3.json each contain only the US and India keys under by_country; France appears only in test_s1/2/3.json."
+  },  "is_it_actually_used": {
+    "headline": "Not inert, but its marginal value is bounded by a number the profile cannot measure. For the scored country (France) the value is exactly zero.",
+    "keyed_on_script": "native Brahmic, 9 scripts, 0 Latin keys",
+    "distinct_india_tokens_it_can_affect": 0,
+    "india_tokens_listed_denominator": 8000,
+    "denominator_arithmetic": "4000 name_tokens + 4000 addr_tokens",
+    "that_zero_is_a_measurement_artifact": true,
+    "why_the_zero_is_an_artifact": "build_profile.py:28 TOKEN_RE = re.compile(r[a-z0-9]+) matches ZERO characters of a Brahmic string. Every token the profile can list is pure ASCII; every key in this table is pure Brahmic. The two sets are disjoint by construction of the profile, so the table is structurally invisible to every profile field the fleet has. Reading 0 tokens affected as inert would be a plausible-but-wrong conclusion.",
+    "table_is_provably_not_dead": "learn_translit.py:42 (if not re.search(IND, n2): continue) means an entry is only written for a token observed in a real train S2/S3 name that actually contained Brahmic script; learn_translit.py:70-72 requires the winning translation to have n >= 2 observations. 1363 entries each backed by >=2 real observations is proof that Brahmic-script text exists in India train s2/s3 at volume.",
+    "open_vocabulary_coverage": "nil. Because the value set is a closed 167-word list, any Indic token outside it bypasses the table entirely and hits romanize() (normalize.py:102). The table is a high-precision patch on a 167-word legal/brand vocabulary, not a transliteration engine.",
+    "marginal_value_for_france": 0,
+    "marginal_value_for_france_basis": "provable, not inferred: France has no rows in train, the table has no Latin keys, and INDIC_RE (normalize.py:91) cannot fire on Latin French text. The table cannot match a single French token."
+  },
+  "vocabulary_already_present_in_data": {
+    "note": "Because the table introduces no new vocabulary, its value collapses to a conversion count. This is NOT evidence the table is working: the counts are raw data counts (build_profile.py:125 nt.update(bnt) on the untransliterated name), so limited, pvt, ltd and delhi were already Latin in the TSV.",
+    "source": "analysis_out/profile/train_s1.json, India, top 4000 per build_profile.py:27 TOPN = 4000",
+    "india_name_tokens": {
+      "listed_tokens": 4000,
+      "dict_atoms_present": 166,
+      "dict_atoms_total": 169,
+      "occurrences_listed": 2955338,
+      "occurrences_covered": 2212001,
+      "share_pct": 74.85,
+      "arithmetic": "2,212,001 / 2,955,338 = 0.74854"
+    },
+    "india_addr_tokens": {
+      "listed_tokens": 4000,
+      "dict_atoms_present": 121,
+      "dict_atoms_total": 169,
+      "occurrences_listed": 9395284,
+      "occurrences_covered": 1896499,
+      "share_pct": 20.19,
+      "arithmetic": "1,896,499 / 9,395,284 = 0.20186"
+    },
+    "raw_token_counts_cited": {
+      "limited": 521781,
+      "pvt": 121461,
+      "ltd": 145941,
+      "delhi": 321971,
+      "note": "delhi is an addr_tokens count; the others are name_tokens counts. All are raw, untransliterated."
+    },
+    "atoms_absent_from_india_name_top4000": ["nadu", "tamil", "telangana"],
+    "those_atoms_instead_appear_in_addr_tokens": { "tamil": 63594, "telangana": 56251 },
+    "top4000_caveat": "Doubly truncated. It is Counter.most_common(4000) (build_profile.py:140-141) over counters periodically pruned of all count==1 tokens (build_profile.py:26 PRUNE_EVERY = 8, lines 45-48 and 128-133). Absence of an atom is not in the top 4000, never does not occur. Does not affect the headline, which is a disjointness proved by the tokenizer, not an occurrence claim.",
+    "per_split_atom_presence_in_india_top4000": {
+      "train_s1": { "name": 166, "addr": 121 },
+      "train_s2": { "name": 166, "addr": 119 },
+      "train_s3": { "name": 166, "addr": 116 },
+      "test_s1": { "name": 167, "addr": 123 },
+      "test_s2": { "name": 167, "addr": 119 },
+      "test_s3": { "name": 166, "addr": 116 }
+    }
+  },  "measured_gap": {
+    "what_is_missing": "the Brahmic-script (U+0900-U+0D7F) row share of India, i.e. how many India rows this table actually fires on",
+    "status": "GAP - not collected. I will not estimate it.",
+    "why_structural": "build_profile.py:28 TOKEN_RE = re.compile(r[a-z0-9]+); build_profile.py:110-111 runs it on the RAW string (bnl = bn.lower(); bnt = TOKEN_RE.findall(bnl)) with no transliteration step anywhere in build_profile.py (grep for indic|devanagari|script|nonascii|unicode|0900 returns nothing). A name written entirely in Devanagari therefore contributes its full length to name_chars (line 102) and exactly zero to name_tokens (line 112), and is invisible in both name_tokens and addr_tokens.",
+    "fix_to_close_it": "add two streaming counters to build_profile.py, e.g. rows_with_indic_name and rows_with_indic_addr, counting U+0900-U+0D7F in the raw field. Same csv-based cost as the existing pass.",
+    "best_available_indirect_bound": {
+      "is_inference_not_measurement": true,
+      "metric": "name_chars / name_tokens per row, both from by_country",
+      "rows": [
+        { "split": "train_s1", "country": "US", "name_chars_per_row": 22.465, "name_tokens_per_row": 3.489, "chars_per_ascii_token": 6.44 },
+        { "split": "train_s1", "country": "India", "name_chars_per_row": 26.386, "name_tokens_per_row": 3.702, "chars_per_ascii_token": 7.13 },
+        { "split": "train_s2", "country": "India", "name_chars_per_row": 27.420, "name_tokens_per_row": 2.893, "chars_per_ascii_token": 9.48 },
+        { "split": "train_s2", "country": "US", "name_chars_per_row": 23.554, "name_tokens_per_row": 3.551, "chars_per_ascii_token": 6.63 },
+        { "split": "train_s3", "country": "India", "name_chars_per_row": 27.038, "name_tokens_per_row": 3.324, "chars_per_ascii_token": 8.13 },
+        { "split": "train_s3", "country": "US", "name_chars_per_row": 23.977, "name_tokens_per_row": 3.635, "chars_per_ascii_token": 6.60 },
+        { "split": "test_s1", "country": "France", "name_chars_per_row": 19.423, "name_tokens_per_row": 3.194, "chars_per_ascii_token": 6.08 },
+        { "split": "test_s1", "country": "India", "name_chars_per_row": 26.375, "name_tokens_per_row": 3.701, "chars_per_ascii_token": 7.13 }
+      ],
+      "bound_stated": "not a large majority of s1, plausibly non-trivial in s2/s3",
+      "why_not_stronger": "India s1 ratio (7.13) is essentially US's (6.44) and higher than France's (6.08), and India s1 name_tokens/row (3.702) is HIGHER than US s1 (3.489) - a large Devanagari subset would push this down, since Devanagari rows contribute 0 tokens. India s2 (9.48) and s3 (8.13) run higher than US (6.63, 6.60), which is directionally consistent with a Brahmic subset in S2/S3 - but Indian transliterated names are also simply longer, and the two explanations are not separable from these fields."
+    }
+  },
+  "verdict_table": {
+    "path_in_work_order_correct": "Yes",
+    "entry_count": 1363,
+    "distinct_canonical_values": 167,
+    "distinct_value_atoms": 169,
+    "empty_values": 0,
+    "missing_self_maps": "0, and the class is vacuous",
+    "overlaps_with_other_dicts": "none that conflict",
+    "country_scoping": "absent - applied to US, India and France alike",
+    "keyed_on_script": "Yes - native Brahmic, 9 scripts, 0 Latin keys",
+    "distinct_india_tokens_it_can_affect": "0 of 8000 listed - a profile artifact, not inertness",
+    "india_rows_it_fires_on": "GAP - not collected by the profile",
+    "marginal_value_for_france_scored_country": 0,
+    "new_defects_found": 2
+  },
+  "no_change_proposals": true,
+  "no_change_proposals_why": "D095 is ground truth only, per the work order.",
+  "not_re_derived": [
+    "US_STATES / IN_STATES / FR_REGIONS dictionary expansion",
+    "France-postcode-loss claim",
+    "pin_eq",
+    "alt_tset",
+    "France blocking caps",
+    "address component order",
+    "ligature defect",
+    "ADDR_CANON_COMMON empty mappings",
+    "LEET French-ordinal defect"
+  ],
+  "constraints_honoured": {
+    "upstream_and_dataset_read_only": true,
+    "raw_tsv_never_opened": true,
+    "all_data_figures_from": "analysis_out/profile/*.json",
+    "no_network_access": true,
+    "powershell_only": true,
+    "files_written": [
+      "analysis_out/findings/D095_audit_indic_token_dict.md",
+      "analysis_out/findings/D095_audit_indic_token_dict.json"
+    ]
+  }
+}

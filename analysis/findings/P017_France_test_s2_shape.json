@@ -1,0 +1,171 @@
+{
+  "task": "P017",
+  "title": "[France] test_s2: shape, null rates, length distribution",
+  "status": "complete",
+  "corrections_to_work_order": [
+    "Department token counts quoted in the work order (nord 152011, gironde 150787, calais 128762, atlantique 128348) are s1+s2+s3 sums, not s2 figures. s2-only: 75362 / 75104 / 55273 / 63697.",
+    "The 0.8874% n-deletion figure is pooled over three test files. s2's own rate is 1.0859%.",
+    "D119's 10.68% s2 cell is the six-word figure; the four-word visible share is 10.5464%."
+  ],
+  "profile_source": "analysis_out/profile/test_s2.json",
+  "semantics_source": "build_profile.py:84-118",
+  "denominator_note": "All rates divide by by_country['France'].rows = 703378 unless stated.",
+  "population": {
+    "rows_france_test_s2": 703378,
+    "file_rows_test_s2": 4887273,
+    "country_rows_test_s2": {"India": 2312565, "France": 703378, "US": 1871330},
+    "sum_country_rows_equals_file_rows": true,
+    "france_rows_all_test": 1694445,
+    "all_test_rows": 11702133,
+    "share_of_test_s2_file_pct": 14.392034,
+    "share_of_france_test_pct": 41.510819,
+    "share_of_all_test_pct": 6.010682,
+    "s2_share_of_all_test_pct": 41.762055,
+    "s2_over_s1_size_ratio": 2.711014,
+    "s2_s3_rows": 1434993,
+    "s2_s3_pct_of_france": 84.6881
+  },
+  "nulls": {
+    "name_empty": 0,
+    "name_empty_rate_pct": 0.0,
+    "addr_empty": 21537,
+    "addr_empty_rate_pct": 3.061938,
+    "addr_empty_rate_se_pp": 0.020542,
+    "addr_empty_rate_ci95_pp": 0.0403,
+    "prefix_bad": 0,
+    "prefix_bad_rate_pct": 0.0,
+    "entity_id_prefix_validity_pct": 100.0
+  },
+  "lengths": {
+    "name_chars_total": 14843398,
+    "mean_name_chars": 21.103,
+    "addr_chars_total": 27816963,
+    "mean_addr_chars_all_rows": 39.5477,
+    "mean_addr_chars_nonempty": 40.7968,
+    "name_tokens_total": 2421234,
+    "mean_name_tokens_per_row": 3.4423,
+    "num_digits_addr_only_total": 1360296,
+    "mean_num_digits_per_row": 1.9339
+  },
+  "name_length_histogram": {
+    "bucket_rule": "len(business_name)//10*10",
+    "rows": {"0": 25983, "10": 300981, "20": 276828, "30": 87987, "40": 11301, "50": 296, "60": 2},
+    "pct": {"0": 3.6940, "10": 42.7908, "20": 39.3569, "30": 12.5092, "40": 1.6067, "50": 0.0421, "60": 0.0003},
+    "sum_equals_rows": true,
+    "pct_le_29_chars": 85.8417,
+    "note": "bucket 0 contains zero empties since name_empty=0, so all 25983 are 1-9 chars"
+  },
+  "rates": {
+    "has_digit_name": 7818,
+    "has_digit_name_rate_pct": 1.111493,
+    "has_digit_name_ci95_pp": 0.0245,
+    "has_comma": 681661,
+    "has_comma_rate_pct": 96.912471,
+    "has_comma_ci95_pp": 0.0404,
+    "has_comma_rate_nonempty_pct": 99.973601,
+    "alpha_only_addr": 26656,
+    "alpha_only_addr_rate_pct": 3.789712,
+    "dig5_occurrences": 3613,
+    "dig5_per_row": 0.005137,
+    "dig6_occurrences": 130,
+    "dig6_per_row": 0.000185,
+    "rows_no_address_number": 48193,
+    "rows_no_address_number_pct": 6.851701
+  },
+  "peer_countries_same_file": {
+    "US": {"rows": 1871330, "mean_name_chars": 24.29, "mean_addr_chars": 31.84, "has_comma_pct": 97.055, "has_digit_name_pct": 6.178},
+    "India": {"rows": 2312565, "mean_name_chars": 28.25, "mean_addr_chars": 68.75, "has_comma_pct": 97.718, "has_digit_name_pct": 2.879},
+    "France": {"rows": 703378, "mean_name_chars": 21.10, "mean_addr_chars": 39.55, "has_comma_pct": 96.912, "has_digit_name_pct": 1.111}
+  },
+  "s2_vs_s1_vs_s3_france": {
+    "test_s1": {"rows": 259452, "addr_empty_rate_pct": 0.0, "has_comma_pct": 100.0, "mean_name_chars": 19.423, "mean_addr_chars": 50.071, "dig5_per_row": 0.00417, "alpha_only_pct": 0.4197},
+    "test_s2": {"rows": 703378, "addr_empty_rate_pct": 3.0619, "has_comma_pct": 96.9125, "mean_name_chars": 21.103, "mean_addr_chars": 39.548, "dig5_per_row": 0.005137, "alpha_only_pct": 3.7897},
+    "test_s3": {"rows": 731615, "addr_empty_rate_pct": 2.9443, "has_comma_pct": 97.0348, "mean_name_chars": 21.14, "mean_addr_chars": 39.969, "dig5_per_row": 0.005343, "alpha_only_pct": 3.6709}
+  },
+  "s2_specific": {
+    "n_empty_deletion": {
+      "mechanism": "ADDR_CANON_FR 'n' -> '' (normalize.py:214), so the token is dropped at normalize.py:349-350",
+      "per_file_n_occurrences": {"test_s1": 2648, "test_s2": 51535, "test_s3": 52241},
+      "pooled_n_occurrences": 106424,
+      "per_file_listed_addr_mass": {"test_s1": 2253877, "test_s2": 4745780, "test_s3": 4993261},
+      "pooled_listed_addr_mass": 11992918,
+      "pooled_rate_pct": 0.88739,
+      "per_file_rate_pct": {"test_s1": 0.117486, "test_s2": 1.085912, "test_s3": 1.04623},
+      "s2_share_of_pooled_deletion_pct": 48.4242,
+      "s2_vs_pooled_ratio": 1.2237,
+      "n_plus_no_occurrences": {"test_s1": 2932, "test_s2": 87530, "test_s3": 87983},
+      "n_plus_no_rate_pct": {"test_s1": 0.130087, "test_s2": 1.844375, "test_s3": 1.762035},
+      "n_plus_no_pooled_pct": 1.48792,
+      "empty_mapping_family_note": "n is not the only token deleted. ADDR_CANON_COMMON (normalize.py:197-198) also maps number/no/nos/num/h/hno/house/door/plot/flat/shop/null/na/none/nil to '' and all survive into the effective France canon (normalize.py:322 drops only st,ste,dr,n,s,e,w from COMMON; n is re-supplied by ADDR_CANON_FR:214).",
+      "empty_mapping_family_per_file_occurrences": {"test_s1": 4280, "test_s2": 90040, "test_s3": 90542},
+      "empty_mapping_family_pooled_occurrences": 184862,
+      "empty_mapping_family_per_file_pct": {"test_s1": 0.189895, "test_s2": 1.897265, "test_s3": 1.813284},
+      "empty_mapping_family_pooled_pct": 1.1245,
+      "empty_mapping_family_s2_vs_pooled_ratio": 2.14,
+      "s2_share_of_family_mass_pct": 66.7645,
+      "empty_mapping_family_breakdown_test_s2": {"n": 51535, "no": 35995, "h": 1990, "na": 520},
+      "not_in_top_4000_for_france_any_test_file": ["number", "nos", "num", "hno", "house", "door", "plot", "flat", "shop", "none", "nil"],
+      "family_total_is_lower_bound": true,
+      "defect": false,
+      "verdict": "intentional behaviour; n/no unselective and keys.py:42 requires len>=3 so neither can be a blocking key. Denominator correction, not a code recommendation."
+    },
+    "function_words_fr_test_s2": {
+      "counts": {"de": 381880, "la": 176186, "du": 90693, "des": 82399, "le": 4882, "les": 1451},
+      "ranks": {"de": 1, "la": 4, "du": 9, "des": 12, "le": 110, "les": 245},
+      "four_word_sum": 731158,
+      "four_word_pct_of_listed_mass": 15.4065,
+      "six_word_sum": 737491,
+      "six_word_pct_of_listed_mass": 15.5399,
+      "RETRACTED": "15.41% profile-flattened figure; superseded by D119",
+      "CORRECTED_pipeline_visible_pct": 10.68,
+      "region_consumed_occurrences_s2": 230650,
+      "six_word_visible_occurrences": 506841,
+      "six_word_visible_pct": 10.6798,
+      "four_word_visible_occurrences": 500508,
+      "four_word_visible_pct": 10.5464,
+      "d119_arithmetic_note": "D119's 10.68% s2 cell is the SIX-word figure; the four-word visible share is 10.5464%. Brief instruction to use 10.68% is correct and is followed.",
+      "corrected_basis": "normalize.py:334-335 matches a whole comma-component against FR_REGIONS and continues, so de/la inside hauts de france, pas de calais, pays de la loire, ile de france never reach atoks. build_profile.py:126-127 has no equivalent guard."
+    },
+    "department_style_tokens_test_s2": {
+      "note": "token OCCURRENCES, not rows; build_profile.py flattens components so a count is not automatically pipeline-visible",
+      "counts": {"nord": 75362, "gironde": 75104, "atlantique": 63697, "calais": 55273},
+      "ranks": {"nord": 13, "gironde": 14, "atlantique": 17, "calais": 20},
+      "s2_rank_order": ["nord", "gironde", "atlantique", "calais"],
+      "s2_share_of_rows_pct": {"nord": 10.7143, "gironde": 10.6776, "atlantique": 9.0559, "calais": 7.8582},
+      "all_four_are_FR_REGIONS_keys_or_fragments": true,
+      "FR_REGIONS_source": "normalize.py:244-250",
+      "WORK_ORDER_CORRECTION": {
+        "work_order_quoted": {"nord": 152011, "gironde": 150787, "calais": 128762, "atlantique": 128348},
+        "finding": "Those four are sums over s1+s2+s3, NOT s2 figures. Verified to the row: nord 75362+76449+200=152011; gironde 75104+75621+62=150787; calais 55273+57522+15967=128762; atlantique 63697+64398+253=128348.",
+        "s2_only_correct": {"nord": 75362, "gironde": 75104, "atlantique": 63697, "calais": 55273},
+        "consequence": "calais in s2 is 2.33x smaller than quoted (55273 not 128762); 15967 of the quoted mass is s1-only, the region-style source."
+      }
+    },
+    "side_observation_d077": {
+      "d077_reported_france_resolvable_pct": 97.438,
+      "pooled_france_has_comma_pct": 97.438,
+      "arithmetic": "(259452+681661+709921)/1694445 = 1651034/1694445 = 97.4380%",
+      "note": "D077's number is exactly the pooled France comma rate; independently confirms D128's criterion-mismatch conclusion."
+    }
+  },
+  "adequacy": {
+    "verdict": "large_enough",
+    "min_ci95_halfwidth_pp": 0.041,
+    "generalises_to_s2_s3_pct_of_france": 84.6881,
+    "does_not_generalise_to_s1": true,
+    "reason": "s1 has 0% addr_empty, 100% comma, mean addr 50.07 vs 39.55; s3 matches s2 closely on every shape metric"
+  },
+  "new_defect_found": false,
+  "new_defects": [],
+  "measurement_corrections_not_code_defects": [
+    "n-deletion per-file split: s2 = 1.085912% of its own listed mass, not the pooled 0.887390%",
+    "empty-mapping family in s2 = 1.897265% (n 51535 + no 35995 + h 1990 + na 520), a lower bound; 66.7645% of the family's mass sits in s2",
+    "department token counts in s2 are roughly half the pooled figures quoted in the work order"
+  ],
+  "gaps": [
+    "No cross-field overlap counts (addr_empty AND has_comma, addr_empty AND digit-name are not recorded)",
+    "addr_tokens/name_tokens are top 4000 per country; absence is not proof of non-occurrence",
+    "name-length histogram is bucketed at 10 chars only; exact per-length distribution not available",
+    "entity_id prefix check is startswith('S2-') only; full entity_id format validity not verifiable from the profile"
+  ]
+}

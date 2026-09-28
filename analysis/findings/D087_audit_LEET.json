@@ -1,0 +1,255 @@
+{
+  "task_id": "D087",
+  "family": "B-dictionary",
+  "title": "audit current LEET",
+  "purpose": "Ground truth only. No change proposed. This is the factual baseline for the follow-on fix tasks.",
+  "profile_files": [
+    "analysis_out/profile/train_s1.json",
+    "analysis_out/profile/train_s2.json",
+    "analysis_out/profile/train_s3.json",
+    "analysis_out/profile/test_s1.json",
+    "analysis_out/profile/test_s2.json",
+    "analysis_out/profile/test_s3.json"
+  ],
+  "upstream_files_read": [
+    "_upstream/src/normalize.py",
+    "_upstream/src/prep.py",
+    "_upstream/src/keys.py",
+    "build_profile.py"
+  ],
+  "headline": "LEET is NOT a token dictionary: it is a single character-to-character str.maketrans table of 10 entries / 8 distinct canonical values at normalize.py:256, applied at exactly ONE call site (normalize.py:280), per whole name token, name field only, with NO country in scope. The confirmed French-ordinal defect therefore cannot be fixed inside the table. The fix belongs at the CALL SITE in _name_tokens. TWO NEW DEFECTS found that the brief's proposed ordinal guard would MISS: 24hr->2ahr (US, 3657) and 1st->lst (US 679 + India 381 = 1060).",
+  "new_defect_found": true,
+  "most_important_number": {
+    "value": 5828,
+    "meaning": "total corrupted name-token occurrences across all 6 profile files, of which the brief's proposed guard ^\\d+(e|er|ere|eme)$ catches only 1111 (19.1%)",
+    "arithmetic": "1111 (French ordinals) + 1060 (1st) + 3657 (24hr) = 5828",
+    "denominator": "176142 mixed letter+digit name-token occurrences, all 6 files, 3 countries",
+    "source": "name_tokens[country] restricted to tokens matching [a-z].*[0-9]|[0-9].*[a-z], in all 6 analysis_out/profile/*.json"
+  },
+  "leet_table_exact_contents": {
+    "source_line": "_upstream/src/normalize.py:256",
+    "source_text": "LEET = str.maketrans({\"0\": \"o\", \"1\": \"l\", \"3\": \"e\", \"4\": \"a\", \"5\": \"s\", \"6\": \"g\", \"7\": \"t\", \"8\": \"b\", \"@\": \"a\", \"$\": \"s\"})",
+    "entry_count": 10,
+    "distinct_canonical_values": 8,
+    "distinct_canonical_values_list": ["a", "b", "e", "g", "l", "o", "s", "t"],
+    "mapping": {
+      "0": "o", "1": "l", "3": "e", "4": "a", "5": "s",
+      "6": "g", "7": "t", "8": "b", "@": "a", "$": "s"
+    },
+    "key_classes": "8 digits (0,1,3,4,5,6,7,8) + 2 symbols (@, $)",
+    "keys_absent": ["2", "9"],
+    "any_key_is_a_letter": false,
+    "any_value_is_itself_a_key": false,
+    "is_recursive": false,
+    "self_maps_present": 0,
+    "self_maps_note": "No key equals its value, and the value space (letters) is disjoint from the key space (digits+symbols), so the table is single-pass and non-cascading. The 'missing self-map' concept from the token-dictionary tables (US_STATES etc) does NOT transfer to LEET.",
+    "empty_string_values": 0,
+    "value_collisions": [
+      {"value": "a", "keys": ["4", "@"]},
+      {"value": "s", "keys": ["5", "$"]}
+    ],
+    "output_length_equals_input_length": true
+  },
+  "call_site": {
+    "repo_wide_search": "LEET|translate(|maketrans over all 19 .py files under _upstream returns EXACTLY TWO hits, both in normalize.py",
+    "hits": [
+      "_upstream/src/normalize.py:256  LEET = str.maketrans({...})",
+      "_upstream/src/normalize.py:280  t = t.translate(LEET)"
+    ],
+    "application_count": 1,
+    "granularity": "per-token, whole-token pass (str.translate rewrites every character of the token; there is no regex, no anchoring, no boundary logic)",
+    "field": "business_name ONLY",
+    "applied_to_address": false,
+    "address_evidence": "normalize_address (normalize.py:314-353) never references LEET; its tokens go to canon.get(t, t) at normalize.py:347",
+    "trigger_condition": "fires only when the token contains BOTH a letter and a digit (normalize.py:279); pure-digit or pure-alpha tokens are never translated",
+    "country_in_scope": false,
+    "country_evidence": "normalize_name(raw) at normalize.py:285 has no country parameter and prep.py:12 does not supply one, whereas normalize_address(raw, country) at normalize.py:314 does take one and uses it at lines 318/321/337. Country is therefore not in scope anywhere on the LEET path.",
+    "country_scoped_guard_implementable": false,
+    "call_path": [
+      "prep.py:12  N.normalize_name(n)   -- NO country",
+      "prep.py:13  N.normalize_address(a, c) -- country passed",
+      "normalize.py:285  def normalize_name(raw: str)",
+      "normalize.py:287  s = translit_text(raw or \"\")",
+      "normalize.py:288  s = strip_accents(s)",
+      "normalize.py:305  full = _name_tokens(main)",
+      "normalize.py:307  alt_core = [_name_tokens(alt) ...] if alt else []",
+      "normalize.py:272  def _name_tokens(s: str)",
+      "normalize.py:273  s = s.lower()... .replace(\"&\", \" and \")",
+      "normalize.py:276  for t in _non_alnum.split(s)   # _non_alnum = [^a-z0-9]+ (line 269)",
+      "normalize.py:279  if any(c.isalpha() for c in t) and any(c.isdigit() for c in t):",
+      "normalize.py:280  t = t.translate(LEET)   <-- THE ONLY APPLICATION",
+      "normalize.py:281  toks.append(NAME_CANON.get(t, t))"
+    ],
+    "ordering": {
+      "after": ["translit_text (287)", "strip_accents (288)", ".lower() (273)"],
+      "before": ["NAME_CANON.get (281)", "NAME_STOP filter (306)"],
+      "implication_for_fix": "A NAME_CANON entry keyed on the literal '3eme' could NEVER fire today, because line 281 already sees 'eeme'. Any guard must run BEFORE line 280 if a NAME_CANON ordinal entry is also wanted."
+    },
+    "downstream_blast_radius": "ncore is built from core (normalize.py:306) and feeds keys.py:33-34. keys.py:42 filters ADDRESS tokens with ~str.contains(r'^\\d+$'), but name tokens enter nt unfiltered at length>=2, so a corrupted name token like 'eeme' becomes a live blocking key while the same business's address side keeps the correct '3eme'."
+  },
+  "per_token_not_per_substring": {
+    "question": "is LEET applied per-token or per-substring, and does the guard need rewriting?",
+    "answer": "per-token, whole-token, single-pass. str.translate rewrites every character; values are never keys so nothing cascades.",
+    "measured_repeated_leet_key": {
+      "types": 0,
+      "occurrences": 0,
+      "meaning": "Across all 284 mixed token types in all 6 files, ZERO contain a repeated leet key. So translate rewrites exactly one character in every observed case."
+    },
+    "implication": "A whole-token-anchored guard ^...$ is the correct shape. An unanchored/substring guard would be wrong in principle even though it is indistinguishable on current data."
+  },
+  "defects": {
+    "denominator": {
+      "definition": "name_tokens[country] in all 6 profile JSONs, restricted to tokens containing at least one letter AND at least one digit (the normalize.py:279 trigger)",
+      "mixed_types": 284,
+      "mixed_occurrences": 176142,
+      "by_country": [
+        {"country": "US", "types": 133, "occurrences": 90100},
+        {"country": "India", "types": 127, "occurrences": 80735},
+        {"country": "France", "types": 24, "occurrences": 5307}
+      ],
+      "arithmetic_check": "133+127+24 = 284 types; 90100+80735+5307 = 176142 occurrences",
+      "caveat": "name_tokens is pruned to top-4000 per country by build_profile.py, so these are LOWER BOUNDS, not complete enumerations."
+    },
+    "D1_french_ordinals": {
+      "status": "CONFIRMED, reproduced independently from the raw profile files",
+      "reproduces_D090": true,
+      "guard_that_catches": "^\\d+(e|er|ere|eme|ieme)$",
+      "types": 5,
+      "occurrences": 1111,
+      "arithmetic": "748 (3eme) + 131 (1er) + 121 (3e) + 102 (1ere) + 9 (7eme) = 1111",
+      "share_of_french_mixed": "1111 / 5307 = 20.93%",
+      "detail": [
+        {"input": "3eme", "output": "eeme", "occurrences": 748},
+        {"input": "1er", "output": "ler", "occurrences": 131},
+        {"input": "3e", "output": "ee", "occurrences": 121},
+        {"input": "1ere", "output": "lere", "occurrences": 102},
+        {"input": "7eme", "output": "teme", "occurrences": 9}
+      ]
+    },
+    "N1_24hr_NEW": {
+      "status": "NEW DEFECT, CONFIRMED",
+      "input": "24hr",
+      "output": "2ahr",
+      "country": "US",
+      "occurrences": 3657,
+      "why_wrong": "'24hr' is the standard abbreviation for 24 hours. The 4 is a real digit, not a leet stand-in, and 2 is not even a LEET key, so the token is mangled into '2ahr', which is not a word in any language in this dataset.",
+      "rank": "2nd-largest single mixed type in the entire dataset",
+      "family_size": {
+        "pattern": "^\\d+[a-z]+ where the leading number >= 10",
+        "types": 1,
+        "occurrences": 3657,
+        "note": "the family is exactly one token, not a class"
+      },
+      "caught_by_brief_guard": false,
+      "why_not": "it ends in 'hr', not in an ordinal suffix",
+      "address_side_occurrences": 0
+    },
+    "N2_1st_NEW": {
+      "status": "NEW DEFECT, CONFIRMED",
+      "input": "1st",
+      "output": "lst",
+      "why_wrong": "'1st' is the ordinary English ordinal; LEET maps 1->l. Same pattern as the French ordinals, in two more countries.",
+      "occurrences_total": 1060,
+      "by_country": [
+        {"country": "US", "occurrences": 679},
+        {"country": "India", "occurrences": 381}
+      ],
+      "arithmetic": "679 + 381 = 1060",
+      "caught_by_brief_guard": false,
+      "why_not": "it is an English ordinal, not a French one",
+      "broader_family": {
+        "pattern": "^\\d+(st|nd|rd|th)$",
+        "types": 3,
+        "occurrences": 1313,
+        "types_present": ["1st (US 679, India 381)", "2nd (India 253)"],
+        "types_absent_from_top4000": ["3rd", "4th", "5th"],
+        "absence_caveat": "NOT in the top-4000 name_tokens is not proof of absence; the list is truncated."
+      },
+      "control_case": {
+        "input": "2nd",
+        "output": "2nd",
+        "occurrences": 253,
+        "meaning": "contains 2, which is NOT a LEET key, so it passes through unchanged and correct. This proves the corruption is caused specifically by the 1->l key, not merely by the presence of a leading digit."
+      },
+      "address_side_occurrences": {
+        "India": 305356,
+        "US": 16478,
+        "total": 321834,
+        "note": "all preserved verbatim because normalize_address never calls LEET"
+      }
+    },
+    "N2_asymmetry_significance": "For 1st alone: 1060 corrupted name occurrences against 321834 preserved address occurrences. keys.py:33 builds name keys from the LEET-processed ncore while keys.py:39-43 builds address keys from unprocessed atoks, and the kind-0 key at keys.py:60 XORs the two. A business whose name contains '1st' therefore cannot match a business whose address contains '1st'. This is the mechanism by which the defect costs matches, not just dirty tokens.",
+    "D3_dead_keys_NEW": {
+      "status": "NEW DEFECT (cosmetic, zero behavioural impact), CONFIRMED by construction",
+      "keys": ["@", "$"],
+      "entries_affected": "2 of 10",
+      "claim": "@->a and $->s are PROVABLY UNREACHABLE in the current pipeline.",
+      "proof": "_name_tokens splits on _non_alnum at normalize.py:276, and _non_alnum = re.compile(r'[^a-z0-9]+') at normalize.py:269. By the time normalize.py:280 runs, the token is guaranteed to contain only [a-z0-9], so a character-level lookup for @ or $ can never hit. A search for [@$] across normalize.py returns ONLY line 256 - no earlier step maps @ or $ to a letter.",
+      "behavioural_impact": "none - harmless, costs nothing and corrupts nothing",
+      "why_still_worth_reporting": "misleading: a maintainer reading the table believes symbol-leetspeak is handled",
+      "resolves_D090_gap": "D090 recorded '@ and $ cannot be evaluated at all' as a GAP. It is resolved here: not merely unmeasurable, but unreachable by construction. The same blindness applies at profile time - build_profile.py:28 TOKEN_RE = re.compile(r'[a-z0-9]+') discards symbols, so no measurement could ever have found them."
+    },
+    "D4_4l_RESOLVED_NOT_A_DEFECT": {
+      "status": "RESOLVED - NOT a defect",
+      "resolves": "D090 left '4l' unresolved (1943 occurrences, its largest French mixed type)",
+      "input": "4l",
+      "output": "al",
+      "occurrences": 1943,
+      "country": "France",
+      "resolution": "4l->al and India's a1->al (272) CONVERGE on the same output. 'al' is an ordinary token (Al / Albert). So 4l behaves as a CORRECT leet expansion of 'al', not a corruption. It is NOT part of the 1111.",
+      "evidence_strength": "inference from output convergence, NOT a raw-data read (raw data access is forbidden by the hard constraints)"
+    },
+    "totals": {
+      "corrupted_occurrences": 5828,
+      "arithmetic": "1111 (French ordinals) + 1060 (1st) + 3657 (24hr) = 5828",
+      "caught_by_brief_guard": 1111,
+      "caught_pct": 19.1,
+      "missed_by_brief_guard": 4717,
+      "missed_arithmetic": "1060 + 3657 = 4717",
+      "missed_multiple_of_french": "4717 / 1111 = 4.25x the French ordinal mass",
+      "share_of_all_mixed": "5828 / 176142 = 3.31%",
+      "correct_preserved_occurrences": 170314,
+      "correct_arithmetic": "176142 - 5828 = 170314",
+      "correct_share": "170314 / 176142 = 96.7%",
+      "regression_cases_that_must_keep_working": ["c1ub->club", "mais0n->maison", "5ervices->services", "de1hi->delhi"]
+    },
+    "many_to_one_collisions": {
+      "outputs_produced_by_more_than_one_input_type": 63,
+      "assessment": "almost all are DESIRABLE many-to-one merges - that is the entire point of the table (5ervices+s0lutions+so1utions -> solutions; 8rothers+br0thers -> brothers). These are the regression set the fix must not break.",
+      "any_collision_produces_a_wrong_word": false
+    }
+  },
+  "structural_defects_checked": {
+    "empty_string_values": {"count": 0, "note": "all 10 values are single characters. For contrast, ADDR_CANON_COMMON DOES carry 13 empty mappings ('number': '' etc, normalize.py:196-197) - a different mechanism: token deletion, consumed downstream at keys.py:39."},
+    "missing_self_maps": {"count": 0, "needed": false, "note": "No LEET key equals its value, and the value space (a,b,e,g,l,o,s,t) is disjoint from the key space (digits+symbols), so the table is idempotent-safe and non-recursive. The 'missing self-map' concept from the token-dictionary tables (US_STATES etc) does NOT transfer to LEET - it is a character map, not a lookup dict."},
+    "overlap_with_ADDR_CANON_COMMON": {"count": 0, "structurally_possible": false, "proof": "LEET is only ever applied at normalize.py:280 inside _name_tokens; ADDR_CANON_COMMON is only ever consulted at normalize.py:347 inside normalize_address. The two tables sit on DISJOINT code paths and can never see the same token. Any audit that treats them as potentially interacting is wrong. Note ADDR_CANON_COMMON does contain first->1st, second->2nd, third->3rd at normalize.py:184 - English ordinals as ADDRESS values - but those are address-side and never meet LEET."},
+    "unmapped_digits": {"digits": ["2", "9"], "is_a_defect": false, "evidence": "only 2 of 284 mixed token types contain 2 or 9 (24hr 3657, 2nd 253), and both are corrupted for a different reason."}
+  },
+  "fix_location_verdict": {
+    "answer": "THE CALL SITE (_name_tokens, normalize.py:279-280). NOT the table.",
+    "reason_1_structural": "LEET is str.maketrans, a character->character map (normalize.py:256). The defect needs the WHOLE token to decide whether to fire. A character map has no context and cannot express 'skip this token'. The information required is strictly more than a per-character table can hold.",
+    "reason_2_empirical": "Deleting a key does not work. Measured sole-dependency mass per key (tokens whose ONLY leet key present is that digit): 0=71527, 1=47775, 5=33541, 8=9195, 6=7373, 4=5600, 3=869, 7=9. Removing 1 to save 1st (1060) would break de1hi (1674), denta1 (1652), techno1ogies (1288) and 82 other types. Removing 4 to save 24hr (3657) would break 4l (1943). EVERY KEY IS LOAD-BEARING.",
+    "reason_3_country_impossible_and_wrong": "Country is not in scope on this path at all (signature normalize.py:285, call site prep.py:12). And a country guard would be the wrong shape anyway: N1 and N2 are US and INDIA defects. A French-only guard fixes 1111 of 5828.",
+    "conclusion": "A guard predicate at the call site, immediately before normalize.py:280, keyed on the whole token. Per per_token_not_per_substring it must be token-anchored (^...$).",
+    "constraint_on_the_fix": "The guard must EXEMPT rather than EXTEND. 170314 of 176142 observed mixed occurrences (96.7%) are correct leet expansions; any change must be a no-op on those. c1ub->club and mais0n->maison are the named regression cases. Also, a NAME_CANON entry keyed '3eme' cannot work today because normalize.py:281 already sees 'eeme' - the guard must run BEFORE line 280 if a NAME_CANON ordinal entry is also wanted.",
+    "status": "JUDGEMENT ONLY - no change proposed, per the work order"
+  },
+  "gaps": [
+    "addr_tokens is also top-4000 and count>=2 per country (build_profile.py:126-127, 141). Address-side masses in N2 are LOWER BOUNDS, and the top-4000 cap means a literal absent from addr_tokens is NOT proven absent.",
+    "~8-10% of name-token mass is outside the top-4000 cut. All type-level lists here (284 types) are floors, not complete enumerations. The 284 / 176142 figures are 'observed within the top-4000', not 'total in the data'.",
+    "NO PROFILE FIELD COUNTS HOW MANY ROWS A GIVEN TOKEN TYPE APPEARS IN - only token occurrences. The per-row impact of the 5828 corrupted occurrences is NOT DERIVABLE from the profile. Do not quote a row count for the ordinal defect.",
+    "No raw-data check was possible or attempted (hard constraint). The 4l resolution is inferred from output convergence with a1->al, not from a source-data read.",
+    "Country-level 'rows' is absent for France in all three train files (by_country has no France key). France is test-only, as D090 already established."
+  ],
+  "not_rederived": [
+    "REFUTED-1 France postal codes lost by the pin guard",
+    "the test_source1-only 100% FR_REGIONS denominator error",
+    "pin_eq / alt_tset are dead",
+    "US_STATES / IN_STATES / FR_REGIONS need no dictionary expansion",
+    "France blocking caps are healthy (99.94% survive S1_MAXCAP=300)",
+    "address component order is not a problem",
+    "ligature deletion and inline-postcode losses are negligible for scoring"
+  ],
+  "md_path": "analysis_out/findings/D087_audit_LEET.md",
+  "authority_note": "The .md is the authoritative artefact. All numbers in this sidecar match it."
+}

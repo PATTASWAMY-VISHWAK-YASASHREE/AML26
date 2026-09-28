@@ -1,0 +1,166 @@
+{
+  "task": "D121",
+  "title": "Remaining gaps in LEET",
+  "headline": "One NEW defect (keys 3 and 7 are 100% harmful / 0% useful, contradicting the brief's blanket 'every key is load-bearing'); otherwise a clean bill of health - the ratio-anomaly test applied to all 284 mixed types (not just France's 24) isolates exactly the three already-known classes and nothing else.",
+  "denominator": {
+    "source": "name_tokens, all 6 profile files, tokens matching both [a-z] and [0-9]",
+    "trigger": "normalize.py:279",
+    "mixed_types": 284,
+    "mixed_occurrences": 176142,
+    "by_country": {"US": {"types": 133, "occ": 90100}, "India": {"types": 127, "occ": 80735}, "France": {"types": 24, "occ": 5307}},
+    "reproduces_D087": true
+  },
+  "new_defect_N4": {
+    "claim": "LEET keys '3' and '7' have a 100% damage rate in the measured window and zero correct expansions.",
+    "contradicts": "FLEET_BRIEF 'Every LEET key is LOAD-BEARING' - established only for keys 1 and 4",
+    "all_name_types_containing_3_or_7": [
+      {"country": "France", "token": "3eme", "out": "eeme", "occ": 748, "verdict": "CORRUPT"},
+      {"country": "France", "token": "3e", "out": "ee", "occ": 121, "verdict": "CORRUPT"},
+      {"country": "France", "token": "7eme", "out": "teme", "occ": 9, "verdict": "CORRUPT"}
+    ],
+    "types": 3,
+    "occ": 878,
+    "corrupt_occ": 878,
+    "correct_occ": 0,
+    "damage_share_pct": 100.0,
+    "per_file_confirmation": {
+      "3eme": {"test_s1": 120, "test_s2": 311, "test_s3": 317},
+      "3e": {"test_s1": 21, "test_s2": 47, "test_s3": 53},
+      "7eme": {"test_s1": 9, "test_s2": 0, "test_s3": 0}
+    },
+    "confidence": "CONFIRMED for the measured top-4000 window; tail unmeasured",
+    "caveat": "8-18% of name-token mass is outside the top-4000 cut, so this is a floor not a census"
+  },
+  "per_key_risk": {
+    "0": {"load_types": 110, "load_occ": 71527, "damage_types": 0, "damage_occ": 0, "damage_share_pct": 0.0},
+    "1": {"load_types": 85, "load_occ": 47775, "damage_types": 4, "damage_occ": 1293, "damage_share_pct": 2.7},
+    "3": {"load_types": 2, "load_occ": 869, "damage_types": 2, "damage_occ": 869, "damage_share_pct": 100.0},
+    "4": {"load_types": 2, "load_occ": 5600, "damage_types": 1, "damage_occ": 3657, "damage_share_pct": 65.3},
+    "5": {"load_types": 54, "load_occ": 33541, "damage_types": 0, "damage_occ": 0, "damage_share_pct": 0.0},
+    "6": {"load_types": 13, "load_occ": 7373, "damage_types": 0, "damage_occ": 0, "damage_share_pct": 0.0},
+    "7": {"load_types": 1, "load_occ": 9, "damage_types": 1, "damage_occ": 9, "damage_share_pct": 100.0},
+    "8": {"load_types": 16, "load_occ": 9195, "damage_types": 0, "damage_occ": 0, "damage_share_pct": 0.0}
+  },
+  "per_key_top_tokens": {
+    "0": [["India","c0m",2873],["US","c0m",2855],["India","br0thers",2000],["US","ass0ciates",1817],["India","f0undation",1734]],
+    "1": [["India","de1hi",1674],["US","denta1",1652],["US","hea1th",1576],["US","fami1y",1395],["India","techno1ogies",1288]],
+    "3": [["France","3eme",748],["France","3e",121]],
+    "4": [["US","24hr",3657],["France","4l",1943]],
+    "5": [["India","5ervices",5407],["US","5ervices",2707],["India","5olutions",1448],["US","5ervice",1357],["India","5ervice",1256]],
+    "6": [["US","6roup",1179],["US","6lobal",796],["US","6reat",770],["US","6reen",717],["India","6lobal",705]],
+    "7": [["France","7eme",9]],
+    "8": [["India","8rothers",2386],["US","8right",804],["US","8lue",758],["India","8usiness",757],["US","8ay",697]]
+  },
+  "ratio_test_all_284": {
+    "criterion": "ratio = n(country,mixed) / n(country,LEET_output), both summed over 6 name_tokens lists",
+    "new_coverage": "D090 ran this only on France's 24 types; D121 ran it on all 284",
+    "anomalous_types": [
+      {"country":"US","token":"24hr","out":"2ahr","n":3657,"plain":0,"ratio":"INF"},
+      {"country":"France","token":"4l","out":"al","n":1943,"plain":645,"ratio":3.012,"verdict":"adjudicated NOT a defect by D087 4e"},
+      {"country":"France","token":"3eme","out":"eeme","n":748,"plain":0,"ratio":"INF"},
+      {"country":"US","token":"1st","out":"lst","n":679,"plain":0,"ratio":"INF"},
+      {"country":"India","token":"1st","out":"lst","n":381,"plain":0,"ratio":"INF"},
+      {"country":"India","token":"2nd","out":"2nd","n":253,"plain":253,"ratio":1.0,"verdict":"control - digit 2 is not a LEET key"},
+      {"country":"France","token":"1er","out":"ler","n":131,"plain":0,"ratio":"INF"},
+      {"country":"France","token":"3e","out":"ee","n":121,"plain":1017,"ratio":0.119},
+      {"country":"France","token":"1ere","out":"lere","n":102,"plain":9,"ratio":11.333},
+      {"country":"France","token":"7eme","out":"teme","n":9,"plain":0,"ratio":"INF"}
+    ],
+    "anomalous_count": 10,
+    "clean_band": {"n": 274, "min": 0.0, "p25": 0.006, "median": 0.009, "p75": 0.013, "max": 0.019},
+    "gap_to_first_anomaly": {"highest_clean": 0.019, "lowest_anomaly": 0.119, "factor": 6.3},
+    "conclusion": "The anomaly set is exactly the known defect set. No fourth corruption class found in the measured window."
+  },
+  "shape_families_clean": {
+    "units": {"name_types": 4, "detail": [["US","24hr",3657],["France","4l",1943],["India","0m",403],["India","5s",238]], "verdict": "24hr already known; family of exactly one member"},
+    "model_codes": {"verdict": "all correct leet (denta1, capita1, physica1...)"},
+    "versions": {"name_types": 0, "addr_types": 4, "detail": [["India","2d",3146],["India","1d",2975]], "verdict": "street slots, address side where LEET never fires"},
+    "resolutions_4K_1080p": {"name_types": 0, "addr_types": 0, "verdict": "not in the top 4000, any country, either column"},
+    "year_suffixes": {"types": 0},
+    "fractions": {"types": 0},
+    "grades": {"types": 40, "verdict": "all genuine leet; India a1 16283, b1 13325, a2 11135, b2 9346, a4 4294 are address-side"},
+    "two_or_more_digits": {"types": 1, "detail": [["US","24hr",3657]], "verdict": "24hr is the ONLY multi-digit mixed name token in the dataset"},
+    "contains_2_or_9": {"types": 2, "detail": [["US","24hr",3657],["India","2nd",253]], "verdict": "leaving 2 and 9 unmapped is correct"}
+  },
+  "address_side_ordinal_family_NEW": {
+    "pattern": "^\\d+(st|nd|rd|th)$",
+    "types": 184,
+    "occ": 1986432,
+    "pct_of_all_mixed_addr_occ": 75.8,
+    "total_mixed_addr_occ": 2620773,
+    "by_country": {"India": {"types": 47, "occ": 1475320}, "US": {"types": 137, "occ": 511112}},
+    "top": [["India","2nd",324528],["India","1st",305356],["India","3rd",226631],["India","4th",146972],["India","5th",92741],["India","6th",62806],["India","7th",55678],["India","8th",38445],["India","9th",35193],["India","10th",26781],["India","11th",20597],["US","2nd",19721]],
+    "name_side_same_regex": {"country_token_entries": 3, "occ": 1313, "1st_US": 679, "1st_India": 381, "2nd_India": 253},
+    "name_side_members_explicitly_zero": ["3rd","4th","5th","6th","7th","8th","9th","10th","11th"],
+    "distinct_name_side_literals": ["1st","2nd"],
+    "asymmetry_ratio_destroyed_vs_all_name_side": 1874,
+    "asymmetry_ratio_vs_all_name_side_occ": 1513,
+    "correction_note": "An earlier draft of this file said 53 types / 1,732,021 occ using an enumerated 1st-30th list. The full regex gives 184 types / 1,986,432 occ; the enumerated list had missed high US ordinals. The corrected figures are the ones reported in the .md.",
+    "conclusion": "Address side preserves 1,986,432 ordinal occurrences; name side destroys 1,060. LEET never fires on addresses (normalize.py:342-349 uses canon.get(t,t) with no translate)."
+  },
+  "known_defects_confirmed": {
+    "french_ordinals": {"tokens": ["3eme","3e","1er","1ere","7eme"], "occ": 1111, "country": "France"},
+    "english_ordinal_1st": {"occ": 1060, "US": 679, "India": 381},
+    "24hr": {"occ": 3657, "country": "US"},
+    "total_corrupt": 5828,
+    "correct_leet_that_must_keep_working": 170314,
+    "correct_pct": 96.7
+  },
+  "cross_country": {
+    "corrupt_by_country": {"US": 4336, "France": 1111, "India": 381},
+    "pct": {"US": 74.4, "France": 19.1, "India": 6.5},
+    "arithmetic": "4336 + 1111 + 381 = 5828",
+    "any_class_country_specific": false,
+    "note": "France - the scored country - is the SMALLEST contributor. Country is not in scope on this path: normalize_name(raw) takes no country (normalize.py:285) and prep.py:12 supplies none. A country guard is not implementable without changing a public signature."
+  },
+  "collisions": {
+    "output_strings_reached_by_multiple_inputs": 43,
+    "occurrences_involved": 52901,
+    "groups_containing_a_plain_absent_member": 0,
+    "corrupted_outputs_mutually_disjoint": true,
+    "only_genuine_cross_country_convergence": "1st -> lst (US 679 + India 381) - desirable, one fix covers both",
+    "lst_as_plain_name_token": 0
+  },
+  "dead_weight": {
+    "unreachable_keys": ["@","$"],
+    "count": 2,
+    "of_total_entries": 10,
+    "proof": "_non_alnum = re.compile(r'[^a-z0-9]+') at normalize.py:269 splits at line 276 before translate at line 280, so tokens are guaranteed [a-z0-9] only",
+    "digit_keys_dead": [],
+    "note": "Keys 3 and 7 are not dead - they fire, but only to cause harm (see new_defect_N4)"
+  },
+  "coverage_limits": {
+    "name_token_coverage_pct": {
+      "train_s1": {"US": 87.89, "India": 90.40},
+      "train_s2": {"US": 82.47, "India": 83.03},
+      "train_s3": {"US": 82.13, "India": 84.10},
+      "test_s1": {"US": 87.96, "India": 90.42, "France": 91.98},
+      "test_s2": {"US": 83.33, "India": 83.93, "France": 90.23},
+      "test_s3": {"US": 83.07, "India": 85.05, "France": 89.61}
+    },
+    "unmeasured_name_token_mass_pct": "8-18",
+    "all_type_lists_are": "FLOORS, not complete enumerations",
+    "counts_are": "token occurrences, never rows"
+  },
+  "gaps_not_filled": [
+    "No raw TSV read, so 4l (ratio 3.012) is not independently re-litigated; D087's verdict stands and it remains the least-evidenced item",
+    "Profile has no field giving row counts containing a given token",
+    "Untruncated tail mass is not computable from the profile",
+    "build_profile.py TOKEN_RE [a-z0-9]+ does no accent stripping, so 1ere appears as 1 + re; accented counts are split across 2+ entries and are floors"
+  ],
+  "mechanism_traced": {
+    "corrupt_token_path": "normalize.py:280 corrupts -> normalize.py:306 into core -> keys.py:33-34 nt (filter len>=2 only, so eeme/lst/2ahr/teme become live blocking keys) -> features.py:128-129 wn via name_idf",
+    "address_path": "keys.py:39-43 alph from raw atoks; keys.py:60 kind-0 key = th ^ (ah//2) XOR of name and address hashes - cannot form when lst != 1st",
+    "separate_idf_tables": "features.py:128 (name_idf) vs 129 (addr_idf) - address side can never rescue the name side",
+    "not_cleaned_downstream": "eeme/ler/teme/lere are in neither NAME_CANON nor NAME_STOP (normalize.py:306 drops only NAME_STOP)"
+  },
+  "verdict": {
+    "new_defect_found": true,
+    "new_defect_ids": ["N4"],
+    "clean_bill_of_health_for": "all other shape families; the three known classes are exhaustive in the measured window",
+    "fix_still_belongs_at": "the call site (_name_tokens, normalize.py:279-280), not the table - D087 section 6 stands",
+    "guard_must_be": "token-anchored (^...$) and exempting rather than extending; country-blind because France contributes only 19.1%"
+  }
+}
+
+

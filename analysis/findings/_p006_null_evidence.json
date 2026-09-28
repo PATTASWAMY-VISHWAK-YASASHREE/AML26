@@ -1,0 +1,22 @@
+{
+ "file": "test_source3.tsv",
+ "country": "US",
+ "us_rows": 1945701,
+ "whole_address_nullish": 0,
+ "contains_nullish_component": 72639,
+ "both": 0,
+ "component_null_but_still_usable": 72639,
+ "component_null_atoks_empty": 0,
+ "examples": [
+  "868-872 Howell Rd, NULL, Hillsboro, Tennessee",
+  "N/A, Charles City, ##4805 Cattail Road, Virginia",
+  "Anodver, Minnesota, 150th Ave, null",
+  "5185 Fox Trot Ln, NULL, Caddo Mills, Texas",
+  "314 Hillsdale Road, <NULL>, Columbia, Missouri",
+  "312 Parkside Rd, NULL, Normal, Illinois",
+  "2056 Youngs Road, null, East Amherst, New York",
+  "2737-C Brooklyn Ave, N/A, Dallas, Texas",
+  "33254 Vine Saint, Ohio, Eastlake, <NULL>",
+  "10th Street, <NULL>, Omaha, Nebraska"
+ ]
+}

@@ -1,0 +1,186 @@
+{
+  "task_id": "D116",
+  "title": "remaining gaps in FR_REGIONS",
+  "agent": "a06",
+  "deliverable_md": "analysis_out/findings/D116_remaining_gaps_FR_REGIONS.md",
+  "authoritative_artifact": "the .md. Where this sidecar and the .md differ, the .md supersedes.",
+  "verdict": "NO_CHANGE_NEEDED",
+  "verdict_statement": "No change to FR_REGIONS is warranted for this dataset. The premise that s2/s3 use department names FR_REGIONS does not handle is REFUTED: the three cited examples (gironde, nord, atlantique) are all already keys. A maximal gazetteer recovers at most 8400 French test rows (0.496%), an optimistic union bound. Adding keys DELETES tokens from live IDF-weighted features, a net-negative trade.",
+  "headline_number": 8400,
+  "headline_number_meaning": "max French test rows a maximal disjoint department gazetteer could add, as an optimistic upper bound, out of 1694445 total France test rows = 0.496%",
+  "new_defect_found": true,
+  "new_defect_summary": "Not a FR_REGIONS defect. France has ZERO training rows: country_rows in train_s1/s2/s3.json contains only US and India, and crossfit.py:112 iterates for c in ('US','India'), so the ranker is fit without France and applied to 1694445 French test rows. The codebase already acknowledges this at decoy_postfilter.py:17-18.",
+  "denominators": {
+    "source": "country_rows['France'] in analysis_out/profile/*.json",
+    "test_s1_france_rows": 259452,
+    "test_s2_france_rows": 703378,
+    "test_s3_france_rows": 731615,
+    "total_test_france_rows": 1694445,
+    "train_s1_france_rows": 0,
+    "train_s2_france_rows": 0,
+    "train_s3_france_rows": 0,
+    "s1_share_of_france_pct": 15.31,
+    "arithmetic_check": "259452 + 703378 + 731615 = 1694445; 259452/1694445 = 15.31%"
+  },
+  "method": {
+    "matching_rule": "normalize.py:322-335 - a France row resolves a state iff some whole comma-component, after translit_text + strip_accents + lowercase + punctuation-to-space, equals one of the 14 FR_REGIONS keys",
+    "bound_type": "union bound over per-key minimum token counts from addr_tokens['France']",
+    "top4000_cutoffs": {
+      "test_s1": 23,
+      "test_s2": 58,
+      "test_s3": 60,
+      "note": "build_profile.py:140 keeps most_common(4000). A token absent from the list has count <= cutoff, NOT 0. Substitution used everywhere."
+    },
+    "accent_correction": "TOKEN_RE [a-z0-9]+ (build_profile.py:28) runs without strip_accents, so accented ile-de-france yields profile token 'le'. Substituted max(count(ile), count(le)). Measured ile/le: 303/1992 s1, 817/4882 s2, 794/5050 s3."
+  },
+  "premise_refutation": {
+    "claim_tested": "test_s2 and test_s3 encode geography with DEPARTMENT names, and most of those departments are absent from FR_REGIONS",
+    "verdict": "FALSE",
+    "reason": "The s1->s2 count rise is a FREQUENCY shift, not a COVERAGE gap. All three cited examples are already FR_REGIONS keys.",
+    "cited_examples_checked": [
+      {"token": "gironde", "cited_as_absent": true, "actually_a_key": true, "maps_to": "naq", "source_line": "normalize.py:246", "s1": 62, "s2": 75104, "s3": 75621},
+      {"token": "nord", "cited_as_absent": true, "actually_a_key": true, "maps_to": "hdf", "source_line": "normalize.py:244", "s1": 200, "s2": 75362, "s3": 76449},
+      {"token": "atlantique", "cited_as_absent": true, "actually_a_key": true, "maps_to": "pdl", "source_line": "normalize.py:247", "s1": 253, "s2": 63697, "s3": 64398}
+    ],
+    "note": "The COUNTS quoted in the work order are all correct; only the interpretation is wrong."
+  },
+  "current_dictionary_bound": {
+    "entry_count": 14,
+    "canonical_values": ["hdf", "naq", "pdl", "idf"],
+    "per_key_binding_token_count": {
+      "hauts de france": {"s1": 101717, "s2": 88519, "s3": 99419},
+      "nouvelle aquitaine": {"s1": 85268, "s2": 74276, "s3": 82987},
+      "pays de la loire": {"s1": 72812, "s2": 63086, "s3": 71498},
+      "gironde": {"s1": 62, "s2": 75104, "s3": 75621},
+      "nord": {"s1": 200, "s2": 75362, "s3": 76449},
+      "loire atlantique": {"s1": 253, "s2": 63697, "s3": 64398},
+      "pas de calais": {"s1": 179, "s2": 14325, "s3": 14528},
+      "somme": {"s1": 333, "s2": 807, "s3": 833},
+      "paris": {"s1": 388, "s2": 952, "s3": 923},
+      "ile de france": {"s1": 303, "s2": 817, "s3": 794},
+      "landes": {"s1": 116, "s2": 292, "s3": 313},
+      "oise": {"s1": 74, "s2": 148, "s3": 139},
+      "aisne": {"s1": "NOTINTOP4000", "s2": "NOTINTOP4000", "s3": "NOTINTOP4000"},
+      "vendee": {"s1": "NOTINTOP4000", "s2": "NOTINTOP4000", "s3": "NOTINTOP4000"}
+    },
+    "ub_sum": {"s1": 261751, "s2": 457501, "s3": 488022},
+    "ub_clipped_to_rows": {"s1": 259452, "s2": 457501, "s3": 488022},
+    "provably_unresolved": {"s1": 0, "s2": 245877, "s3": 243593, "total": 489470},
+    "pct_unresolved": {"s1": 0.0, "s2": 34.96, "s3": 33.3, "total": 28.89},
+    "s1_bound_is_vacuous": true,
+    "s1_vacuous_reason": "UB 261751 exceeds rows 259452, so the bound cannot detect anything in s1. This is why it cannot support a 100% claim."
+  },
+  "gazetteer_extension": {
+    "departments_enumerated": 84,
+    "threshold": "candidate kept if its binding-token count exceeds the rank-4000 cutoff (>60) in at least one file",
+    "not_resolvable_above_cutoff_count": 58,
+    "clear_threshold_count": 26,
+    "of_which_already_keys": ["nord", "gironde", "loire atlantique", "pas de calais", "somme", "landes", "paris", "oise"],
+    "candidates_scored": 24,
+    "disjointness_rule": "candidate key's token set must be disjoint from the 20-token set the current 14 keys already use",
+    "current_dict_token_set": ["aisne", "aquitaine", "atlantique", "calais", "de", "france", "gironde", "hauts", "ile", "la", "landes", "loire", "nord", "nouvelle", "oise", "paris", "pas", "pays", "somme", "vendee"],
+    "disqualified_on_overlap": [
+      {"key": "val de marne", "shared_token": "de"},
+      {"key": "maine et loire", "shared_token": "loire"}
+    ],
+    "disjoint_candidate_count": 20,
+    "disjoint_candidates": ["gard", "marne", "haute marne", "moselle", "vosges", "haute provence", "cote d or", "vienne", "haute vienne", "jura", "indre", "orne", "bas rhin", "haut rhin", "haute garonne", "haute normandie", "auvergne", "martinique", "guyane", "departement"],
+    "per_file_upper_bound": {"s1": 1435, "s2": 3368, "s3": 3597},
+    "grand_total_upper_bound": 8400,
+    "grand_total_pct_of_france": 0.496,
+    "largest_contributors_s3": {"marne": 1061, "gard": 320, "haute normandie": 239, "haute marne": 239, "auvergne": 218, "martinique": 173, "cote d or": 169},
+    "is_optimistic": true,
+    "why_optimistic": "union bound: keys whose components co-occur in one row are double-counted, and a token count is not a component count. True recoverable figure is LOWER."
+  },
+  "idf_argument": {
+    "conclusion": "Adding a key DELETES a live feature rather than adding one.",
+    "mechanism": "normalize.py:335 `continue` means a matching component's tokens are never appended to `toks` (line 342 toks.extend is skipped), so they never reach atoks (prep.py:16), so they never reach features.py:129 wa (IDF-weighted address overlap), features.py:123-124 a_jac/a_cont, or keys.py:39 alph blocking tokens.",
+    "worked_example": "marne occurs 1061 times in French s3 rows and is NOT a key, so it stays in atoks and contributes to wa_wj when an s2/s3 record and its s1 counterpart share it. Adding 'marne':'idf' would delete it from all 1061 rows.",
+    "candidate_key_token_mass": {
+      "test_s2": {"mass": 25944, "of_total": 4745780, "pct": 0.55},
+      "test_s3": {"mass": 27103, "of_total": 4993261, "pct": 0.54}
+    },
+    "trade": "lose ~0.55% of address IDF mass to gain 0.496% more state coverage = net negative",
+    "liveness_of_affected_features": "wa_* is consumed at features.py:139-146 into w_sum, w_sum_rank, w_sum_gap, which feed the ranker",
+    "inference_flag": true,
+    "inference_note": "Mechanism argument from quoted code plus measured token mass. NOT a measured F0.5 delta. Full pipeline not run."
+  },
+  "france_has_no_training_data": {
+    "is_new_finding": true,
+    "evidence_1_profile": "country_rows in train_s1.json = {US:1323633, India:883188}; train_s2.json = {India:2017799, US:3016817}; train_s3.json = {US:3170056, India:2115547}. No France key. by_country likewise. Raw Select-String for \"France\" against train_s1.json returns 0 matches.",
+    "evidence_2_code": "_upstream/src/crossfit.py:112 `for c in (\"US\", \"India\"):` and line 122 concat over the same tuple. France never enters stage-2 context or the training table.",
+    "evidence_3_codebase_acknowledges": "_upstream/src/decoy_postfilter.py:17-18 '(b) the country has no training labels (e.g. France in the test set)... Without labels for that country the model is least calibrated.' and line 179 derives `unlabeled` at run time.",
+    "consequence": "INFERENCE: the LightGBM ranker (crossfit.py:143) is fit on US and India pairs only, then applied to 1694445 French test rows. Every France-specific parameter, including whatever state_eq (features.py:114) contributes, is extrapolated and never validated on French labels.",
+    "relevance": "The binding constraint on France is the absence of training labels, not the absence of dictionary entries. This is the strongest argument for leaving FR_REGIONS alone.",
+    "no_change_proposed_to_crossfit": true,
+    "why_no_change": "French training labels cannot be fabricated (no ground truth exists) and decoy_postfilter already handles the unlabelled case. Reported as context only."
+  },
+  "work_order_questions": {
+    "dead_weight_entries": {
+      "entries": ["aisne", "vendee"],
+      "evidence": "not in the top 4000 of ANY of the six profile files",
+      "implied_counts_upper_bound": {"s1": 23, "s2": 58, "s3": 60},
+      "phrasing_rule": "NOT 'does not occur'. Counts are <= the rank-4000 cutoff; the tail is truncated.",
+      "smallest_live_entries": {"landes_s3": 313, "oise_s3": 139},
+      "recommendation": "No case for removal either: they are correct geography, cost nothing, and removing them changes nothing measurable."
+    },
+    "unhandled_but_should_be": {
+      "answer": "None that would pay.",
+      "reasoning": "58 of 84 departments do not clear the top-4000 cutoff in any file; the ~20 that do are worth <=8400 rows while costing ~0.55% of address IDF mass. The genuinely missing tokens (de, la, du, des, le, les) belong to ADDR_CANON_FR not FR_REGIONS and are already established as settled; not re-measured."
+    },
+    "cross_country_collisions": {
+      "found": false,
+      "reason": "STATE_MAPS is country-keyed (normalize.py:250), so a French row can never read US_STATES or IN_STATES. No cross-country collision is possible in the state path by construction.",
+      "within_france": "The 14 keys map to 4 canonical values with no ambiguous key; each key appears once.",
+      "theoretical_collision_tested": "nord (a department) vs the word 'north' in a street name. A whole-component match is required, so 'rue du nord' does NOT match key 'nord'. The continue-consumes-component rule protects this."
+    }
+  },
+  "self_map_defect_separate": {
+    "do_not_conflate_with_gazetteer_gap": true,
+    "source_line": "normalize.py:252 `for _m in (US_STATES, IN_STATES):` - FR_REGIONS omitted",
+    "us_states_keys_after_loop": 104,
+    "in_states_keys_after_loop": 86,
+    "fr_regions_keys_after_loop": 14,
+    "hdf_in_fr_regions": false,
+    "independent_confirmation": "fleet log _fr2.log: '[FAIL] France abbreviations are ALSO self-mapped'",
+    "canonical_values": ["hdf", "naq", "pdl", "idf"],
+    "canonical_values_occurring_as_input_tokens": 0,
+    "measured_effect_on_dataset": 0,
+    "scope_statement": "This is a statement about the SELF-MAP LOOP ONLY. It is NOT evidence that the gazetteer residual is harmless.",
+    "one_token_fix": "for _m in (US_STATES, IN_STATES, FR_REGIONS):",
+    "recommendation": "Optional and cosmetic on this dataset. Safe future-proofing, not a scoring fix."
+  },
+  "contradiction_71_vs_97": {
+    "owned_by": "a01 / D128",
+    "i_attempt_to_settle_it": false,
+    "my_position": "Three distinct quantities, not two competing estimates.",
+    "quantities": [
+      {"source": "D073 / inherited", "value": "71.10% resolvable, 28.90% not", "measures": "DICTIONARY ceiling via per-key token minimum"},
+      {"source": "D077", "value": "97.4380% ceiling", "measures": "ADDRESS PARSEABILITY (non-empty AND comma-bearing)"},
+      {"source": "D116 section 3.1", "value": "71.10% resolvable, 28.89% not", "measures": "same criterion as D073, independently reproduced"}
+    ],
+    "reproduction_agreement_pct": "resolvable side matches D073 exactly at 71.10%; unresolved 28.89% vs 28.40%, difference being my accent correction and cutoff substitution",
+    "set_relationship": "D077's 43411 unparseable France rows (2.5620%) are a SUBSET of my 489470, not a competing estimate",
+    "size_of_difference": 446059,
+    "difference_meaning": "489470 - 43411 = 446059 French rows that are well-formed and comma-bearing yet carry no component equal to any of the 14 keys",
+    "max_recoverable_from_that_difference": 8400
+  },
+  "recommended_actions": [
+    {"rank": 1, "action": "Nothing to FR_REGIONS", "expected_value": "avoids a net-negative change", "status": "DO THIS"},
+    {"rank": 2, "action": "normalize.py:252 add FR_REGIONS to the self-map loop", "expected_value": "0 on this dataset; safe future-proofing", "status": "OPTIONAL, COSMETIC"},
+    {"rank": 3, "action": "Explicitly do NOT add department names", "expected_value": "mechanism in normalize.py:335 shows it removes signal", "status": "NOT RECOMMENDED"}
+  ],
+  "limitations": [
+    "addr_tokens / name_tokens are TOP 4000 ONLY (build_profile.py:140). Every 'not in the top 4000' means count <= rank-4000 cutoff (23/58/60), NEVER 'does not occur'.",
+    "The profile destroys component structure, so all section 3 figures are UPPER BOUNDS, not direct counts.",
+    "The IDF trade-off is a mechanism argument from quoted code plus measured token mass, NOT a measured F0.5 delta. Full pipeline not run.",
+    "No raw *.tsv was opened. All data came from the six profile JSONs.",
+    "Did not re-derive the postcode, region-coverage, function-word, or self-map findings marked settled in FLEET_BRIEF.md / D073 / D128."
+  ],
+  "constraints_respected": {
+    "read_only_on_dataset_and_upstream": true,
+    "read_only_profile_json_only": true,
+    "files_written": 2,
+    "network_access": "none"
+  }
+}

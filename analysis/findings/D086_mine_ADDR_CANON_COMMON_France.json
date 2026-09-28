@@ -1,0 +1,635 @@
+{
+ "task_id": "D086",
+ "family": "B-dictionary",
+ "title": "mine evidence to extend ADDR_CANON_COMMON for France",
+ "headline": "ADDR_CANON_COMMON is NOT the binding constraint for France. The entire mined extension set (abbreviations + street types + ordinals) is worth 54,758 of 11,992,918 listed French address tokens = 0.4566%. Real French signal sits in geography (16.92-23.88%), function words (15.71-19.79%) and house-number digits (11.49-13.49%), all outside this table. Four genuine defects found, none of them a missing ADDR_CANON_COMMON entry.",
+ "single_most_important_number": {
+  "value": 0.4566,
+  "unit": "percent",
+  "meaning": "Share of listed French address-token mass addressed by the ENTIRE proposed ADDR_CANON_COMMON extension (54,758 / 11,992,918). The dictionary is not the bottleneck.",
+  "arithmetic": "54758 / 11992918 = 0.4566%"
+ },
+ "new_defect_found": true,
+ "new_defects": [
+  {
+   "id": "D086-N1",
+   "title": "Five cross-language collisions in ADDR_CANON_COMMON applied to France",
+   "status": "CONFIRMED",
+   "severity": "P0",
+   "detail": "ADDR_CANON_COMMON encodes US compass/real-estate senses that are wrong for French text. normalize.py:321 removes only (st,ste,dr,n,s,e,w) for France while ADDR_CANON_FR overrides none of them.",
+   "tokens": [
+    {
+     "token": "ne",
+     "fr_count": 6465,
+     "common_maps_to": "ne",
+     "fr_sense": "negation particle",
+     "fr_override": "none",
+     "verdict": "CONFIRMED"
+    },
+    {
+     "token": "fort",
+     "fr_count": 1923,
+     "common_maps_to": "ft",
+     "fr_sense": "fort",
+     "fr_override": "none",
+     "verdict": "CONFIRMED"
+    },
+    {
+     "token": "est",
+     "fr_count": 469,
+     "common_maps_to": "estate",
+     "fr_sense": "east",
+     "fr_override": "none",
+     "verdict": "CONFIRMED"
+    },
+    {
+     "token": "se",
+     "fr_count": 556,
+     "common_maps_to": "se",
+     "fr_sense": "reflexive pronoun",
+     "fr_override": "none",
+     "verdict": "CONFIRMED"
+    },
+    {
+     "token": "col",
+     "fr_count": 125,
+     "common_maps_to": "colony",
+     "fr_sense": "mountain pass",
+     "fr_override": "none",
+     "verdict": "LIKELY"
+    }
+   ],
+   "pooled_mass": 9538,
+   "pooled_share_pct": 0.0795,
+   "why_it_matters": "A wrong-sense entry manufactures a token that never occurs naturally in French addresses, injecting IDF-weighted noise on every occurrence. A missing entry only loses a match opportunity. These five are worth more than all ~20 Tier-2 additions combined despite being a quarter of their mass."
+  },
+  {
+   "id": "D086-N2",
+   "title": "normalize_address never applies the LEET map that normalize_name applies",
+   "status": "CONFIRMED",
+   "severity": "do-not-fix",
+   "detail": "LEET defined at normalize.py:256, applied at exactly one site, normalize.py:280 inside _name_tokens. normalize_address (lines 314-353) never calls translate(LEET). Verified by scanning every line of the file for LEET: only 256 and 280 match.",
+   "recommendation": "DO NOT extend LEET to addresses. The asymmetry is real but the fix would be a regression: the mixed tokens are French house-number forms (12 bis, 2e) and street truncations (chem1), not leetspeak. Folding chem1 -> chems would be wrong."
+  },
+  {
+   "id": "D086-N3",
+   "title": "French ordinal family entirely absent from both address tables",
+   "status": "CONFIRMED",
+   "severity": "P3",
+   "detail": "ADDR_CANON_COMMON:184-185 has a complete English ordinal set (first->1st, second->2nd, third->3rd, fourth->4th, fifth->5th). No French counterpart exists in ADDR_CANON_COMMON or ADDR_CANON_FR.",
+   "tokens": [
+    {
+     "token": "1er",
+     "fr_count": 1963,
+     "share_pct": 0.0164,
+     "proposed": "1st"
+    },
+    {
+     "token": "2eme",
+     "fr_count": 697,
+     "share_pct": 0.0058,
+     "proposed": "2nd"
+    },
+    {
+     "token": "3eme",
+     "fr_count": 350,
+     "share_pct": 0.0029,
+     "proposed": "3rd"
+    },
+    {
+     "token": "2e",
+     "fr_count": 162,
+     "share_pct": 0.0014,
+     "proposed": "2nd"
+    },
+    {
+     "token": "premier",
+     "fr_count": 149,
+     "share_pct": 0.0012,
+     "proposed": "1st"
+    }
+   ],
+   "pooled_mass": 3172,
+   "pooled_share_pct": 0.0264
+  },
+  {
+   "id": "D086-N4",
+   "title": "Profile tokenizer does not strip accents, unlike the production tokenizer",
+   "status": "CONFIRMED",
+   "severity": "fleet-level P0",
+   "detail": "build_profile.py:28 TOKEN_RE=[a-z0-9]+ is applied to ba.lower() WITHOUT strip_accents. normalize.py:317 calls strip_accents() BEFORE tokenising. The two tokenisers disagree on every accented French word, so 1-char alpha tokens are largely debris, not real tokens.",
+   "evidence_fragments": {
+    "test_s1": {
+     "general": 279,
+     "g": 2611,
+     "n": 2648,
+     "ral": 2218,
+     "residence": 879,
+     "r": 2543,
+     "sidence": 454,
+     "hopital": 105,
+     "h": 1051,
+     "pital": 83,
+     "ecole": 290,
+     "ole": 38
+    },
+    "one_char_alpha_mass": {
+     "test_s1": 71805,
+     "test_s2": 367602,
+     "test_s3": 375721
+    },
+    "one_char_alpha_share_pct": {
+     "test_s1": 2.7,
+     "test_s2": 2.47,
+     "test_s3": 2.48
+    },
+    "smoking_gun": "r = 182,872 in test_s2 vs 2,543 in test_s1. A 72x jump across sources for a 1-letter token is a tokenizer artefact signature, not a language fact."
+   },
+   "recommendation": "Fix build_profile.py:28 to apply strip_accents() before TOKEN_RE, matching normalize.py:317, and re-run the profile build before any agent mines short tokens. Does NOT affect this task candidates, all of which are long unambiguous tokens."
+  }
+ ],
+ "denominators": {
+  "france_test_rows": {
+   "test_s1": 259452,
+   "test_s2": 703378,
+   "test_s3": 731615,
+   "pooled": 1694445
+  },
+  "france_train_rows": {
+   "train_s1": 0,
+   "train_s2": 0,
+   "train_s3": 0,
+   "note": "train is France-free, so the France branch of normalize_address is never exercised by train data"
+  },
+  "test_s1_share_of_france_pct": 15.31,
+  "test_s1_share_arithmetic": "259452 / 1694445 = 15.31%",
+  "france_listed_addr_token_mass": {
+   "test_s1": 2253877,
+   "test_s2": 4745780,
+   "test_s3": 4993261,
+   "pooled": 11992918
+  },
+  "caveat": "addr_tokens is a top-4000 list with hapax pruning (build_profile.py:140 TOPN=4000, prune() at :45-48). All three France lists are AT the 4,000 cap, so listed mass is a LOWER BOUND on true token mass and the vocabulary is truncated."
+ },
+ "dictionaries_as_built": {
+  "source": "_upstream/src/normalize.py",
+  "ADDR_CANON_COMMON_keys": 176,
+  "ADDR_CANON_FR_keys": 67,
+  "FR_REGIONS_keys": 14,
+  "FR_REGIONS_canonical_values": [
+   "hdf",
+   "naq",
+   "pdl",
+   "idf"
+  ],
+  "effective_french_map_keys": 220,
+  "effective_french_map_formula": "eff = {k:v for k,v in COMMON if k not in (st,ste,dr,n,s,e,w)} then union ADDR_CANON_FR  (normalize.py:319-321)",
+  "coverage_of_french_listed_mass_pct": {
+   "test_s1": 13.9,
+   "test_s2": 18.5,
+   "test_s3": 18.27
+  },
+  "uncovered_pct": {
+   "test_s1": 86.1,
+   "test_s2": 81.5,
+   "test_s3": 81.73
+  }
+ },
+ "uncovered_mass_decomposition": {
+  "note": "Percentages are of each file France listed address mass. Buckets are mutually exclusive by construction: geography, function words, pure digits, 1-char alpha, curated street types, remainder.",
+  "test_s1": {
+   "geography": 538138,
+   "function_words": 446027,
+   "pure_digits": 258867,
+   "one_char_alpha": 60906,
+   "street_types_unhandled": 5423,
+   "remainder_city_person_names": 631137,
+   "listed_mass": 2253877
+  },
+  "test_s2": {
+   "geography": 803195,
+   "function_words": 745474,
+   "pure_digits": 640133,
+   "one_char_alpha": 117194,
+   "street_types_unhandled": 12725,
+   "remainder_city_person_names": 1548941,
+   "listed_mass": 4745780
+  },
+  "test_s3": {
+   "geography": 864792,
+   "function_words": 794562,
+   "pure_digits": 668275,
+   "one_char_alpha": 124027,
+   "street_types_unhandled": 13261,
+   "remainder_city_person_names": 1615959,
+   "listed_mass": 4993261
+  },
+  "pct_of_listed_mass": {
+   "test_s2": {
+    "geography": 16.92,
+    "function_words": 15.71,
+    "pure_digits": 13.49,
+    "one_char_alpha": 2.47,
+    "street_types_unhandled": 0.27
+   }
+  },
+  "key_inference": "The street_types_unhandled bucket, the ONLY bucket ADDR_CANON_COMMON is designed to address, is ~0.25% of mass, roughly 60x smaller than the geography bucket. No amount of dictionary work moves this pipeline."
+ },
+ "candidates": {
+  "tier1_apartment_family": {
+   "placement": "ADDR_CANON_COMMON (also occurs in India)",
+   "proposed": {
+    "appt": "apt",
+    "app": "apt",
+    "appart": "apt",
+    "appartement": "apt"
+   },
+   "counts_pooled": {
+    "appt": 5113,
+    "appartement": 4307,
+    "app": 620,
+    "appart": 88
+   },
+   "us_counts": {
+    "appt": 0,
+    "app": 0
+   },
+   "india_counts": {
+    "appt": 7992,
+    "app": 1629
+   },
+   "already_in_common": {
+    "apt": "apt->apt (handled)",
+    "apartment": "apartment->apt (handled)"
+   },
+   "verdict": "CONFIRMED",
+   "pooled_mass": 10128,
+   "pooled_share_pct": 0.0845,
+   "note": "The dictionary already contains apartment->apt and apt->apt. The French spelling of the same concept is simply missing."
+  },
+  "tier2_french_street_types": {
+   "placement": "mostly ADDR_CANON_FR (France-only); port and villa to ADDR_CANON_COMMON (occur in US/India)",
+   "fr_only_confirmed": [
+    {
+     "token": "pont",
+     "count": 3866,
+     "share_pct": 0.0322
+    },
+    {
+     "token": "clos",
+     "count": 3588,
+     "share_pct": 0.0299
+    },
+    {
+     "token": "mail",
+     "count": 1731,
+     "share_pct": 0.0144
+    },
+    {
+     "token": "hameau",
+     "count": 1067,
+     "share_pct": 0.0089
+    },
+    {
+     "token": "esplanade",
+     "count": 878,
+     "share_pct": 0.0073
+    },
+    {
+     "token": "loti",
+     "count": 755,
+     "share_pct": 0.0063
+    },
+    {
+     "token": "sentier",
+     "count": 618,
+     "share_pct": 0.0052,
+     "pair_with": "sente"
+    },
+    {
+     "token": "sente",
+     "count": 562,
+     "share_pct": 0.0047,
+     "pair_with": "sentier"
+    },
+    {
+     "token": "ruelle",
+     "count": 593,
+     "share_pct": 0.0049
+    },
+    {
+     "token": "parvis",
+     "count": 587,
+     "share_pct": 0.0049
+    },
+    {
+     "token": "venelle",
+     "count": 481,
+     "share_pct": 0.004
+    },
+    {
+     "token": "pav",
+     "count": 481,
+     "share_pct": 0.004,
+     "pair_with": "pavillon"
+    },
+    {
+     "token": "pavillon",
+     "count": 256,
+     "share_pct": 0.0021,
+     "pair_with": "pav"
+    },
+    {
+     "token": "promenade",
+     "count": 536,
+     "share_pct": 0.0045
+    },
+    {
+     "token": "immeuble",
+     "count": 434,
+     "share_pct": 0.0036
+    },
+    {
+     "token": "rond",
+     "count": 411,
+     "share_pct": 0.0034
+    },
+    {
+     "token": "halle",
+     "count": 291,
+     "share_pct": 0.0024
+    }
+   ],
+   "shared_place_in_common": [
+    {
+     "token": "port",
+     "fr": 3825,
+     "us": 9716,
+     "india": 1120,
+     "share_pct": 0.0319
+    },
+    {
+     "token": "villa",
+     "fr": 594,
+     "us": 3033,
+     "india": 20861,
+     "share_pct": 0.005
+    }
+   ],
+   "likely_only": [
+    {
+     "token": "nationale",
+     "count": 2091,
+     "share_pct": 0.0174,
+     "verdict": "LIKELY"
+    }
+   ],
+   "tier2_total_mass": 26966,
+   "tier2_total_share_pct": 0.2248,
+   "verdict": "CONFIRMED for France-only entries",
+   "priority": "P2 - deliberately low, this bucket cannot move the needle"
+  },
+  "tier_totals": {
+   "tier1_mass": 27792,
+   "tier1_share_pct": 0.2317,
+   "tier2_mass": 26966,
+   "tier2_share_pct": 0.2248,
+   "combined_mass": 54758,
+   "combined_share_pct": 0.4566,
+   "arithmetic": "54758 / 11992918 = 0.4566%"
+  }
+ },
+ "abbreviation_pair_mining": {
+  "method": "every short token (len 2-5) x every longer token containing it, both >=300 pooled occurrences, excluding pairs already unified in the effective French map",
+  "raw_pairs_found": 5248,
+  "verdict": "NEGATIVE RESULT - essentially all false positives",
+  "why": "The top 45 pairs are all the French function words de/des against place or person names (de~bordeaux 1050023~277474, de~gironde 1050023~150787, de~president, de~claude). de and des are function words, not abbreviations.",
+  "genuine_pairs_recovered_by_curated_scan": [
+   {
+    "pair": [
+     "sente",
+     "sentier"
+    ],
+    "counts": [
+     562,
+     618
+    ]
+   },
+   {
+    "pair": [
+     "pav",
+     "pavillon"
+    ],
+    "counts": [
+     481,
+     256
+    ]
+   },
+   {
+    "pair": [
+     "cit",
+     "cite"
+    ],
+    "counts": [
+     5580,
+     2546
+    ]
+   },
+   {
+    "pair": [
+     "appt",
+     "appartement"
+    ],
+    "counts": [
+     5113,
+     4307
+    ]
+   },
+   {
+    "pair": [
+     "app",
+     "appart"
+    ],
+    "counts": [
+     620,
+     88
+    ]
+   }
+  ],
+  "conclusion": "The abbreviation-table opportunity in ADDR_CANON_COMMON for France is essentially empty beyond the apartment family. A purely mechanical prefix heuristic would have produced about 5,000 junk entries."
+ },
+ "leetspeak_analysis": {
+  "mixed_alpha_digit_fr_addr_tokens": {
+   "test_s1": {
+    "distinct": 11,
+    "occurrences": 1610,
+    "share_pct": 0.0714
+   },
+   "test_s2": {
+    "distinct": 43,
+    "occurrences": 6122,
+    "share_pct": 0.129
+   },
+   "test_s3": {
+    "distinct": 37,
+    "occurrences": 5848,
+    "share_pct": 0.1171
+   }
+  },
+  "example_tokens": [
+   "cour2",
+   "1er",
+   "chem1",
+   "2eme",
+   "3eme",
+   "espl1",
+   "chau1",
+   "cite1",
+   "2bis",
+   "13bis",
+   "12b"
+  ],
+  "conclusion": "These are French house-number constructions and street truncations, NOT leetspeak. Do not extend LEET to addresses."
+ },
+ "d073_d077_reconciliation": {
+  "status": "RESOLVED",
+  "criterion_stated": "Union bound over the 14 FR_REGIONS keys. normalize_address:333 resolves state only when a whole comma-component, after re.sub of non-alnum to space and whitespace collapse, exactly equals a key. Multi-word keys therefore require ALL component tokens to co-occur. The profile discards component structure, so rows matching key k are bounded above by the min over t in T(k) of count(t); summing over the 14 keys bounds resolvable rows from above.",
+  "strict_criterion_all_tokens_present": {
+   "test_s1": {
+    "sum_min": 261705,
+    "pct": 100.87,
+    "unresolvable_pct": -0.87,
+    "note": "vacuous, exceeds row count; floor at 0"
+   },
+   "test_s2": {
+    "sum_min": 457385,
+    "pct": 65.03,
+    "unresolvable_pct": 34.97
+   },
+   "test_s3": {
+    "sum_min": 487902,
+    "pct": 66.69,
+    "unresolvable_pct": 33.31
+   },
+   "pooled": {
+    "sum_min": 1206992,
+    "resolvable_ceiling_pct": 71.2323,
+    "unresolvable_floor_pct": 28.7677,
+    "arithmetic": "1206992 / 1694445 = 71.2323% resolvable; (1694445-1206992)/1694445 = 28.7677% unresolvable"
+   }
+  },
+  "loose_criterion_any_one_token": {
+   "pooled_sum_max": 5085429,
+   "pct_of_row_count": 300.12,
+   "verdict": "VACUOUS - exceeds the row count, so the ceiling is 100% resolvable and 0% unresolvable"
+  },
+  "verdict": "D073 is RIGHT (71.10% / 28.90%), reproduced to within 0.13 pp. D077 97.4380% is NOT reproducible under either criterion and sits just above the vacuous loose-criterion line. The disagreement is a criterion artefact, not a data disagreement.",
+  "per_key_test_s2": {
+   "hauts de france": 88519,
+   "nord": 75362,
+   "gironde": 75104,
+   "nouvelle aquitaine": 74276,
+   "pays de la loire": 63086,
+   "loire atlantique": 63697,
+   "pas de calais": 14325,
+   "paris": 952,
+   "ile de france": 817,
+   "somme": 807,
+   "landes": 292,
+   "oise": 148,
+   "aisne": 0,
+   "vendee": 0
+  },
+  "premise_correction": "The work order premise that test_s2 and test_s3 encode geography with department names ABSENT from FR_REGIONS is partly wrong. gironde, nord, loire atlantique, pas de calais, somme, landes and paris ARE already FR_REGIONS keys and carry 293,000+ occurrences in test_s2. Only aisne and vendee are genuinely absent and both are 0 occurrences. The 28.77% shortfall is NOT department-table coverage. ZERO new FR_REGIONS entries are warranted.",
+  "bound_status": "UNION BOUND (upper bound on resolvable), not a direct count. True resolvable <= 71.2323%, true unresolvable >= 28.7677%."
+ },
+ "proven_no_ops": [
+  {
+   "id": "D086-X1",
+   "claim": "The 7-key exclusion list (st,ste,dr,n,s,e,w) at normalize.py:321 is a semantic no-op for France.",
+   "method": "Compared the as-built effective map against a hypothetical map built with NO exclusion list, across all 222 keys.",
+   "differences_found": 3,
+   "detail": "Only s, e and w differ, and only by passing through unchanged instead of self-mapping, which is semantically identical because ADDR_CANON_COMMON defines south/s->s, east/e->e, west/w->w. All other excluded keys (st, ste, dr, n) are redefined by ADDR_CANON_FR, which is merged AFTER the exclusion.",
+   "recommendation": "Do not spend effort on it."
+  },
+  {
+   "id": "D086-X2",
+   "claim": "The missing FR_REGIONS self-map loop entry (normalize.py:252 omits FR_REGIONS) has zero measurable effect on this dataset.",
+   "method": "Checked whether the 4 canonical values occur as input address tokens.",
+   "result": "hdf, naq, pdl and idf each occur 0 times as input address tokens in all three France test files.",
+   "recommendation": "Real code defect, no effect on this data. Independently re-measured, consistent with the work order. Applies to the self-map loop ONLY and must not be conflated with the department gap."
+  }
+ ],
+ "watchlist_not_recommended": [
+  {
+   "item": "bld",
+   "common_maps_to": "bldg",
+   "fr_overrides_to": "blvd",
+   "fr_occurrences": 0,
+   "note": "bld means building in English and boulevard in French. Currently inert because bld is 0 occurrences in the France vocabulary.",
+   "verdict": "SPECULATIVE",
+   "priority": "low"
+  },
+  {
+   "item": "europe",
+   "fr_count": 691,
+   "share_pct": 0.0058,
+   "verdict": "SPECULATIVE",
+   "note": "Possible country or continent component, unhandled, no clear normalisation target"
+  },
+  {
+   "item": "france",
+   "fr_count": 293150,
+   "share_pct": 2.4448,
+   "verdict": "SPECULATIVE",
+   "note": "Very frequent as a trailing component; unclear whether it should be dropped as a country marker"
+  }
+ ],
+ "gaps": [
+  "All three France addr_tokens lists are AT the 4,000 cap. Tokens outside the top 4,000 per source are invisible. Absent from the France vocabulary and therefore UNDETERMINABLE, not estimated: national, section, imm, societe, entreprise, hame, ham, ruel, ven, espl, hll, im, traverse, montee, descente.",
+  "Component structure is destroyed by the profile builder, so every D073/D077 figure is a union bound and not a count. No exact per-row state-resolution rate is derivable.",
+  "No row-level co-occurrence: I can count token occurrences, not rows containing them. All row-level statements are bounds.",
+  "Hapaxe pruning (build_profile.py:45-48) drops count-1 tokens, so listed mass under-counts by an unknown amount.",
+  "Downstream model effect unmeasurable from the profile; all expected-effect statements are INFERENCE.",
+  "Train is France-free, so no France dictionary entry can be validated against a France ground truth and no France train/test shift can be measured."
+ ],
+ "recommendations_priority_order": [
+  {
+   "priority": "P0",
+   "action": "Fix the 5 cross-language collisions in ADDR_CANON_FR: est->e, se->se, ne->ne, col->col, fort->fort. Pooled 9,538 (0.0795%).",
+   "rationale": "Correctness fix, not a recall fix. Highest value per byte available."
+  },
+  {
+   "priority": "P1",
+   "action": "Add apartment family to ADDR_CANON_COMMON: appt/app/appart/appartement -> apt. Pooled 10,128 (0.0845%).",
+   "rationale": "Also present in India so COMMON is the correct home; apartment->apt already exists, the French spelling is missing."
+  },
+  {
+   "priority": "P2",
+   "action": "Add about 18 French street types to ADDR_CANON_FR; move port and villa to COMMON. Pooled 26,966 (0.2248%).",
+   "rationale": "Deliberately low priority, this bucket cannot move the needle."
+  },
+  {
+   "priority": "P3",
+   "action": "Add French ordinals 1er/2eme/3eme/2e alongside the English set at ADDR_CANON_COMMON:184-185. Pooled 3,172 (0.0264%).",
+   "rationale": "Clean self-contained gap, small mass."
+  },
+  {
+   "priority": "FLEET-P0",
+   "action": "Fix build_profile.py:28 to strip accents before TOKEN_RE, matching normalize.py:317, and re-run the profile build.",
+   "rationale": "More valuable to the fleet than anything task-specific. 2.47-2.70% of French mass is accent debris and short-token mining on current profiles yields confident nonsense."
+  }
+ ],
+ "explicitly_not_recommended": [
+  "Extending LEET to addresses, it would mangle French house-number forms. Real asymmetry, wrong fix.",
+  "Adding FR_REGIONS entries, aisne and vendee are the only absent keys and both are 0 occurrences.",
+  "Touching the normalize.py:252 self-map loop, the 4 canonical values occur 0 times as input tokens.",
+  "Editing the (st,ste,dr,n,s,e,w) exclusion list, proven no-op.",
+  "A mechanical abbreviation-pair miner, 5,248 raw pairs, all false positives."
+ ],
+ "relation_to_already_checked": {
+  "REFUTED-1_french_postcodes": "Not re-derived. Mixed-digit token counts are consistent with it: the only digit-bearing French tokens are house numbers, not postcodes.",
+  "REFUTED-2_france_region": "The s1-only 100% figure is NOT reproduced and NOT quoted. My France-wide figure is 71.2323% resolvable and 28.7677% unresolvable, as a union bound with the criterion stated. I agree with D073 and reject D077 under the stated criterion, and additionally show the premise that the shortfall is caused by missing department entries is itself false.",
+  "function_words_finding": "Corroborated, not re-derived: de+la+le+les+du+des in test_s2 = 737,491 / 4,745,780 = 15.54%, against the established 731,158 / 15.41%. The difference is consistent with the established set omitting le and les."
+ }
+}

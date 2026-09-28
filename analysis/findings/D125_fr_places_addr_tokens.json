@@ -1,0 +1,246 @@
+{
+ "task_id": "D125",
+ "family": "B-dictionary",
+ "title": "France addr_tokens: city and place-name coverage",
+ "deliverable": "analysis_out/findings/D125_fr_places_addr_tokens.md",
+ "headline": "Top-10 French places cover at most 85.174% of French test rows (1,443,231 of 1,694,445) and only 12 of the top-30 unigrams are places. City is already an unintentional blocking key but only in compound form (keys.py has no bare-address-token key kind), so adding city as a blocking key is a no-op. New defect: 19 ADDR_CANON_FR canonicals are missing from ADDR_GENERIC, leaking 336,623 occurrences (19.866 per 100 rows) into the key vocabulary; and normalize.py does not handle the U+2019 typographic apostrophe, which splits French elisions.",
+ "most_important_number": "85.174 occurrences per 100 French rows = 1,443,231 of 1,694,445, an UPPER bound on the top-10 row share",
+ "revision_note": "A prior draft and sidecar existed. All figures re-derived from the profile. Three errors corrected (bound direction, non-existent bare-city key kind, mixed s1/all-source denominators), one reclassification (r and n are abbreviations, not accent fragments), one arithmetic fix (legacy regions), and one omission added (U+2019).",
+
+ "denominators": {
+  "profile_fields": "by_country.France.rows and addr_tokens.France in analysis_out/profile/test_s{1,2,3}.json",
+  "france_rows_s1": 259452,
+  "france_rows_s2": 703378,
+  "france_rows_s3": 731615,
+  "france_rows_total": 1694445,
+  "share_of_france_rows_s1_pct": 15.31,
+  "share_of_france_rows_s2_pct": 41.51,
+  "share_of_france_rows_s3_pct": 43.18,
+  "invariants_verified": ["sum(len_hist.values()) == by_country.France.rows for all three France slices"],
+  "listed_addr_token_mass": {"s1": 2253877, "s2": 4745780, "s3": 4993261, "total": 11992918},
+  "merged_distinct_tokens_retained": 4441,
+  "tokens_retained_in_all_three": 3519
+ },
+
+ "unit_caveat": {
+  "statement": "addr_tokens counts token OCCURRENCES, not rows. occurrences/rows is occurrences-per-row and is NOT a percentage of rows; it can exceed 100. Every rate in this deliverable is stated as occurrences per 100 rows.",
+  "examples": {
+   "de_occurrences": 1050023,
+   "de_per_100_rows": 61.98,
+   "s1_region_heads_per_100_rows": 100.15,
+   "defect2_leakers_per_100_rows": 19.866
+  },
+  "reason": "build_profile.py:112-127 pools all comma-separated components into one counter; no token-to-row or token-to-component mapping is retained"
+ },
+
+ "a_top_places": {
+  "method": "merged counts across s1/s2/s3; a multi-word place uses min over its constituent tokens because the generic component is shared",
+  "top10": [
+   {"rank": 1, "place": "Bordeaux", "proxy": "bordeaux", "occ": 277474, "s1": 43634, "s2": 114608, "s3": 119232, "per_100_rows": 16.376},
+   {"rank": 2, "place": "Nantes", "proxy": "nantes", "occ": 238748, "s1": 37624, "s2": 98429, "s3": 102695, "per_100_rows": 14.090},
+   {"rank": 3, "place": "Lille", "proxy": "lille", "occ": 221585, "s1": 34931, "s2": 91622, "s3": 95032, "per_100_rows": 13.077},
+   {"rank": 4, "place": "Calais", "proxy": "calais", "occ": 128762, "s1": 15967, "s2": 55273, "s3": 57522, "per_100_rows": 7.599},
+   {"rank": 5, "place": "Tourcoing", "proxy": "tourcoing", "occ": 115914, "s1": 18284, "s2": 47908, "s3": 49722, "per_100_rows": 6.841},
+   {"rank": 6, "place": "Dunkerque", "proxy": "dunkerque", "occ": 111538, "s1": 17582, "s2": 45959, "s3": 47997, "per_100_rows": 6.583},
+   {"rank": 7, "place": "Roubaix", "proxy": "roubaix", "occ": 107111, "s1": 16827, "s2": 44317, "s3": 45967, "per_100_rows": 6.321},
+   {"rank": 8, "place": "Saint-Nazaire", "proxy": "nazaire", "occ": 88016, "s1": 13864, "s2": 36278, "s3": 37874, "per_100_rows": 5.194},
+   {"rank": 9, "place": "Pessac", "proxy": "pessac", "occ": 81815, "s1": 12837, "s2": 33729, "s3": 35249, "per_100_rows": 4.828},
+   {"rank": 10, "place": "La Teste-de-Buch", "proxy": "teste", "occ": 72268, "s1": 11381, "s2": 29862, "s3": 31025, "per_100_rows": 4.265}
+  ],
+  "top30_classification": {
+   "place": {"tokens": 12, "occ": 1656926, "pct_of_top30_mass": 23.4},
+   "function_word": {"tokens": 4, "occ": 1950792, "pct_of_top30_mass": 27.6},
+   "region": {"tokens": 6, "occ": 1609953, "pct_of_top30_mass": 22.7},
+   "street_type": {"tokens": 2, "occ": 855080, "pct_of_top30_mass": 12.1},
+   "abbreviation": {"tokens": 2, "occ": 474648, "pct_of_top30_mass": 6.7},
+   "department": {"tokens": 3, "occ": 431146, "pct_of_top30_mass": 6.1},
+   "fragment": {"tokens": 1, "occ": 99889, "pct_of_top30_mass": 1.4},
+   "total_mass": 7078434,
+   "place_share_of_top30_count_pct": 40.0
+  },
+  "saint_is_not_a_place_count": {
+   "saint_occ": 141364,
+   "nazaire_occ": 88016,
+   "reason": "saint is simultaneously a commune prefix, a street element (Rue Saint-Martin) and part of Saint-Herblain",
+   "consequence": "the naive sum of the 10 head tokens (1,515,562) overstates the top-10 total, so the min-token proxy is used"
+  }
+ },
+
+ "b_top10_share": {
+  "top10_occ_sum": 1443231,
+  "arithmetic": "277474+238748+221585+128762+115914+111538+107111+88016+81815+72268 = 1443231",
+  "per_100_rows": 85.174,
+  "bound_direction": "UPPER bound on the row share, because occurrences >= rows",
+  "rows_inside_upper_bound": 1443231,
+  "rows_outside_lower_bound": 251214,
+  "rows_outside_lower_bound_pct": 14.826,
+  "per_source": {
+   "s1": {"occ": 222931, "rows": 259452, "per_100_rows": 85.924},
+   "s2": {"occ": 597985, "rows": 703378, "per_100_rows": 85.016},
+   "s3": {"occ": 622315, "rows": 731615, "per_100_rows": 85.060}
+  },
+  "stability": "within 0.9 pp across all three sources, so a property of the French data and not of one source's formatting",
+  "cross_check_established_row_level_pct": 84.58,
+  "cross_check_source": "analyse_france.py, row-level, computed from raw data",
+  "cross_check_consistent": true,
+  "cross_check_note": "84.58 <= 85.174, so the upper bound is satisfied and the true row share lies between the two"
+ },
+
+ "c_separability": {
+  "verdict": "NOT cleanly separable from the profile; only partially in the pipeline",
+  "reasons": [
+   "the profile destroys component identity: build_profile.py:126-127 splits on comma/semicolon then pools all components into one counter, so component index is discarded",
+   "the profile tokeniser shatters accented place names: TOKEN_RE = [a-z0-9]+ (build_profile.py:28) does not strip accents, so Merignac -> m+rignac (rignac 51156 vs merignac 14416, 3.5x) and Lege-Cap-Ferret -> l+ge+cap+ferret (ge 41120 vs lege 11261, 3.6x); merignac and lege are exactly 0 in s1",
+   "in the pipeline, normalize.py:322-352 builds city_comps from every digit-free component, so street components are also labelled as cities (verified: '45 Rue de l Eglise, Tourcoing' -> city_comps ['rue de l eglise', 'tourcoing'])",
+   "the profile tokenisation is NOT the pipeline tokenisation: normalize.py:317 calls strip_accents(), verified '175 Rue de la Merignac, Merignac' -> ['175','rue','de','la','merignac','merignac']"
+  ],
+  "street_words_work_correctly": true,
+  "street_words_evidence": "rue 728583, avenue 126497, boulevard 38275 all reach canonical forms present in ADDR_GENERIC, which keys.py:39 drops before key generation"
+ },
+
+ "new_defect_typographic_apostrophe": {
+  "status": "LIKELY - code defect CONFIRMED, data prevalence UNVERIFIED",
+  "location": ["normalize.py:342", "normalize.py:273", "normalize.py:269"],
+  "cause": "_non_alnum.split(c.replace(ASCII_APOSTROPHE, empty)) strips the ASCII apostrophe only; U+2019 is left in place and _non_alnum = [^a-z0-9]+ then treats it as a separator",
+  "ascii_form_input": "45 Rue de l'Eglise, Tourcoing",
+  "ascii_form_result": ["45", "rue", "de", "leglise", "tourcoing"],
+  "u2019_form_input": "45 Rue de l\u2019Eglise, Tourcoing",
+  "u2019_form_result": ["45", "rue", "de", "l", "eglise", "tourcoing"],
+  "consequence": "the same address yields two different token vectors, and the U+2019 form emits a meaningless 1-char token l",
+  "supporting_profile_evidence": {"l_occ": 99889, "ge_occ": 41120, "l_minus_ge": 58769, "note": "at least 58,769 l occurrences cannot be explained by Lege alone"},
+  "french_specific": "elision (l', d', qu', n', c', j') is exactly where U+2019 appears",
+  "impact": "blocking-key impact limited because keys.py:42 drops tokens shorter than 3 chars; the cost lands on the IDF-weighted features path at features.py:120-123",
+  "priority": "MEDIUM"
+ },
+
+ "d_blocking": {
+  "defect1_source_vocabulary_split": {
+   "status": "CONFIRMED",
+   "region_heads_per_100_rows": {
+    "s1": {"hauts": 39.205, "nouvelle": 32.881, "pays": 28.064, "subtotal": 100.15},
+    "s2": {"hauts": 12.585, "nouvelle": 10.576, "pays": 8.969, "subtotal": 32.13},
+    "s3": {"hauts": 13.589, "nouvelle": 11.358, "pays": 9.773, "subtotal": 34.72}
+   },
+   "dept_heads_per_100_rows": {
+    "s1": {"nord": 0.077, "gironde": 0.024, "atlantique": 0.098, "subtotal": 0.20},
+    "s2": {"nord": 10.714, "gironde": 10.678, "atlantique": 9.056, "subtotal": 30.45},
+    "s3": {"nord": 10.449, "gironde": 10.336, "atlantique": 8.802, "subtotal": 29.59}
+   },
+   "s1_region_to_dept_occurrence_ratio": 504.5,
+   "resolvable_ceiling_occ": {"s1": 260355, "s2": 440160, "s3": 470484, "total": 1170999},
+   "resolvable_ceiling_per_100_rows": 69.11,
+   "work_order_independent_ceiling_pct": 71.10,
+   "residual_explanation": "my count omits pas de calais (pas 29032 occ) and loire atlantique spelled whole, both of which are in FR_REGIONS",
+   "fr_regions_is_not_the_bottleneck": "nord, gironde, loire atlantique and pas de calais are all present at normalize.py:244-247; the bottleneck is rows carrying no mappable component"
+  },
+  "defect2_missing_from_addr_generic": {
+   "status": "CONFIRMED",
+   "count": 19,
+   "verification": "set(ADDR_CANON_FR.values()) - set(ADDR_GENERIC), both imported from _upstream/src",
+   "canonicals": ["bat", "bis", "crs", "fbg", "gen", "lieu", "lieudit", "mal", "pres", "prof", "quai", "res", "rte", "saint", "sainte", "za", "zac", "zi", "zone"],
+   "total_occ": 336623,
+   "per_100_rows": 19.866,
+   "breakdown_occ": {"saint": 166818, "bis": 69757, "rte": 29927, "crs": 13281, "res": 13088, "quai": 13004, "sainte": 8077, "gen": 6078, "mal": 4730, "bat": 3745, "fbg": 3046, "prof": 2485, "pres": 2380, "lieu_and_zone": 207},
+   "length_filter_note": "all 19 are 3+ chars or have zero measured mass (za and zi are 2 chars but never occur), so all 336,623 occurrences are eligible to reach alph",
+   "end_to_end_verification": "normalize_address('5 Rue des Lilas, Saint-Nazaire') -> toks ['5','rue','des','lilas','saint','nazaire'] -> alph ['nazaire','lilas','saint']",
+   "mitigating_factor": "alph is sorted longest-first (keys.py:43), so the 3-char leakers are pushed down and only make the cut when the address yields fewer than 9 longer tokens; saint at 5 chars is the one that genuinely competes"
+  },
+  "defect3_abbreviation_split": {
+   "status": "CONFIRMED",
+   "is_matching_bug": false,
+   "reason": "ADDR_CANON_FR maps both spellings to the same canonical value, so token identity is preserved",
+   "rate_definition": "abbr / (full + abbr), within one source",
+   "rates_pct": {
+    "rue_r": {"s1": 1.5, "s2": 40.4, "s3": 38.8},
+    "avenue_av": {"s1": 6.7, "s2": 37.5, "s3": 35.7},
+    "boulevard_bd": {"s1": 17.4, "s2": 45.3, "s3": 44.0},
+    "place_pl": {"s1": 23.2, "s2": 55.4, "s3": 53.3},
+    "chemin_ch": {"s1": 25.2, "s2": 50.9, "s3": 49.0},
+    "impasse_imp": {"s1": 4.1, "s2": 43.7, "s3": 42.2},
+    "route_rte": {"s1": 8.2, "s2": 46.9, "s3": 45.5},
+    "cours_crs": {"s1": 0.0, "s2": 41.6, "s3": 39.9},
+    "quai_q": {"s1": 1.7, "s2": 41.7, "s3": 40.4}
+   },
+   "consequence": "any s1-tuned French threshold is mis-set for 84.7% of French rows"
+  },
+  "city_is_already_a_blocking_key": true,
+  "but_only_in_compound_form": true,
+  "bare_city_key_kind_exists": false,
+  "key_kinds_defined": {"0": "name-token x addr-token", "1": "pair of name tokens", "2": "num x addr-token and addr-token x addr-token", "3": "full name", "4": "single NAME token"},
+  "key_kinds_observed_empirically": {"0": 16, "2": 24, "3": 4, "4": 4},
+  "non_separability_evidence": "for '12 Rue Dunkerque, Lille' the alph is ['dunkerque','lille'] - the street Dunkerque and the city Lille are indistinguishable to the key builder",
+  "recommendation_city_as_blocking_key": "NO CHANGE",
+  "recommendation_reason": "no bare-city key kind exists, and the df caps already drop the city-bearing compound keys, so adding city is a no-op at best",
+  "cap_arithmetic_s1_index": {
+   "CAPS": {"0": 50, "1": 50, "2": 30, "3": 50, "4": 20},
+   "S1_MAXCAP": 300,
+   "governs": "the source-1 index only (blocking.py:13,16), so all numerators must be s1-only",
+   "bare_city_s1": {"bordeaux": {"occ": 43634, "x_S1_MAXCAP": 145.4}, "nantes": {"occ": 37624, "x_S1_MAXCAP": 125.4}, "lille": {"occ": 34931, "x_S1_MAXCAP": 116.4}},
+   "num_city_cell_s1_only": {"distinct_numeric_tokens_s1": 373, "numeric_mass_s1": 258867, "median_per_number": 128, "bordeaux_per_cell": 117.0, "multiple_of_AA_cap_30": 3.9, "numbers_at_or_below_200": 223},
+   "assumption": "uniform spread of house numbers over the city; the profile has no row-level co-occurrence, so this cell size is inferred, not measured"
+  },
+  "residual_risk": "budget dilution rather than collisions: city tokens and the 19 defect-2 leakers compete for the same 9 alph slots, longest-first"
+ },
+
+ "gaps": [
+  "no component/axis field: tokens are pooled across comma-separated components (build_profile.py:126-127), so which component a token came from is unanswerable, including the work order's {axis} framing and the region-before-or-after-city ordering question",
+  "no row-level co-occurrence: the (number, city) cell sizes are inferred from marginals under a uniform-spread assumption, not measured",
+  "no alph-occupancy histogram: the dilution magnitude of defect 2 is unquantified",
+  "no distinct-city count: the vocabulary is truncated at 4000 tokens per source, so the true number of distinct French places is unknown; the 5,960 figure quoted in the work order is not reproducible from this profile",
+  "accent folding is a profile artefact: rignac and merignac are the same place under two spellings and the true split is unrecoverable",
+  "saint is not separable from a place: it is simultaneously a place prefix, a street element and a commune prefix across its 141,364 occurrences",
+  "U+2019 prevalence is unknown: the profile tokeniser discards the apostrophe character, so the elision-splitting defect is confirmed in the code but unquantified in the data"
+ ],
+
+ "recommendations": [
+  {"priority": "HIGH", "action": "Add the 19 missing French canonical forms to ADDR_GENERIC in _upstream/src/keys.py: saint, sainte, bis, rte, crs, quai, res, gen, mal, bat, fbg, prof, pres, lieu, lieudit, zone, za, zi, zac", "confidence": "CONFIRMED", "expected_effect": "Removes 336,623 occurrences (19.866 per 100 French rows) of pure street/building grammar from the key vocabulary and frees alph slots"},
+  {"priority": "HIGH", "action": "Do not tune any French threshold or dictionary on test_source1 alone", "confidence": "CONFIRMED", "expected_effect": "s1 is 15.31% of French rows and uses a different address convention (regions, 1.5% r-abbreviation) from s2/s3 (departments, ~40% r); avoids mis-calibration for 84.7% of French rows"},
+  {"priority": "MEDIUM", "action": "Normalise U+2019 and U+02BC to ASCII apostrophe in normalize.py before the strip at line 342, and likewise at line 273 in normalize_name", "confidence": "LIKELY - code defect CONFIRMED, data prevalence UNVERIFIED", "expected_effect": "Removes spurious 1-char tokens from the IDF feature path; blocking-key effect is small because keys.py:42 already drops tokens shorter than 3 chars"},
+  {"priority": "MEDIUM", "action": "Reconcile the region-resolvability contradiction (2.56% vs 28.90% unresolvable) and add the remaining modern French region names to FR_REGIONS", "confidence": "LIKELY cause, CONFIRMED legacy size", "expected_effect": "My ceiling is 69.11% and the work order's is 71.10%; the legacy names are not where the gap lives, totalling only 10,000 occurrences = 0.590 per 100 rows"},
+  {"priority": "LOW", "action": "NO CHANGE - do not add city as a blocking key", "confidence": "CONFIRMED", "expected_effect": "No bare-city key kind exists and the df caps already drop city-bearing compound keys; recorded to prevent a redundant or harmful later fix"},
+  {"priority": "NONE", "action": "NO CHANGE - the s1/s2/s3 abbreviation split is not a matching bug; ADDR_CANON_FR collapses both spellings to the same canonical token", "confidence": "CONFIRMED", "expected_effect": "None; matters for threshold calibration, not token identity"},
+  {"priority": "NONE", "action": "NO CHANGE - accent handling in the pipeline is correct (strip_accents at normalize.py:317); the m/rignac and l/ge fragmentation is a build_profile.py TOKEN_RE artefact", "confidence": "CONFIRMED", "expected_effect": "If the profile is rebuilt, TOKEN_RE should strip accents first, but note this would also mask the U+2019 defect, so both profile fixes should be considered together"}
+ ],
+
+ "legacy_region_check": {
+  "purpose": "test whether legacy French region names explain the unresolvable-row gap",
+  "names_checked": {"bretagne": 1262, "alsace": 1813, "lorraine": 1948, "bourgogne": 713, "normandie": 756, "champagne": 195, "auvergne": 520, "midi": 392, "centre": 967, "martinique": 414, "picardie": 215, "poitou": 96, "provence": 291, "franche_comte": 418},
+  "total_occ": 10000,
+  "per_100_rows": 0.590,
+  "excluded": "aquitaine, because it is part of nouvelle aquitaine and not a legacy region",
+  "conclusion": "legacy names are NOT where the missing ~31% lives; the gap is rows carrying no region or department component at all"
+ },
+
+ "corrections_to_prior_draft": [
+  {"id": 1, "prior_claim": "at most 251,214 rows (14.825%) sit outside the top 10, an upper bound", "status": "wrong direction", "correction": "occurrences >= rows, so rows outside the top 10 is a LOWER bound (>= 251,214) and inside is an UPPER bound (<= 85.174%)"},
+  {"id": 2, "prior_claim": "a bare city key would be dropped outright, 1454x over cap for Bordeaux", "status": "no such key kind exists", "correction": "keys.py:56-73 emits no singleton-address-token kind; city enters only compound keys, so the cap arithmetic must be redone on compounds"},
+  {"id": 3, "prior_claim": "(num, city) = 535.7 per cell = 17.9x the cap, from 518 numbers and 277,474 Bordeaux occurrences", "status": "mixed denominators", "correction": "the cap governs the s1 index only; s1 has 373 numeric tokens and 43,634 Bordeaux occurrences, giving 117.0 per cell = 3.9x, and 223 of 373 numbers occur 200 times or fewer"},
+  {"id": 4, "prior_claim": "r, n and l are all fragments produced by accent shattering", "status": "partly wrong", "correction": "r is overwhelmingly the rue abbreviation: 365,681 of 368,224 occurrences (99.31%) are in s2/s3 where the abbreviation rate is ~40%, while s1 has only 2,543 against rue 170,819; n is 97.51% in s2/s3; only l is a fragment"},
+  {"id": 5, "prior_claim": "omission", "status": "new finding added", "correction": "the U+2019 typographic apostrophe is not handled in normalize.py:342 or :273, splitting l'Eglise into l + eglise"},
+  {"id": 6, "prior_claim": "legacy regions total 14,253 occurrences = 0.84% of French rows", "status": "arithmetic", "correction": "excluding aquitaine gives 10,000 occurrences = 0.590 per 100 rows; same qualitative conclusion"}
+ ],
+
+ "reverified_unchanged": [
+  "France row counts and per-source shares (259,452 / 703,378 / 731,615 = 1,694,445)",
+  "the top-10 place table and the 85.174 figure",
+  "the region vs department split and the 504.5x ratio",
+  "the 19 Defect-2 leakers and the 336,623 total",
+  "all nine street-abbreviation rates",
+  "the resolvable ceiling 1,170,999 = 69.11 per 100 rows",
+  "the conclusion that French region handling is not settled"
+ ],
+
+ "already_checked_dispositions": {
+  "REFUTED_1_france_postcode_loss": "Not re-derived; nothing in this deliverable bears on it. For the record my s1 figures are consistent: dig5 = 1,082 and dig6 = 34 over 259,452 s1 France rows. The top-30 addr list is dominated by house numbers (1 = 8,195 through 17 = 4,277), confirming French addresses carry numbers but not postcodes.",
+  "REFUTED_2_france_region_claim": "Re-scoping CONFIRMED with numbers. The famous 100% is a test_source1-only denominator and s1 is 15.31% of French rows. My independent component-level ceiling is 69.11% across all three sources versus the work order's 71.10%; both agree the s1 figure does not generalise. Mechanism identified: s1 writes regions (100.15 occ per 100 rows) while s2/s3 write departments (30.45 and 29.59), and roughly 31% of French rows carry neither. French geography is NOT settled."
+ },
+
+ "constraints_respected": {
+  "raw_tsv_opened": false,
+  "profile_files_read": ["analysis_out/profile/test_s1.json", "analysis_out/profile/test_s2.json", "analysis_out/profile/test_s3.json"],
+  "upstream_src_read_only": true,
+  "upstream_modified": false,
+  "network_used": false,
+  "files_written": ["analysis_out/findings/D125_fr_places_addr_tokens.md", "analysis_out/findings/D125_fr_places_addr_tokens.json"]
+ }
+}

@@ -1,0 +1,266 @@
+{
+  "task_id": "D081",
+  "family": "B-dictionary",
+  "title": "audit current ADDR_CANON_FR",
+  "deliverable": "analysis_out/findings/D081_audit_ADDR_CANON_FR.md",
+  "headline": "ADDR_CANON_FR is 68 entries / 30 canonical values. It is already fully self-mapped, so the long-standing 'missing self-map loop entry' defect does NOT apply to it. The real new defect is that the 7-key exclusion tuple at normalize.py:321 is a provable no-op, and the dictionary maps only 17.54% of retained French address-token mass. Separately, build_profile.py and normalize.py use different tokenisers, so profile token counts over-count French elision particles and accent fragments.",
+  "new_defect_found": true,
+
+  "dictionary_facts": {
+    "source_file": "_upstream/src/normalize.py",
+    "source_lines": "199-214",
+    "consumed_at": ["normalize.py:319", "normalize.py:320", "normalize.py:321", "normalize.py:347"],
+    "method": "ast.literal_eval of the module-level assignment; no import of polars, no dataset read",
+    "entries": 68,
+    "distinct_canonical_values": 30,
+    "non_empty_distinct_canonical_values": 29,
+    "self_maps_k_equals_v": 29,
+    "values_lacking_a_self_map": 0,
+    "empty_valued_keys": ["n", "na", "no", "null", "numero"],
+    "empty_valued_key_count": 5,
+    "single_character_keys": ["b", "n", "q", "r", "t"],
+    "keys_overlapping_ADDR_CANON_COMMON": 23,
+    "overlapping_keys_redefining_value": {
+      "bld": {"common": "bldg", "fr": "blvd"},
+      "n": {"common": "n", "fr": ""},
+      "st": {"common": "st", "fr": "saint"},
+      "ste": {"common": "ste", "fr": "sainte"}
+    },
+    "fr_only_keys": 45,
+    "ADDR_CANON_COMMON_entries": 177
+  },
+
+  "arithmetic_invariants": {
+    "effective_france_canon_size": {
+      "formula": "|COMMON| - 7 + |FR| - |FR INTERSECT surviving COMMON|",
+      "substitution": "177 - 7 + 68 - 19",
+      "value": 219,
+      "measured_len_effective_canon": 219,
+      "holds": true,
+      "note": "the naive overlap |FR INTERSECT COMMON| = 23 OVER-counts by exactly 4; the extra 4 are dr, n, st, ste, which the exclusion tuple removes from COMMON and ADDR_CANON_FR then re-adds. The merge is a {**base, **FR} overwrite, not an add."
+    },
+    "canonical_value_sets": {
+      "ADDR_CANON_COMMON_alone": 81,
+      "ADDR_CANON_FR_alone": 30,
+      "effective_france_canon": 103,
+      "values_common_can_emit_that_france_cannot": 0,
+      "france_only_values_count": 22,
+      "france_only_values": ["allee", "bat", "bis", "chemin", "crs", "fbg", "gen", "impasse", "lieu", "lieudit", "mal", "pres", "prof", "quai", "res", "rue", "saint", "sainte", "za", "zac", "zi", "zone"]
+    }
+  },
+
+  "defect_1_exclusion_tuple_is_a_noop": {
+    "status": "NEW",
+    "severity_assessment": "code hygiene, zero behavioural effect",
+    "location": "normalize.py:321",
+    "tuple": ["st", "ste", "dr", "n", "s", "e", "w"],
+    "claim": "All 7 excluded keys are IDENTITY self-maps in ADDR_CANON_COMMON, and 4 of the 7 (st, ste, dr, n) are immediately re-added by ADDR_CANON_FR. Only s, e, w are actually dropped, and dropping an identity self-map is indistinguishable from leaving it in, because canon.get(t, t) returns t in both cases.",
+    "keys_where_with_tuple_differs_from_no_tuple": ["e", "s", "w"],
+    "nature_of_that_diff": "identity self-map -> unmapped; both emit the same string",
+    "all_7_are_identity_self_maps": true,
+    "fate_of_each": {
+      "st": "re-added by FR as 'saint'",
+      "ste": "re-added by FR as 'sainte'",
+      "dr": "re-added by FR as 'dr' (identical)",
+      "n": "re-added by FR as '' (deleted)",
+      "s": "dropped",
+      "e": "dropped",
+      "w": "dropped"
+    },
+    "measured_france_direction_token_counts": {
+      "source": "addr_tokens['France'] summed over test_s1, test_s2, test_s3",
+      "n": {"occurrences": 106424, "france_output": ""},
+      "e": {"occurrences": 45410, "france_output": "e (passthrough)"},
+      "s": {"occurrences": 12701, "france_output": "s (passthrough)"},
+      "w": {"occurrences": 104, "france_output": "w (passthrough)"},
+      "st": {"occurrences": 25454, "france_output": "saint"},
+      "ste": {"occurrences": 591, "france_output": "sainte"},
+      "ne": {"occurrences": 6465, "france_output": "ne"},
+      "se": {"occurrences": 556, "france_output": "se"},
+      "north": {"occurrences": 0},
+      "south": {"occurrences": 0},
+      "east": {"occurrences": 0},
+      "west": {"occurrences": 0},
+      "so": {"occurrences": 0},
+      "nw": {"occurrences": 0},
+      "sw": {"occurrences": 0}
+    },
+    "conclusion": "The tuple never suppresses English direction words in French addresses. That apparent effect comes entirely from ADDR_CANON_FR redefining st/ste/n, never from the removal. ne (6,465) and se (556) survive as evidence."
+  },
+
+  "self_map_question_resolved": {
+    "loop_location": "normalize.py:251-254",
+    "loop_covers": ["US_STATES", "IN_STATES"],
+    "ADDR_CANON_FR_in_loop": false,
+    "verdict": "NOT A DEFECT for ADDR_CANON_FR",
+    "reason": "all 29 non-empty canonical values already exist as keys mapping to themselves; adding ADDR_CANON_FR to the loop would setdefault(v, v) for values already present with identical values, i.e. zero behavioural change.",
+    "contrast_FR_REGIONS": {
+      "entries": 14,
+      "distinct_values": 4,
+      "values": ["hdf", "idf", "naq", "pdl"],
+      "any_value_is_a_key": false,
+      "verdict": "FR_REGIONS genuinely DOES need the loop; ADDR_CANON_FR does not. The existing narrative conflates the two dictionaries."
+    }
+  },
+
+  "defect_2_non_fixed_point_canonical_values": {
+    "status": "NEW but LATENT",
+    "location": "normalize.py:321 combined with ADDR_CANON_COMMON",
+    "emitted_values_that_are_not_fixed_points": {
+      "st": {"produced_by": ["street", "str", "strt"], "remaps_to": "saint", "france_occurrences_of_producers": [0, 0, 0]},
+      "ste": {"produced_by": ["suite"], "remaps_to": "sainte", "france_occurrences_of_producers": [0]},
+      "n": {"produced_by": ["north"], "remaps_to": "", "france_occurrences_of_producers": [0]}
+    },
+    "contaminating": false,
+    "why_not_contaminating": "token_idf is keyed on (country, tok) - features.py:19-20",
+    "measured_effect_on_this_dataset": "ZERO - none of street, str, strt, suite, north occurs in any French address"
+  },
+
+  "coverage": {
+    "retained_france_addr_token_mass": 11992918,
+    "mass_basis": "union of addr_tokens['France'] (top-4000) over test_s1, test_s2, test_s3",
+    "distinct_france_addr_tokens_retained": 4441,
+    "tokens_with_no_entry_in_effective_france_canon": 4375,
+    "unmapped_token_mass": 9889036,
+    "unmapped_mass_pct": 82.46,
+    "mapped_mass_pct": 17.54,
+    "interpretation": "ADDR_CANON_FR is a narrow street-type canonicaliser, not a general French address dictionary. INFERENCE, marked as such.",
+    "keys_that_fire": 55,
+    "keys_that_never_fire_in_retained_list": ["avn", "bld", "boul", "chem", "fbg", "fg", "prof", "lieudit", "za", "zi", "zac", "numero", "null"],
+    "keys_never_fire_count": 13,
+    "never_fire_caveat": "NOT proven absent from the data. build_profile.py:27 keeps only TOPN=4000 and prune() at build_profile.py:45-49 drops count<=1 every 8 chunks, so a key occurring once in 480 MB is invisible. Rarest visible key is 'gal' at 25. Absence != zero."
+  },
+
+  "function_words_by_source": {
+    "note": "rebuilt independently; test_s2 reproduces the already-established 15.41% exactly. New information: the rate is source-dependent, so the France-wide statement is a range, not a single number.",
+    "per_source": [
+      {"file": "test_s1.json", "france_rows": 259452, "retained_token_mass": 2253877, "de_la_du_des": 440035, "share_pct": 19.52},
+      {"file": "test_s2.json", "france_rows": 703378, "retained_token_mass": 4745780, "de_la_du_des": 731158, "share_pct": 15.41},
+      {"file": "test_s3.json", "france_rows": 731615, "retained_token_mass": 4993261, "de_la_du_des": 779599, "share_pct": 15.61}
+    ],
+    "all_three_union": {"france_rows": 1694445, "retained_token_mass": 11992918, "de_la_du_des": 1950792, "share_pct": 16.27},
+    "france_wide_statement": "15.41% to 19.52% depending on source; do not quote a single number"
+  },
+
+  "country_scoping": {
+    "ADDR_CANON_FR_applies_to": "France only (normalize.py:320-321)",
+    "other_consumer_in_upstream": "none; prep.py:13 is the only call site of normalize_address",
+    "scoping_is_load_bearing": true,
+    "ADDR_CANON_FR_keys_also_occurring_in_US_or_India": 33,
+    "of_68": true,
+    "highest_risk_leak_collisions": {
+      "no": {"india": 2993998},
+      "b": {"india": 462898, "us": 37604},
+      "st": {"us": 403281, "india": 36361},
+      "dr": {"us": 342400, "india": 27809},
+      "avenue": {"us": 321245, "india": 40677},
+      "r": {"india": 100313},
+      "saint": {"us": 75969}
+    },
+    "scoping_direction": "ONE-DIRECTIONAL - the overlay adds FR entries on top of ADDR_CANON_COMMON but never removes COMMON's India-specific aliases (bengaluru, gurgaon, nagar, taluk, colony, ...)",
+    "measured_french_exposure_to_india_aliases": {
+      "keys_of_48_probed": 1,
+      "the_one_key": "col",
+      "mapping": "col -> colony",
+      "france_occurrences": 125,
+      "verdict": "benign at present, but the protection is accidental rather than designed"
+    }
+  },
+
+  "token_deletion_mass": {
+    "mechanism": "empty canon value => token dropped at normalize.py:348-349 (if t: ctoks.append(t))",
+    "by_key": {
+      "n": {"source": "ADDR_CANON_FR", "france_occurrences": 106424},
+      "no": {"source": "ADDR_CANON_FR", "france_occurrences": 72021},
+      "na": {"source": "ADDR_CANON_FR", "france_occurrences": 1397},
+      "numero": {"source": "ADDR_CANON_FR", "france_occurrences": 0},
+      "null": {"source": "ADDR_CANON_FR", "france_occurrences": 0},
+      "h": {"source": "ADDR_CANON_COMMON (still live for France)", "france_occurrences": 5020}
+    },
+    "total": 184862,
+    "pct_of_retained_france_mass": 1.54,
+    "interpretation": "INFERENCE, not measured: n/no are the French numero marker, so deleting them is correct behaviour. Not verified against raw strings - the profile does not retain them."
+  },
+
+  "defect_3_tokeniser_divergence": {
+    "status": "NEW - affects the evidence base, not the pipeline",
+    "profile_tokeniser": "build_profile.py:28 TOKEN_RE = re.compile(r'[a-z0-9]+') applied to the RAW lowercased address",
+    "pipeline_tokeniser": "normalize.py:264-266 strip_accents, then normalize.py:269 _non_alnum = re.compile(r'[^a-z0-9]+'), plus normalize.py:342 c.replace(chr(39), '')",
+    "examples": [
+      {"address": "Residence du Cote Sud (accented)", "profile": ["r", "sidence", "du", "c", "t", "sud"], "pipeline": ["residence", "du", "cote", "sud"]},
+      {"address": "Allee des Tilleuls (accented)", "profile": ["all", "e", "des", "tilleuls"], "pipeline": ["allee", "des", "tilleuls"]},
+      {"address": "Impasse du Chateau (accented)", "profile": ["impasse", "du", "ch", "teau"], "pipeline": ["impasse", "du", "chateau"]},
+      {"address": "Rue de l'Eglise (typographic apostrophe)", "profile": ["rue", "de", "l", "eglise"], "pipeline": ["rue", "de", "l", "eglise"]}
+    ],
+    "impossible_tokens_direct_evidence": {
+      "note": "a pipeline tokenisation can never emit these; they are pure profile artefacts",
+      "sidence": {"france": 1467, "us": 0, "india": 0, "origin": "Residence"},
+      "chal": {"france": 8318, "us": 0, "india": 0, "origin": "Marechal"},
+      "coeur": {"france": 696, "us": 0, "india": 0, "origin": "coeur ligature, not decomposed by NFKD"}
+    },
+    "apostrophe_glyph_inconsistency": {
+      "normalize_py_342": "strips only ASCII U+0027; typographic U+2019 is NOT stripped and NFKD does not decompose it",
+      "consequence_proven_from_source": [
+        {"address": "Rue de l'Eglise", "ascii_apostrophe_form": ["rue", "de", "leglise"], "u2019_form": ["rue", "de", "l", "eglise"], "same": false},
+        {"address": "Impasse d'Azur", "ascii_apostrophe_form": ["impasse", "dazur"], "u2019_form": ["impasse", "d", "azur"], "same": false},
+        {"address": "Bd de l'Hippodrome", "ascii_apostrophe_form": ["bd", "de", "lhippodrome"], "u2019_form": ["bd", "de", "l", "hippodrome"], "same": false}
+      ],
+      "frequency": "GAP - the profile's [a-z0-9]+ treats both glyphs identically, so the split cannot be measured. Inconsistency proven from source; impact unquantified."
+    },
+    "aggregate_evidence": {
+      "one_char_france_tokens_distinct": 36,
+      "one_char_france_token_mass": 1136211,
+      "pct_of_retained_france_mass": 9.47,
+      "largest_offenders": {"l": 99889, "n": 106424, "d": 50816, "m": 56527, "e": 45410, "r": 368224, "b": 17685, "s": 12701},
+      "note": "l and d are overwhelmingly apostrophe fragments of l'/d'; the pipeline joins those (leglise, dazur) and never emits standalone l or d. 36 distinct 1-char tokens is implausible for real address vocabulary."
+    },
+    "consequence": "Profile token counts remain valid as evidence that a WORD occurs, but are NOT valid as evidence of how many tokens the pipeline will see. Any dictionary mined from profile counts is mined from a different tokeniser than the one that runs. Treat French profile token counts as upper bounds."
+  },
+
+  "gaps": [
+    {"gap": "per-component token attribution", "why": "build_profile.py:126-127 splits on [,;] then tokenises, discarding which component a token came from", "blocks": "any claim about ADDR_CANON_FR falsely rewriting a city-name token"},
+    {"gap": "apostrophe glyph frequency", "why": "profile treats ASCII apostrophe and U+2019 identically as non-alnum", "blocks": "sizing the normalize.py:342 inconsistency"},
+    {"gap": "fragment-to-parent-word attribution", "why": "profile cannot map a fragment back to its source word", "blocks": "true pipeline counts for m (56,527) and e (45,410)"},
+    {"gap": "true zero-count for the 13 never-observed keys", "why": "TOPN=4000 cap at build_profile.py:27 and hapax pruning at build_profile.py:45-49", "blocks": "proving avn, bld, boul, chem, fbg, fg, prof, lieudit, za, zi, zac, numero, null are unused"},
+    {"gap": "raw-string verification", "why": "no *.tsv file was opened, per the under-1 GB RAM constraint", "blocks": "confirming that n/no are the numero marker"},
+    {"gap": "city_comps behaviour for France", "why": "normalize.py:351-352 is not exercised by any profile field", "blocks": "assessing acity feature quality for France"}
+  ],
+
+  "recommendations": [
+    {"priority": 1, "action": "Do NOT add ADDR_CANON_FR to the normalize.py:252 self-map loop.", "rationale": "zero effect; all 29 non-empty values already self-map", "effort": "zero"},
+    {"priority": 2, "action": "Remove the 7-key exclusion tuple at normalize.py:321, or replace it with a comment stating it is inert.", "rationale": "it is a provable no-op; there is nothing to fix", "effort": "trivial"},
+    {"priority": 3, "action": "Align build_profile.py:28 with normalize.py:264-266,342 - apply strip_accents and apostrophe removal before findall.", "rationale": "highest value per line of code; unblocks accurate mining for every follow-on task", "effort": "1-2 lines"},
+    {"priority": 4, "action": "If direction-word suppression is genuinely wanted for France, add north, south, east, west, ne, se, nw, sw explicitly.", "rationale": "the current tuple does not do it; zero of these long forms occur in French data today, so this is hygiene not a score fix", "effort": "small"},
+    {"priority": 5, "action": "No change to the 68 entries themselves on the basis of this task.", "rationale": "the coverage gap is real but dominated by geography words handled by FR_REGIONS, a separate open question", "effort": "none"},
+    {"priority": 6, "action": "Extend the profile with per-component token attribution.", "rationale": "would let a later task measure false canonicalisation of city names", "effort": "small"}
+  ],
+
+  "already_checked_compliance": {
+    "REFUTED_1_french_postcode_pin_guard": "not re-derived; this task does not touch pin; no claim made either way",
+    "REFUTED_2_france_region_handling": "not re-derived; no France-wide state-resolution rate quoted; the 71.10% vs 97.44% D073/D077 contradiction remains unreconciled and is not settled here; geography words in the coverage section are the INPUT to FR_REGIONS, not evidence about its coverage",
+    "function_word_finding": "rebuilt independently; test_s2 15.41% reproduced exactly; ADDED the s1 (19.52%) and s3 (15.61%) source split, which the existing write-up lacks",
+    "FR_REGIONS_self_map_gap": "confirmed real for FR_REGIONS; shown INAPPLICABLE to ADDR_CANON_FR; the two dictionaries are being conflated"
+  },
+
+  "new_defects_summary": [
+    {"id": "a", "defect": "the normalize.py:321 seven-key exclusion tuple is a provable no-op", "active_effect": "none"},
+    {"id": "b", "defect": "st, ste and n are not fixed points of the France canon", "active_effect": "zero on this dataset (producers never occur in French addresses)"},
+    {"id": "c", "defect": "build_profile.py and normalize.py use different tokenisers, so profile token counts over-count French elision particles and accent fragments", "active_effect": "most consequential result; affects the evidence base for all follow-on mining tasks"}
+  ],
+
+  "provenance": {
+    "data_read": "analysis_out/profile/*.json only (6 files, 589-885 KB each, loaded one at a time)",
+    "raw_tsv_opened": false,
+    "network_used": false,
+    "upstream_modified": false,
+    "files_written": [
+      "analysis_out/findings/D081_audit_ADDR_CANON_FR.md",
+      "analysis_out/findings/D081_audit_ADDR_CANON_FR.json"
+    ],
+    "interpreter": ".venv/Scripts/python.exe (stdlib only: ast, json, os, re, unicodedata)"
+  }
+}
+
+
+
+

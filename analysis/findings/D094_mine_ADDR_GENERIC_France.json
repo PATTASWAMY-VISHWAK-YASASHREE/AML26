@@ -1,0 +1,184 @@
+{
+  "task_id": "D094",
+  "family": "B-dictionary",
+  "title": "mine evidence to extend ADDR_GENERIC for France",
+  "deliverable": "analysis_out/findings/D094_mine_ADDR_GENERIC_France.md",
+  "headline": "ADDR_CANON_FR already covers the dominant French street-type vocabulary; the unhandled mass is only 45,443 token occurrences over 1,694,445 France test rows (0.0268/row). FR_REGIONS is adequate (missing-department bound = 0.336% of France rows). The one NEW defect is NOT a missing entry: LEET at normalize.py:256 corrupts French ordinal suffixes, destroying 1,111 CONFIRMED France name-token occurrences (20.9% of the 5,307 France name tokens containing a digit), plus 1,943 ambiguous occurrences of '4l'.",
+  "new_defect_found": true,
+  "new_defect": {
+    "id": "LEET_FR_ORDINAL_CORRUPTION",
+    "confidence": "CONFIRMED",
+    "location": "_upstream/src/normalize.py:279-280 (trigger) and :256 (LEET table)",
+    "mechanism": "_name_tokens applies LEET to any token containing both a letter and a digit. French ordinal suffixes match that shape and are transliterated into non-words: 1er->ler, 3eme->eeme, 3e->ee, 1ere->lere, 7eme->teme.",
+    "leet_table": {"0": "o", "1": "l", "3": "e", "4": "a", "5": "s", "6": "g", "7": "t", "8": "b", "@": "a", "$": "s"},
+    "confirmed_destroyed_occurrences": 1111,
+    "confirmed_destroyed_pct": 20.9,
+    "ambiguous_occurrences": 1943,
+    "ambiguous_token": "4l",
+    "ambiguous_note": "4l -> al via LEET. Largest digit-bearing France name token, but NOT a standard French ordinal suffix and the profile cannot say what it is. Marked SPECULATIVE and EXCLUDED from the confirmed subtotal. If ordinal-like the true figure is 3054 (57.5%); if genuine leetspeak the figure is 1111 (20.9%). Both are reported; the confirmed figure is 1111. Resolving it needs the raw business_name values, which were not read (gap G5).",
+    "compounding_factor": "LEET omits digits 2 and 9, so 2eme and 2bis survive intact today. Any future LEET edit adding 2/9 without an ordinal guard would newly break the 697 2eme and 196 2bis address tokens.",
+    "fix": "Guard, do not extend: skip translate(LEET) when the token matches ^\\d+(er|ere|eme|e)$",
+    "evidence_field": "name_tokens.France"
+  },
+  "denominators": {
+    "france_test_rows_total": 1694445,
+    "arithmetic": "259452 + 703378 + 731615 = 1694445",
+    "per_source": {
+      "test_s1": {"file_rows": 1732544, "france_rows": 259452, "pct_of_split": 14.98},
+      "test_s2": {"file_rows": 4887273, "france_rows": 703378, "pct_of_split": 14.39},
+      "test_s3": {"file_rows": 5082316, "france_rows": 731615, "pct_of_split": 14.39}
+    },
+    "france_in_train": false,
+    "train_note": "train_s1.json has no France key in by_country or addr_tokens; countries present are US,India. France is test-only, so there is no French ground truth for learning abbreviations."
+  },
+  "already_checked_corroboration": {
+    "refuted_1_france_postcode": "not re-derived, per instructions",
+    "refuted_2_region_claim": "CONFIRMED the re-scoping, independently. test_s1 France is 259452/1694445 = 15.31% of French rows, so any s1-only rate is not a France-wide rate. I do not restate the 100% figure and make no France-wide state-resolution claim (gap G2). My 0.336% is a dictionary-gap bound, a strictly different and weaker quantity.",
+    "additional_independent_evidence": "F6 shows test_s1 uses region names (Hauts-de-France, Nouvelle-Aquitaine, Pays de la Loire) while test_s2/s3 additionally use department names (Nord, Gironde, Pas-de-Calais, Loire-Atlantique) at volume. The strings being matched are not the same across sources, which is independent evidence that the s1-only figure cannot be extrapolated."
+  },
+  "canon_table_state": {
+    "ADDR_CANON_FR_entries": 68,
+    "ADDR_CANON_COMMON_entries": 177,
+    "france_excluded_common_keys": ["st", "ste", "dr", "n", "s", "e", "w"],
+    "effective_france_canon_keys": 222,
+    "derivation": "parsed normalize.py:153-214 directly, then applied the normalize.py:321 France override",
+    "FR_REGIONS_entries": 14,
+    "FR_REGIONS_distinct_canonical_values": ["hdf", "idf", "naq", "pdl"]
+  },
+  "street_type_candidates": {
+    "note": "accent-free words only, due to gap G1. Field: addr_tokens.France, summed over test_s1+s2+s3.",
+    "already_mapped_verdict": "every French street-type word above rank 3,000 in the data is already in the table; negative result reported as such",
+    "already_mapped": [
+      {"token": "rue", "occ": 728583, "canon": "rue"},
+      {"token": "avenue", "occ": 126497, "canon": "ave"},
+      {"token": "boulevard", "occ": 38275, "canon": "blvd"},
+      {"token": "impasse", "occ": 21102, "canon": "impasse"},
+      {"token": "allee", "occ": 17779, "canon": "allee"},
+      {"token": "chemin", "occ": 15244, "canon": "chemin"},
+      {"token": "place", "occ": 13363, "canon": "pl"},
+      {"token": "route", "occ": 17932, "canon": "rte"},
+      {"token": "cours", "occ": 8761, "canon": "crs"},
+      {"token": "quai", "occ": 8089, "canon": "quai"},
+      {"token": "square", "occ": 4933, "canon": "sq"},
+      {"token": "faubourg", "occ": 3046, "canon": "fbg"},
+      {"token": "residence", "occ": 4748, "canon": "res"}
+    ],
+    "missing_ranked": [
+      {"candidate": "cit", "occ": 5580, "proposed": "cite", "confidence": "CONFIRMED", "caveat": "UPPER BOUND; mixes Cit. abbreviation with Cite accent fragments (G1)"},
+      {"candidate": "appt", "occ": 5113, "proposed": "apt", "confidence": "CONFIRMED"},
+      {"candidate": "parc", "occ": 4244, "proposed": "parc", "confidence": "CONFIRMED"},
+      {"candidate": "clos", "occ": 3588, "proposed": "clos", "confidence": "LIKELY"},
+      {"candidate": "passage", "occ": 3167, "proposed": "passage", "confidence": "CONFIRMED"},
+      {"candidate": "cite", "occ": 2546, "proposed": "cite", "confidence": "CONFIRMED"},
+      {"candidate": "plage", "occ": 2054, "proposed": "plage", "confidence": "CONFIRMED"},
+      {"candidate": "jardin", "occ": 1644, "proposed": "jardin", "confidence": "CONFIRMED"},
+      {"candidate": "mail", "occ": 1731, "proposed": "mail", "confidence": "LIKELY", "caveat": "collides with English 'mail'"},
+      {"candidate": "domaine", "occ": 1194, "proposed": "domaine", "confidence": "CONFIRMED"},
+      {"candidate": "chaussee", "occ": 1125, "proposed": "chaussee", "confidence": "CONFIRMED"},
+      {"candidate": "hameau", "occ": 1067, "proposed": "hameau", "confidence": "CONFIRMED"},
+      {"candidate": "esplanade", "occ": 878, "proposed": "esplanade", "confidence": "CONFIRMED"},
+      {"candidate": "sentier", "occ": 618, "proposed": "sentier", "confidence": "CONFIRMED"},
+      {"candidate": "villa", "occ": 594, "proposed": "villa", "confidence": "LIKELY", "caveat": "proper-noun risk"},
+      {"candidate": "parvis", "occ": 587, "proposed": "parvis", "confidence": "CONFIRMED"},
+      {"candidate": "sente", "occ": 562, "proposed": "sente", "confidence": "SPECULATIVE"},
+      {"candidate": "promenade", "occ": 536, "proposed": "promenade", "confidence": "CONFIRMED"},
+      {"candidate": "venelle", "occ": 481, "proposed": "venelle", "confidence": "CONFIRMED"},
+      {"candidate": "immeuble", "occ": 434, "proposed": "immeuble", "confidence": "CONFIRMED"},
+      {"candidate": "rond", "occ": 411, "proposed": "rond", "confidence": "SPECULATIVE", "caveat": "rond alone is a fragment risk"},
+      {"candidate": "marche", "occ": 370, "proposed": "marche", "confidence": "LIKELY"},
+      {"candidate": "halle", "occ": 291, "proposed": "halle", "confidence": "CONFIRMED"},
+      {"candidate": "allees", "occ": 187, "proposed": "allee", "confidence": "CONFIRMED"},
+      {"candidate": "portail", "occ": 150, "proposed": "portail", "confidence": "CONFIRMED"},
+      {"candidate": "galerie", "occ": 144, "proposed": "galerie", "confidence": "LIKELY"},
+      {"candidate": "pass", "occ": 874, "proposed": "passage", "confidence": "CONFIRMED"},
+      {"candidate": "appart", "occ": 88, "proposed": "apt", "confidence": "CONFIRMED"}
+    ],
+    "aggregate_impact": {
+      "total_occurrences": 45443,
+      "france_test_rows": 1694445,
+      "occurrences_per_row": 0.0268,
+      "verdict": "marginal gain, not a fix. No single candidate exceeds 5580."
+    },
+    "not_a_gap": "fbg and fg are defined at ADDR_CANON_FR:205 but the token fbg is absent from the France top-4000, i.e. the data spells out 'faubourg' (3046). The abbreviation is defined and unused."
+  },
+  "abbreviation_pairs": {
+    "verdict": "no material extension needed; all 14 high-frequency pairs already collapsed",
+    "already_handled": [
+      {"long": "avenue", "long_occ": 126497, "short": "av", "short_occ": 57361, "short_maps_to": "ave"},
+      {"long": "boulevard", "long_occ": 38275, "short": "bd", "short_occ": 25273, "short_maps_to": "blvd"},
+      {"long": "allee", "long_occ": 17779, "short": "all", "short_occ": 61298, "short_maps_to": "allee"},
+      {"long": "place", "long_occ": 13363, "short": "pl", "short_occ": 12989, "short_maps_to": "pl"},
+      {"long": "chemin", "long_occ": 15244, "short": "ch", "short_occ": 12774, "short_maps_to": "chemin"},
+      {"long": "saint", "long_occ": 141364, "short": "st", "short_occ": 25454, "short_maps_to": "saint"},
+      {"long": "impasse", "long_occ": 21102, "short": "imp", "short_occ": 12228, "short_maps_to": "impasse"},
+      {"long": "route", "long_occ": 17932, "short": "rte", "short_occ": 11995, "short_maps_to": "rte"},
+      {"long": "cours", "long_occ": 8761, "short": "crs", "short_occ": 4520, "short_maps_to": "crs"},
+      {"long": "residence", "long_occ": 4748, "short": "res", "short_occ": 8340, "short_maps_to": "res"},
+      {"long": "square", "long_occ": 4933, "short": "sq", "short_occ": 458, "short_maps_to": "sq"},
+      {"long": "quai", "long_occ": 8089, "short": "q", "short_occ": 4283, "short_maps_to": "quai"},
+      {"long": "docteur", "long_occ": 10362, "short": "dr", "short_occ": 256, "short_maps_to": "dr"},
+      {"long": "sainte", "long_occ": 7486, "short": "ste", "short_occ": 591, "short_maps_to": "sainte"}
+    ],
+    "unhandled": ["appartement/appt", "cite/cit", "passage/pass"],
+    "unhandled_note": "all three already appear in street_type_candidates.missing_ranked; all are small"
+  },
+  "leetspeak_address_side": {
+    "finding": "normalize_address (normalize.py:314-353) NEVER calls LEET; only _name_tokens does (normalize.py:279-280). The France address digit-tokens are therefore untouched BY DESIGN and are legitimate French forms, not leetspeak.",
+    "recommendation": "DO NOT add a leet pass to normalize_address - it would corrupt these",
+    "confidence": "CONFIRMED",
+    "no_change": true,
+    "tokens": {"cour2": 3872, "1er": 1963, "chem1": 1102, "2eme": 697, "3eme": 350, "2b": 237, "1b": 221, "80b": 179, "2bis": 196, "1bis": 181, "espl1": 311, "chau1": 177, "cite1": 89},
+    "readings": {"cour2": "cour 2 (courtyard no. 2)", "chem1": "chemin 1", "2eme/3eme": "ordinals", "2b/1b/80b": "batiment B", "2bis/1bis": "bis = secondary entrance", "espl1/chau1/cite1": "truncated street-type words"}
+  },
+  "region_table": {
+    "verdict": "no meaningful change needed; FR_REGIONS is not the bottleneck",
+    "method": "min() over component word counts, because a department only resolves if all its words co-occur; sum() would overstate",
+    "already_in_FR_REGIONS_min_bound_sum": 1206992,
+    "missing_from_FR_REGIONS_min_bound_sum": 5688,
+    "missing_dept_pct_of_france_rows": 0.336,
+    "interpretation": "even a perfect complete French department table would touch at most ~0.34% of France rows by this measure",
+    "already_mapped": {"hauts de france": 289655, "nouvelle aquitaine": 242531, "pays de la loire": 207396, "nord": 152011, "gironde": 150787, "loire atlantique": 128348, "pas de calais": 29032, "paris": 2263, "somme": 1973, "ile de france": 1914, "landes": 721, "oise": 361},
+    "missing": {"marne": 2478, "val de marne": 1124, "maine et loire": 645, "val d oise": 361, "haute garonne": 257, "haut rhin": 244, "bas rhin": 244, "moselle": 222, "orne": 113},
+    "unboundable": ["aisne", "vendee", "sarthe", "mayenne", "charente", "dordogne", "calvados", "finistere", "seine maritime"],
+    "unboundable_reason": "at least one component word is absent from the top-4000 (TOPN=4000, build_profile.py:27) or was pruned as a hapax (prune(), line 45). NOT estimated.",
+    "source_vocabulary_split": {
+      "note": "test_s1 uses region names; test_s2/s3 additionally use department names at volume. Both spellings are already in FR_REGIONS so both resolve. Independent evidence that the s1-only figure cannot be extrapolated.",
+      "hauts": {"s1": 101717, "s2": 88519, "s3": 99419},
+      "france": {"s1": 102319, "s2": 89929, "s3": 100902},
+      "nouvelle": {"s1": 85311, "s2": 74392, "s3": 83099},
+      "pays": {"s1": 72812, "s2": 63086, "s3": 71498},
+      "nord": {"s1": 200, "s2": 75362, "s3": 76449},
+      "gironde": {"s1": 62, "s2": 75104, "s3": 75621},
+      "calais": {"s1": 15967, "s2": 55273, "s3": 57522},
+      "atlantique": {"s1": 253, "s2": 63697, "s3": 64398}
+    }
+  },
+  "gaps": {
+    "G1": "build_profile.py:28 uses TOKEN_RE=[a-z0-9]+ on ba.lower() WITHOUT accent stripping, while normalize.py:317 calls strip_accents first. Accented French words are emitted as fragments: allee 17779 vs all 61298; cite 2546 vs cit 5580; chaussee 1125 vs chauss 2372; residence 4748 vs sidence 1467; general 4826 vs n 106424; ecole 1560 vs cole 505; chateau 1640 vs te 857. Handled by quoting only accent-free candidates. The cit=5580 figure is an UPPER BOUND. Same class as D081's finding.",
+    "G2": "The profile records no component or row-level co-occurrence (build_profile.py splits on ADDR_SPLIT at line 126 and discards grouping), so a France-wide state-resolution rate CANNOT be computed. I neither reproduce nor contest the re-scoped 71.10% ceiling and make no France-wide rate claim.",
+    "G3": "Departments whose component words fall outside the top-4000 are unbounded; not estimated.",
+    "G4": "normalize.py:342 strips apostrophes before splitting (l'herblain -> single token lherblain) but the profiler splits on them, emitting l=99889 and herblain=44846 separately; lherblain is absent from the top-4000. The 1-2 char profile tail is 4,264,808 occurrences (35.6% of retained) and is largely artifact; must not be mined for dictionary entries.",
+    "G5": "The token 4l (1943 occurrences) cannot be classified from the profile. It is corrupted by LEET either way, but whether that is damage or a correct repair depends on the raw business_name value, which was not read. Not estimated.",
+    "G6": "No raw *.tsv opened. All figures come from the six profile JSONs and normalize.py:109-256."
+  },
+  "recommendations": [
+    {"priority": 1, "action": "Guard LEET against French ordinals in _name_tokens (normalize.py:279-280): skip translate(LEET) when the token matches ^\\d+(er|ere|eme|e)$", "confidence": "CONFIRMED", "expected_effect": "restores 1111 confirmed France name-token occurrences (20.9% of the digit-token mass), plus up to 1943 more if 4l proves ordinal-like (G5)", "note": "must land together with or before any LEET digit-map change, since adding 2/9 would newly break 2eme (697) and 2bis (196)"},
+    {"priority": 2, "action": "Add clearly-safe street types: appt/appart->apt, parc, passage/pass, domaine, chaussee, sentier, venelle, esplanade, parvis, hameau, portail, halle, plage, jardin, immeuble, allees->allee", "confidence": "CONFIRMED", "expected_effect": "~30000 occurrences, ~0.018 per France row; marginal, cheap, low-risk"},
+    {"priority": 3, "action": "Add cit->cite", "confidence": "LIKELY", "expected_effect": "unquantified until the cit/Cite fragment contamination in G1 is resolved against raw data"},
+    {"priority": 4, "action": "Add 9 missing departments to FR_REGIONS: maine et loire->pdl, val de marne->idf, val d oise->idf, marne->idf, haute garonne->naq, haut rhin, bas rhin, moselle, orne", "confidence": "LIKELY", "expected_effect": "<=0.336% of France rows; upper bound. Completeness only, not score. haut rhin/bas rhin/moselle/orne would introduce NEW canonical values = schema change, review separately."}
+  ],
+  "explicitly_not_recommended": [
+    "DO NOT add a leet pass to normalize_address: would corrupt cour2 (3872) and chem1 (1102). CONFIRMED no-change.",
+    "DO NOT expand abbreviation tables further: all 14 high-frequency pairs already collapsed.",
+    "DO NOT mine the 1-2 char profile token tail for dictionary entries: 35.6% of retained occurrences are apostrophe/accent fragments.",
+    "DO NOT treat s1 region-token counts as France-wide."
+  ],
+  "tooling_followup": "Re-run build_profile.py with strip_accents applied before TOKEN_RE and preserve component grouping. This removes G1 and G4 and makes future France token counts directly pipeline-representative. Highest-value change to the analysis tooling.",
+  "provenance": {
+    "inputs_read": ["analysis_out/profile/test_s1.json", "analysis_out/profile/test_s2.json", "analysis_out/profile/test_s3.json", "analysis_out/profile/train_s1.json", "build_profile.py", "_upstream/src/normalize.py"],
+    "raw_tsv_opened": false,
+    "network_used": false,
+    "upstream_modified": false,
+    "files_written": ["analysis_out/findings/D094_mine_ADDR_GENERIC_France.md", "analysis_out/findings/D094_mine_ADDR_GENERIC_France.json"]
+  }
+}

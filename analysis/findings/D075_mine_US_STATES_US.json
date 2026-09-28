@@ -1,0 +1,97 @@
+{
+ "task_id": "D075",
+ "family": "B-dictionary",
+ "title": "mine evidence to extend US_STATES for US",
+ "headline": "US_STATES needs no extension (47/52 keys evidenced; only 'del' 10711 and 'penn' 3084 are LIKELY additions). NEW: the US corpus has two incompatible state dialects - sources 1-2 write 2-letter codes, source 3 writes full names (code/name ratio 35-37 vs 0.10) - and ADDR_CANON_COMMON leaves 396959 ordinal occurrences (77.67%) un-normalised.",
+ "key_number": {
+   "value": 396959,
+   "unit": "uncanonicalised ordinal occurrences in US addr_tokens across all 6 profiles",
+   "arithmetic": "396959/11990643 US rows * 1000 = 33.11 per 1000 rows; 396959/511112 numeric ordinals = 77.67%; per-file sum 68456+87101+93571+34430+54574+58827 = 396959 exactly"
+ },
+ "new_defect_found": true,
+ "new_defects": [
+   {
+     "id": "F2",
+     "name": "US state dialect split by source",
+     "verdict": "CONFIRMED",
+     "detail": "sources 1 and 2 write the 2-letter state code, source 3 writes the full state name; no file is intermediate",
+     "evidence_field": "addr_tokens[\"US\"] summed over by_country.US.rows",
+     "per_file": {
+       "train_s1": {"us_rows": 1323633, "sum_single_word_names": 38124, "sum_all_codes": 1359620, "ratio": 35.663},
+       "train_s2": {"us_rows": 3016817, "sum_single_word_names": 80883, "sum_all_codes": 3002591, "ratio": 37.123},
+       "train_s3": {"us_rows": 3170056, "sum_single_word_names": 2494884, "sum_all_codes": 280424, "ratio": 0.112},
+       "test_s1":  {"us_rows": 663106,  "sum_single_word_names": 19188,  "sum_all_codes": 680728,  "ratio": 35.477},
+       "test_s2":  {"us_rows": 1871330, "sum_single_word_names": 50448,  "sum_all_codes": 1876297, "ratio": 37.193},
+       "test_s3":  {"us_rows": 1945701, "sum_single_word_names": 1557020, "sum_all_codes": 154358,  "ratio": 0.099}
+     },
+     "artefact_warning": "The apparent aggregate code/name ratio of ~1.44 (25 states in [1.30,1.60], median 1.4404) is a mixing artefact of name-dominant and code-dominant files, not a per-state property. Per-file the same states swing 0.041 to 202.7 (texas 186.9 in tr_s1 vs 0.052 in tr_s3)."
+   },
+   {
+     "id": "F3",
+     "name": "ADDR_CANON_COMMON ordinal canonicalisation stops at fifth",
+     "verdict": "CONFIRMED",
+     "detail": "normalize.py:184 maps only first->1st .. fifth->5th. 'First Ave' and '1st Ave' unify but 'Sixth Ave' and '6th Ave' do not ('sixth' vs '6th').",
+     "evidence_field": "addr_tokens[\"US\"] filtered by regex ^\\d+(st|nd|rd|th)$",
+     "totals": {"ordinal_occurrences": 511112, "n_le_5_canonicalised": 114153, "n_ge_6_not_canonicalised": 396959, "pct_uncovered": 77.67, "per_1000_us_rows": 33.11},
+     "per_file_uncovered": {"train_s1": 68456, "train_s2": 87101, "train_s3": 93571, "test_s1": 34430, "test_s2": 54574, "test_s3": 58827},
+     "spelled_forms_present": {"first": 15800, "second": 15184, "third": 14029, "fourth": 13704, "fifth": 11551, "sixth": 9900, "seventh": 9382, "eighth": 7850, "ninth": 6565, "tenth": 6237, "eleventh": 5359, "twelfth": 5356, "fourteenth": 4596, "thirteenth": 4281, "fifteenth": 4065, "twentieth": 3044, "sixteenth": 0, "seventeenth": 0, "eighteenth": 0, "nineteenth": 0}
+   }
+ ],
+ "us_states_audit": {
+   "dict_entries": 52,
+   "keys_with_zero_name_and_zero_code_evidence": ["hawaii", "mississippi", "new hampshire", "new jersey", "puerto rico"],
+   "single_word_names_present": 36,
+   "single_word_names_total": 38,
+   "codes_with_zero_evidence_all_6_files": ["hi", "mi", "ms", "nv", "nh", "nj", "pr"],
+   "multiword_keys_unmeasurable": 14,
+   "notable": "michigan 7822 and nevada 3472 occur as names while mi and nv are 0 - written out in full, never abbreviated",
+   "largest_name_counts": {"texas": 480985, "ohio": 307283, "illinois": 273325, "washington": 267075, "tennessee": 216224, "arizona": 206484, "massachusetts": 206116, "indiana": 181306, "maryland": 150378, "california": 139681}
+ },
+
+ "candidates": [
+   {"token": "del", "count": 10711, "target_code": "de", "target_name": "delaware", "verdict": "LIKELY", "note": "classic Del. abbreviation; not in US_STATES"},
+   {"token": "penn", "count": 3084, "target_code": "pa", "target_name": "pennsylvania", "verdict": "LIKELY", "note": "Penn abbrev; not in US_STATES"},
+   {"token": "sixth..fifteenth,twentieth", "count": 136903, "target": "ordinals", "verdict": "CONFIRMED", "note": "stranded by ADDR_CANON_COMMON, see F3"},
+   {"token": "wisc,calif,fla,mass,wash,ariz,colo,conn,mich,minn,miss,mont,nebr,okla,tenn,wyo,kan", "count": 0, "target": "various", "verdict": "SPECULATIVE_REJECT", "note": "zero occurrences; adding is inert"}
+ ],
+ "leet_audit": {
+   "dict": "0->o 1->l 3->e 4->a 5->s 6->g 7->t 8->b @->a $->s",
+   "mixed_alpha_digit_name_token_types": 133,
+   "mixed_alpha_digit_name_token_occurrences": 90100,
+   "digit_occurrences": {"0": 34401, "1": 28895, "2": 3657, "3": 0, "4": 3657, "5": 14302, "6": 4933, "7": 0, "8": 3912, "9": 0},
+   "dead_keys_zero_evidence": ["3", "7"],
+   "unmapped_digits_present": {"2": 3657, "9": 0},
+   "unreachable_keys": ["@", "$"],
+   "unreachable_reason": "_non_alnum=[^a-z0-9]+ (normalize.py:269) splits on them before t.translate(LEET) at line 280, so no surviving token can contain @ or $",
+   "only_unmapped_digit_token": "24hr (3657) - a legitimate abbreviation, not leetspeak, so the missing 2->z mapping has no measured cost",
+   "verdict": "NO CHANGE NEEDED"
+ },
+ "territory_region_audit": {
+   "verdict": "NO GAP",
+   "zero_counts": ["guam", "samoa", "mariana", "virgin", "islands", "zone", "territory", "united", "states", "zip", "postal", "code", "parish"],
+   "false_positives_explained": {"marshall": 9430, "canal": 7451},
+   "non_state_admin_units": {"county": 281125, "township": 157227, "cdp": 116500, "borough": 17520, "commonwealth": 3603}
+ },
+ "gaps": [
+   "Multi-word US_STATES keys are unmeasurable: TOKEN_RE=[a-z0-9]+ and ADDR_SPLIT=[,;] store 'New York' as separate tokens new(519714) and york(384608); no bigram/component field exists. 14 keys unauditable.",
+   "Suspected D.C. defect unquantified: normalize.py:331 turns 'D.C.' into 'd c' with a space while smap holds 'dc'; profile has dc=35681 but cannot distinguish dotted from undotted.",
+   "Truncation: top-4000 per file, rank-4000 counts 201/407/440/101/258/274; absent from all six means <101 occurrences per file, not literally zero.",
+   "Hapax pruning (build_profile.py:45) deletes count==1 tokens every 8 chunks.",
+   "No row-level co-occurrence field, so 'del'/'penn' cannot be confirmed as standalone address components."
+ ],
+ "recommendations": [
+   "P1 Extend ADDR_CANON_COMMON ordinals 5->20 (sixth..twentieth). Closes 77.67% of the ordinal gap, ~33 defects per 1000 US rows, low false-merge risk.",
+   "P2 Add 'del':'de' and 'penn':'pa' to US_STATES (LIKELY). 13795 additional components normalised. Do not add the 17 zero-count abbreviations.",
+   "P3 No change to US_STATES for territory/region names; no change to LEET.",
+   "P4 Investigate the F2 dialect split outside the dictionary - a state-string feature may be fitted on one dialect and scored on another.",
+   "P5 Add a component-level field to build_profile.py to close the multi-word key, D.C. and co-occurrence gaps."
+ ],
+ "profile_fields_used": ["by_country.US.rows", "by_country.US.num_digits", "by_country.US.dig5", "by_country.US.dig6", "addr_tokens.US", "name_tokens.US", "len_hist"],
+ "upstream_files_read": ["_upstream/src/normalize.py", "build_profile.py"],
+ "dataset_files_opened": "none (read-only profile JSON only)",
+ "already_checked_refutations": {
+   "france_pin_guard": "not re-derived, not contradicted; this task covers US only",
+   "fr_regions_self_map": "not re-derived, not contradicted; this task covers US only"
+ },
+ "confidence": "high for F1-F4 (every number traceable to a named profile field with arithmetic shown); medium for F5 candidates (circumstantial, marked LIKELY)"
+}

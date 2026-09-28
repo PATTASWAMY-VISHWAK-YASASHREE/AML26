@@ -1,0 +1,216 @@
+{
+  "task": "D084",
+  "title": "mine ADDR_CANON_COMMON for US",
+  "deliverable": "analysis_out/findings/D084_mine_ADDR_CANON_COMMON_US.md",
+  "headline": "Do NOT extend ADDR_CANON_COMMON for the US. It already fires on 15,139,578 of 54,780,019 pooled US address tokens (27.637%), and 7,036,251 of the 7,331,972 non-identity rewrites (95.97%) land on a canonical value that is itself a live token, i.e. genuinely fuse. The measured upside ceiling is 295,721 = 0.5398% of listed mass (eleven keys that rename a US token onto a canonical value occurring ZERO times in the corpus), against an already-realised Class-A blocking cost of 3,150,695 = 5.7517% plus 309,855 = 0.5656% deletion.",
+  "verdict_extend_for_us": false,
+
+  "denominators": {
+    "source": "analysis_out/profile/{train,test}_s{1,2,3}.json, fields rows / country_rows.US / addr_tokens.US",
+    "us_rows_train_s1": 1323633,
+    "us_rows_train_s2": 3016817,
+    "us_rows_train_s3": 3170056,
+    "us_rows_test_s1": 663106,
+    "us_rows_test_s2": 1871330,
+    "us_rows_test_s3": 1945701,
+    "us_rows_pooled": 11990643,
+    "us_test_rows": 4480137,
+    "us_test_s1_share_of_us_test": 0.1480,
+    "us_listed_addr_mass_test_s1": 3189237,
+    "us_listed_addr_mass_test_s2": 8135308,
+    "us_listed_addr_mass_test_s3": 9208864,
+    "us_listed_addr_mass_test_pooled": 20533409,
+    "us_listed_addr_mass_pooled": 54780019,
+    "us_distinct_addr_tokens_union": 4510,
+    "addr_tokens_topn": 4000,
+    "us_list_at_cap": true,
+    "units": "TOKEN OCCURRENCES, never rows"
+  },
+
+  "dictionaries_as_built": {
+    "source": "_upstream/src/normalize.py and keys.py, parsed directly out of the source text",
+    "addr_canon_common_keys": 177,
+    "addr_canon_common_distinct_keys": 177,
+    "addr_canon_common_distinct_values": 81,
+    "addr_canon_common_nonempty_values": 80,
+    "addr_canon_common_empty_keys": 15,
+    "addr_generic_keys": 62,
+    "us_states_literal_keys": 52,
+    "us_states_runtime_keys": 104,
+    "canon_apply_line": 347,
+    "state_skip_line": "333-335",
+    "addr_generic_filter_line": 39
+  },
+
+  "coverage": {
+    "total_listed_mass": 54780019,
+    "canon_fired_mass": 15139578,
+    "canon_fired_rate_pct": 27.637,
+    "unmapped_distinct_tokens": 4415,
+    "unmapped_mass": 39640441,
+    "unmapped_rate_pct": 72.363,
+    "nonidentity_rewrite_mass": 7331972,
+    "selfmap_mass": 7497751,
+    "deleted_mass": 309855,
+    "check_fired_plus_unmapped": "15139578 + 39640441",
+    "check_fired_plus_unmapped_equals_total": true,
+    "check_fired_equals_chg_del_self": "7331972 + 309855 + 7497751",
+    "check_fired_equals_chg_del_self_value": 15139578
+  },
+  "class_A_blocking_destroyed": {
+    "condition": "key NOT in ADDR_GENERIC but canonical value IS in ADDR_GENERIC",
+    "mass": 3150695,
+    "mass_test_only": 1157896,
+    "pct": 5.7517,
+    "members": {
+      "drive->dr": 1069145, "avenue->ave": 879283, "court->ct": 285466,
+      "lane->ln": 457876, "place->pl": 133034, "circle->cir": 139669,
+      "boulevard->blvd": 104757, "village->vill": 79428, "trail->trl": 74078,
+      "highway->hwy": 72714, "mount->mt": 50792, "apartment->apt": 82987,
+      "wy->way": 14214, "terrace->ter": 40048, "parkway->pkwy": 34378,
+      "district->dist": 27527, "suite->ste": 12698, "building->bldg": 7295,
+      "post->po": 7378, "industrial->indl": 4316,
+      "first->1st": 15800, "second->2nd": 15184, "third->3rd": 14029,
+      "fourth->4th": 13704, "fifth->5th": 11551
+    }
+  },
+
+  "class_B_blocking_created": {
+    "condition": "key IS in ADDR_GENERIC but canonical value is NOT",
+    "mass": 8286,
+    "mass_test_only": 3203,
+    "pct": 0.0151,
+    "members": { "plaza->plz": 8286 },
+    "net_blocking_delta": "-3150695 + 8286",
+    "net_blocking_delta_value": -3142409,
+    "ratio_A_to_B": 380.2
+  },
+
+  "fusing_vs_rename_to_dead": {
+    "definition_fusing": "canonical value occurs one or more times in the US union",
+    "definition_rename_to_dead": "canonical value occurs ZERO times in the US union, so the mapping cannot bring two observed surface forms together",
+    "fusing_mass": 7036251,
+    "fusing_pct": 12.8446,
+    "fusing_share_of_rewrites_pct": 95.97,
+    "rename_to_dead_mass": 295721,
+    "rename_to_dead_pct": 0.5398,
+    "check_fusing_plus_renamedead": "7036251 + 295721",
+    "check_equals_nonidentity_rewrite_mass": 7331972,
+    "upside_ceiling_pct": 0.5398,
+    "rename_to_dead_members": {
+      "village->vill": 79428, "heights->hts": 62420, "mountain->mtn": 54177,
+      "center->ctr": 37722, "district->dist": 27527, "junction->jct": 14061,
+      "plaza->plz": 8286, "centre->ctr": 5208, "industrial->indl": 4316,
+      "freeway->fwy": 2174, "expressway->expy": 402
+    },
+    "check_members_sum": "79428 + 62420 + 54177 + 37722 + 27527 + 14061 + 8286 + 5208 + 4316 + 2174 + 402",
+    "check_members_sum_value": 295721,
+    "subsplit_no_sibling_key": {
+      "mass": 145836,
+      "pct": 0.2662,
+      "members": "heights->hts, mountain->mtn, junction->jct, industrial->indl, plaza->plz, freeway->fwy, expressway->expy",
+      "note": "pure one-way renames, no other table key maps to the same dead target"
+    },
+    "subsplit_sibling_key_also_dead": {
+      "mass": 149885,
+      "members": "village->vill, center->ctr, centre->ctr, district->dist",
+      "note": "sibling keys exist in the table but that target is also dead in the corpus, so observable fusion is still zero"
+    },
+    "check_subsplit_sum": "145836 + 149885",
+    "check_subsplit_sum_value": 295721
+  },
+  "empty_mappings_us": {
+    "count_of_empty_keys": 15,
+    "work_order_stated_count": 13,
+    "correction": "15 is correct; the work order's 13 is off by two",
+    "keys": ["door","flat","h","hno","house","na","nil","no","none","nos","null","num","number","plot","shop"],
+    "keys_firing_in_us": 4,
+    "mass": 309855,
+    "mass_test_only": 118742,
+    "pct": 0.5656,
+    "members": { "null": 283911, "house": 11518, "h": 9587, "flat": 4839 },
+    "check_members_sum": "283911 + 11518 + 9587 + 4839",
+    "check_members_sum_value": 309855,
+    "null_share_pct": 91.65,
+    "verdict": "harmless for the US, and the 'null' deletion is LOAD-BEARING: normalize.py:329 only skips a component whose stripped text is exactly null/<null>/n/a/na/none, so these 283911 come from 'null' embedded in longer text that the :329 guard does not catch"
+  },
+
+  "state_skip_union_bound": {
+    "method": "replicated normalize.py:333-335 over the 104 runtime US_STATES keys, summing addr_tokens.US occurrences",
+    "is_union_bound_not_row_count": true,
+    "mass": 11594565,
+    "mass_test_only": 4338039,
+    "pct": 21.1657,
+    "caveat": "build_profile.py:126-127 flattens components, so this is an UPPER BOUND on rows, not a row count"
+  },
+
+  "wy_collision": {
+    "reconfirmed": true,
+    "canon_keys_intersecting_us_states_runtime_keys": ["fl","ct","mt","ne","wy"],
+    "non_identity_among_them": ["wy"],
+    "canon_value": "way",
+    "state_value": "wy",
+    "mass": 14214,
+    "mass_test_only": 5011,
+    "pct": 0.0259,
+    "fix_location": "normalize.py:333 positional logic, NOT a dictionary entry"
+  },
+
+  "new_defect_saint": {
+    "status": "CONFIRMED defect, fix DEFERRED, no dictionary change recommended",
+    "statement": "saint is UNMAPPED in ADDR_CANON_COMMON while st->st (street); NAME_CANON:131 and ADDR_CANON_FR:207 both map st->saint",
+    "saint_mass": 201117,
+    "saint_mass_test_only": 75969,
+    "pct": 0.3671,
+    "st_mass": 1054366,
+    "ste_mass": 11831,
+    "why_no_fix_recommended": "saint in US addresses is more often part of a CITY name (St Louis, St Paul) than a street name, so saint->st would fuse two genuinely different concepts and fire on every occurrence. Needs component-position awareness, which this profile cannot express.",
+    "mirror_of": "D120's France wrong-sense finding, running the other way: the US is WITHHELD a needed sense"
+  },
+
+  "mirror_risk_clean": {
+    "statement": "all non-US-sense keys fire zero times in the US union; UK/India spelling variants are all 'not in the top 4000'",
+    "keys_probed_all_zero": ["est","col","so","plc","nr","opp","tq","ngr","ph","sec","dt","gf","grd","bvd","boul","avn","aven","str","strt","hiway","terr","bld"],
+    "centre_fires_and_is_correct": { "mass": 5208, "mass_test_only": 1999, "maps_to": "ctr" },
+    "spanish_tokens_correctly_unmapped": { "el": 44528, "los": 10963, "san": 39639, "santa": 18149, "paso": 30048, "del": 10711 }
+  },
+
+  "extension_candidates": [
+    { "rank": 1, "candidate": "twp->township", "mass": 43490, "mass_test_only": 16161, "pct": 0.0794, "rating": "LIKELY", "mechanism": "clean: township is NOT in ADDR_GENERIC, so no Class-A blocking loss" },
+    { "rank": 2, "candidate": "saint handling", "mass": 201117, "mass_test_only": 75969, "pct": 0.3671, "rating": "CONFIRMED defect, fix deferred", "mechanism": "needs component position, not a dictionary" },
+    { "rank": 3, "candidate": "merge mtn into mt", "mass": 54177, "mass_test_only": 20426, "pct": 0.0989, "rating": "LIKELY", "mechanism": "fixes D083 D2 plus the dead-token finding" },
+    { "rank": 4, "candidate": "hills->hts", "mass": 58248, "mass_test_only": 22148, "pct": 0.1063, "rating": "SPECULATIVE - DO NOT", "mechanism": "conflates Hills with Heights" },
+    { "rank": 5, "candidate": "estates->estate", "mass": 9201, "mass_test_only": 3519, "pct": 0.0168, "rating": "LIKELY", "mechanism": "Class A: estate IS in ADDR_GENERIC, net unclear" },
+    { "rank": 6, "candidate": "borough->bo", "mass": 17520, "mass_test_only": 6362, "pct": 0.0320, "rating": "SPECULATIVE - DO NOT", "mechanism": "boro/bo not in top 4000, would create a dead token" },
+    { "rank": 7, "candidate": "del->de, penn->pa", "mass": 10711, "mass_test_only": 3084, "pct": 0.0251, "rating": "LIKELY (D117 owns)", "mechanism": "US_STATES item, not ADDR_CANON_COMMON" }
+  ],
+
+  "extension_total_if_1_3_5_7": {
+    "total": 120663,
+    "arithmetic": "43490 + 54177 + 9201 + 10711 + 3084",
+    "pct": 0.2203,
+    "note": "optimistic sum counting overlapping concepts once, before any Class-A blocking loss is deducted, versus an existing 5.7517% Class-A cost"
+  },
+  "unhandled_us_tokens_by_type": {
+    "note": "TOKEN OCCURRENCES. Every zero means 'not in the top 4000 of the six profiles', never 'does not occur'. Type labels are inferences from token identity; counts are measured.",
+    "state_codes_and_names": { "tx": 696979, "ny": 535094, "nc": 498226, "tn": 313504, "az": 298158, "ma": 297168, "ca": 196583, "wa": 222793, "or": 157903, "mt": 74552, "wy": 14214, "del": 10711, "penn": 3084, "texas": 480985, "ohio": 307283, "illinois": 273325, "washington": 267075 },
+    "city_and_place_names": { "houston": 118232, "chicago": 85039, "charlotte": 75302, "columbus": 72939, "phoenix": 68041, "springfield": 56544, "indianapolis": 56539, "nashville": 55807, "salem": 52580, "dallas": 52537, "mesa": 51113, "austin": 50866, "cleveland": 50763, "louisville": 50026, "louis": 49573, "portland": 47633, "brooklyn": 47143, "boston": 46214, "sacramento": 45494, "raleigh": 44796, "cincinnati": 44088, "richmond": 43887, "baltimore": 39543, "buffalo": 38292, "memphis": 35354, "arlington": 35228, "eloy": 2591, "nixa": 1980 },
+    "street_name_nouns": { "lake": 190688, "park": 183782, "hill": 162002, "township": 157227, "creek": 140077, "valley": 134797, "ridge": 123214, "view": 59566, "hills": 58248, "green": 54658, "cedar": 54995, "oak": 102050, "pine": 50458, "maple": 40771, "elm": 25814, "springs": 78084, "spring": 76367, "falls": 78814, "river": 81026, "beach": 68214, "island": 48250, "grove": 92198, "meadow": 34095, "orchard": 22748, "farm": 25348, "vista": 31893, "canyon": 19912, "summit": 14455, "prairie": 28868 },
+    "administrative_census": { "pmb": 162985, "cdp": 116500, "twp": 43490, "borough": 17520, "county": 281125, "town": 104576, "cddp": 1943, "ccdp": 2114, "cpd": 2356, "dcp": 2262, "ward": 3471, "lot": 13005 },
+    "religious_spanish": { "saint": 201117, "san": 39639, "santa": 18149, "el": 44528, "los": 10963 },
+    "pure_digits": { "1": 336186, "2": 277980, "0": 54623, "3": 49855, "10": 42392, "4": 40844, "11": 39763, "12": 36445, "5": 38004, "6": 35837, "15": 35220, "7": 35097, "20": 34108 },
+    "ordinary_english_words": { "old": 71613, "high": 32853, "big": 18843, "little": 38643, "long": 16587, "pass": 14602, "run": 40121, "line": 9930, "path": 10023, "port": 26363, "new": 519714 }
+  },
+
+  "gaps": [
+    "IDF effect not computable: features.py:13-20 uses idf=ln(n/df) where df counts ROWS containing a token after list.unique(), but addr_tokens gives token OCCURRENCES, flattened and truncated to 4000. No IDF-shift number is estimated anywhere in this report.",
+    "No component structure: build_profile.py:126-127 flattens on [,;] boundaries. This is why the state figure is a union bound and why the saint defect cannot be fixed from this evidence.",
+    "Top-4000 truncation on all six addr_tokens.US lists; union is 4510 distinct tokens. Every absent/zero means not in the top 4000.",
+    "Hapax pruning at build_profile.py:26 and 45-48 drops count<=1 tokens, so listed mass under-counts by an unknown amount.",
+    "Tokenizer mismatch: build_profile.py:28 TOKEN_RE [a-z0-9]+ runs WITHOUT strip_accents, while normalize.py:317 calls strip_accents first. Small effect for the US (D120 measured 71.9x more impact for France) but short-token US claims are lower bounds.",
+    "Leetspeak in US addresses unmeasured and out of scope: normalize_address :314-353 never calls translate(LEET); only _name_tokens :280 does. The fleet's 24hr/1st findings are a name-path defect.",
+    "No row-level effects measured. atoks traced into prep.py:16 -> features.py:98,112,123-124,129 and keys.py:39,41-43, but score movement is not quantified."
+  ],
+
+  "method": "Python broken on this box; all computation in PowerShell. ADDR_CANON_COMMON parsed by regex over _upstream/src/normalize.py:153-198 (177 entries, matching D083). ADDR_GENERIC parsed from keys.py:14-19. US_STATES parsed from normalize.py:216-229 and the runtime self-map loop at :251-253 replicated. Token counts summed across all six analysis_out/profile/*.json addr_tokens.US. No raw TSV opened, no network, _upstream/ and the dataset untouched."
+}

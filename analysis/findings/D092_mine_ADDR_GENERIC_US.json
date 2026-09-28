@@ -1,0 +1,227 @@
+{
+ "id": "D092",
+ "title": "mine evidence to extend ADDR_GENERIC for US",
+ "agent": "c06",
+ "status": "COMPLETE",
+ "verdict": "DO NOT EXTEND ADDR_GENERIC FOR THE US",
+ "deliverable": "analysis_out/findings/D092_mine_ADDR_GENERIC_US.md",
+ "sources_read": [
+  "_upstream/src/keys.py",
+  "_upstream/src/normalize.py",
+  "_upstream/src/features.py",
+  "_upstream/src/blocking.py",
+  "_upstream/src/prep.py",
+  "_upstream/src/build_features.py",
+  "_upstream/src/run_blocking.py",
+  "build_profile.py",
+  "analysis_out/profile/train_s1.json",
+  "analysis_out/profile/train_s2.json",
+  "analysis_out/profile/train_s3.json",
+  "analysis_out/profile/test_s1.json",
+  "analysis_out/profile/test_s2.json",
+  "analysis_out/profile/test_s3.json"
+ ],
+ "built_on_not_redone": ["D091", "D094", "D116", "D120", "D122", "D127", "D084"],
+
+ "denominators": {
+  "note": "token OCCURRENCES inside the top-4000 listed set, never rows",
+  "per_file_us_listed_mass": {
+   "train_s1": 6364441,
+   "train_s2": 12997820,
+   "train_s3": 14884349,
+   "test_s1": 3189237,
+   "test_s2": 8135308,
+   "test_s3": 9208864
+  },
+  "per_file_us_rows": {
+   "train_s1": 1323633,
+   "train_s2": 3016817,
+   "train_s3": 3170056,
+   "test_s1": 663106,
+   "test_s2": 1871330,
+   "test_s3": 1945701
+  },
+  "us_rows_pooled": 11990643,
+  "us_listed_mass_pooled": 54780019,
+  "us_listed_mass_test_only": 20533409,
+  "us_distinct_listed_tokens": 4510,
+  "us_4000th_cutoff": {"test_s1": 101, "test_s2": 258, "test_s3": 274}
+ },
+
+ "method": {
+  "ordering_is_load_bearing": "build_profile.py:113,126-127 stores RAW pre-canon tokens; ADDR_GENERIC is applied at keys.py:39 to the POST-canon string written by prep.py:16. Applied ADDR_CANON_COMMON (normalize.py:319, non-France branch) first, then membership, then keys.py:41/42 length gates.",
+  "replication_check_vs_D122": {
+   "my_us_test_removal_total": 5029788,
+   "D122_reported_us_test_removal": 5029788,
+   "my_us_test_listed_mass": 20533409,
+   "D122_reported_us_test_listed": 20533409,
+   "match": true
+  }
+ },
+
+ "partition_of_us_listed_mass_all6": {
+  "state_name_component_skipped": {"mass": 4240547, "pct": 7.741, "source": "normalize.py:333-335", "caveat": "UPPER BOUND - normalize.py:333 matches a whole component; per-token test over-counts"},
+  "removed_by_empty_canon": {"mass": 309855, "pct": 0.5656, "source": "normalize.py:196-197"},
+  "addr_generic_blocking_visible": {"mass": 4930257, "pct": 9.0001},
+  "addr_generic_structurally_inert": {"mass": 8518413, "pct": 15.5502},
+  "survives_len3plus": {"mass": 20303952, "pct": 37.0645},
+  "survives_len_lt3": {"mass": 9048835, "pct": 16.5185},
+  "survives_digit_only": {"mass": 7428160, "pct": 13.56},
+  "total": 54780019,
+  "sum_check": "4240547+309855+4930257+8518413+20303952+9048835+7428160 = 54780019 MATCH"
+ },
+
+ "defect_1_inert": {
+  "statement": "63.34% of all US ADDR_GENERIC removal mass is structurally invisible to the pipeline",
+  "mechanism": "keys.py:42 gates alph on str.len_chars() >= 3; keys.py:41 gates nums on ^\\d+$; keys.py:45 returns only rid,country,nt,pref,nums,alph,pin,fk - atoks is not an output column",
+  "digit_only_entries": 0,
+  "len_lt3_entries": ["st", "rd", "dr", "ln", "ct", "pl", "sq", "fl", "po"],
+  "per_entry_us_mass": {"st": 2379276, "rd": 2198791, "dr": 1959575, "ln": 835113, "ct": 609931, "pl": 235891, "po": 170152, "fl": 113027, "sq": 16657},
+  "per_entry_total": 8518413,
+  "us_removal_total": 13448670,
+  "inert_share_of_removal_all6_pct": 63.3402,
+  "inert_mass_test": 3192235,
+  "us_removal_total_test": 5029788,
+  "inert_share_of_removal_test_pct": 63.4666,
+  "D122_pooled_all_country_test_pct": 39.91,
+  "us_is_worse_by_factor": 1.59,
+  "novelty": "mechanism is D122 NEW-1; the US-specific magnitude and its cause are this task's"
+ },
+
+ "defect_2_des": {
+  "statement": "des deletes 'Des Moines' and 'Des Plaines' from US blocking keys",
+  "us_mass_all6": 22816,
+  "us_mass_test": 8331,
+  "pct_of_us_mass": 0.0417,
+  "french_mass": 199183,
+  "is_in_addr_canon_common": false,
+  "len": 3,
+  "is_live_for_us": true,
+  "probe_moines_addr": 18957,
+  "probe_plaines_addr": 2750,
+  "probe_sum": 21707,
+  "probe_sum_pct_of_des": 95.1394,
+  "verdict": "LIKELY (promote to CONFIRMED after one raw-inspection pass confirming co-occurrence)",
+  "why_inference": "profile has no co-occurrence data; rests on absence of des from ADDR_CANON_COMMON plus the 95.14% mass match"
+ },
+
+ "ter_asymmetry_check": {
+  "question": "does the France bis/ter asymmetry reproduce for the US?",
+  "answer": "NO",
+  "ter_raw_us": 22742,
+  "terrace_raw_us": 40048,
+  "ter_post_canon_us": 62790,
+  "terr_raw_us": 0,
+  "conclusion": "ter is CORRECT for the US (terrace), len 3 so live and suppressing genuine US street-type noise. D127's asymmetry is France-specific."
+ },
+
+ "work_order_premise_refuted": {
+  "claim_in_work_order": "adding an entry to ADDR_GENERIC REMOVES that token from the features (features.py:129 wa)",
+  "verdict": "REFUTED - agrees with D122 NEW-2",
+  "reason": "keys.py:39 builds a LOCAL toks list; keys.py:45 does not return atoks and it is never written back. prep.py:16 persisted atoks to parquet before run_blocking.py reads it; build_features.py:26 token_idf(frames,'atoks') and features.py:129 read that untouched column.",
+  "consequence": "adding entries costs exactly zero IDF feature mass; the D116 'live feature mass' argument does not transfer"
+ },
+
+ "class_a_upside_ceiling": {
+  "definition": "ADDR_CANON_COMMON values that are non-empty, not in ADDR_GENERIC, len>=3, not digit-only, AND whose canonical form never occurs raw in the US corpus (D084 no-fusion test)",
+  "items": [
+   {"canon": "hts", "feeder": "heights", "us_all6": 62420, "us_test": 23567, "len": 3, "pct": 0.1139, "verdict": "SPECULATIVE"},
+   {"canon": "mtn", "feeder": "mountain", "us_all6": 54177, "us_test": 20426, "len": 3, "pct": 0.0989, "verdict": "SPECULATIVE"},
+   {"canon": "ctr", "feeder": "center,centre", "us_all6": 42930, "us_test": 16119, "len": 3, "pct": 0.0784, "verdict": "SPECULATIVE"},
+   {"canon": "jct", "feeder": "junction", "us_all6": 14061, "us_test": 5439, "len": 3, "pct": 0.0257, "verdict": "LIKELY"},
+   {"canon": "plz", "feeder": "plaza", "us_all6": 8286, "us_test": 3203, "len": 3, "pct": 0.0151, "verdict": "CONFIRMED"},
+   {"canon": "fwy", "feeder": "freeway", "us_all6": 2174, "us_test": 885, "len": 3, "pct": 0.004, "verdict": "LIKELY"},
+   {"canon": "expy", "feeder": "expressway", "us_all6": 402, "us_test": 146, "len": 4, "pct": 0.0007, "verdict": "LIKELY"}
+  ],
+  "total_us_all6": 184450,
+  "total_us_test": 69785,
+  "total_pct_of_us_mass": 0.3367,
+  "top3_share_pct": 86.4879,
+  "top3_total": 159527,
+  "why_top3_speculative": "each long form is also a US place-name morpheme; name_tokens prove collision: center 514865, mountain 58186, heights 1847",
+  "place_name_collision_probes_addr_vs_name": {
+   "center": {"addr": 37722, "name": 514865},
+   "mountain": {"addr": 54177, "name": 58186},
+   "heights": {"addr": 62420, "name": 1847},
+   "city": {"addr": 798242, "name": 29258},
+   "saint": {"addr": 201117, "name": 11527},
+   "junction": {"addr": 14061, "name": 36}
+  },
+  "caveat": "184450 is a CEILING on removable mass, not a predicted score gain"
+ },
+
+ "reconciliation_with_D084": {
+  "D084_nofusion_class_total": 295721,
+  "already_suppressed_by_addr_generic": {"tokens": ["vill", "dist", "indl"], "mass": 111271, "pct_of_class": 37.627},
+  "leaks_into_us_keys": {"tokens": ["hts", "mtn", "ctr", "jct", "plz", "fwy", "expy"], "mass": 184450, "pct_of_class": 62.373},
+  "sum_check": "111271 + 184450 = 295721 MATCH",
+  "relationship": "strict refinement of D084, not a contradiction; without the partition the US gap is overstated by 1.60x"
+ },
+
+ "per_entry_liveness_us": {
+  "summary": {"fire": 31, "inert": 9, "dead": 22, "total": 62, "sum_check": "31+9+22 = 62"},
+  "fire_mass": 4930257,
+  "fire_pct": 9.0001,
+  "fire": {"ave": 1610417, "city": 798242, "unit": 607229, "way": 284878, "cir": 249327, "blvd": 189169, "box": 163713, "apt": 155013, "trl": 123479, "main": 121494, "hwy": 113225, "vill": 79428, "ter": 62790, "pkwy": 59054, "2nd": 34905, "4th": 33165, "3rd": 33048, "1st": 32278, "bldg": 29515, "5th": 28376, "dist": 27527, "ste": 24529, "des": 22816, "cross": 11684, "the": 8767, "tower": 6129, "and": 5071, "colony": 4895, "indl": 4316, "ground": 3598, "estate": 2180},
+  "inert": {"st": 2379276, "rd": 2198791, "dr": 1959575, "ln": 835113, "ct": 609931, "pl": 235891, "po": 170152, "fl": 113027, "sq": 16657},
+  "dead_french_or_india_scoped": ["rue", "chemin", "allee", "impasse", "nagar", "sector", "phase", "complex", "apts", "near", "opposite", "off", "wing", "block", "office", "pvt", "ltd"],
+  "dead_killed_by_canon": {"road": "-> rd (inert target)", "lane": "-> ln (inert target)", "street": "-> st (inert target)", "floor": "-> fl (inert target)", "plaza": "-> plz (NOT in list, LEAKS)"}
+ },
+
+ "addr_generic_list_structure": {
+  "entries": 62,
+  "distinct": 62,
+  "duplicates_present": 0,
+  "uppercase_entries": 0,
+  "empty_or_null_entries": 0,
+  "canonical_values": "N/A - a list has no values; consumed by pl.element().is_in()",
+  "len_lt3_count": 9,
+  "len_gte3_count": 53,
+  "digit_only_count": 0,
+  "consequences": [
+   "ordering is semantically irrelevant (is_in is set membership; the visual clustering in keys.py:14-19 is documentation, not behaviour)",
+   "membership cost is a 62-element linear scan per token per row, not a dict lookup - GAP, no timing claim made",
+   "duplicates are possible in principle (list literal) but none present today",
+   "no country predicate anywhere on this path (keys.py:39)"
+  ]
+ },
+
+ "st_ste_check_us": {
+  "question": "D120 asked whether st/ste are live for the US",
+  "answer": "asymmetric, and in the opposite way to France",
+  "st_post_canon_us": 2379276,
+  "st_len": 2,
+  "st_status_us": "INERT",
+  "ste_post_canon_us": 24529,
+  "ste_len": 3,
+  "ste_status_us": "LIVE - one of the 31 firing entries",
+  "france": "both dead - ADDR_CANON_FR:207 rewrites st->saint, ste->sainte first (D091 D4)"
+ },
+
+ "recommendations": [
+  {"rank": 1, "action": "remove des", "confidence": "CONFIRMED", "mass_us": 22816, "reason": "only entry that provably deletes an identity-bearing US token; worth 199183 in France, negative in the US", "note": "clean fix is a country predicate at keys.py:39; minimal correct action is removal"},
+  {"rank": 2, "action": "add plz", "confidence": "CONFIRMED", "mass_us": 8286, "mass_all_country": 125969, "reason": "closes D091 self-inflicted hole (plaza->plz, plz not in list); zero IDF cost", "note": "France/India fix that helps the US slightly; not a US extension"},
+  {"rank": 3, "action": "add jct, fwy, expy", "confidence": "LIKELY", "mass_us": 16637, "pct": 0.0304, "reason": "no plausible US place-name sense (junction name_tokens = 36)", "note": "below the noise floor; take only if the file is being edited anyway"},
+  {"rank": 4, "action": "DO NOT add hts, mtn, ctr", "confidence": "SPECULATIVE", "mass_us": 159527, "pct": 0.2912, "reason": "86.49% of the upside but each is a live place-name morpheme (center in 514865 US business names); most likely way to make US blocking worse"},
+  {"rank": 5, "action": "optionally delete 9 inert + 22 dead entries", "confidence": "CONFIRMED", "reason": "provably zero effect on keys; cosmetic honesty only", "note": "KEEP st/rd/ln - they are the canon targets for road/lane/street and document intent"},
+  {"rank": 6, "action": "DO NOT add saint", "confidence": "CONFIRMED", "mass_us": 201117, "reason": "overwhelmingly a US city-name token (louis 49573, paul 30845); would fuse 'St Louis' with unrelated addresses", "note": "resolves the item D122 flagged as needing raw inspection"},
+  {"rank": 7, "action": "structural: country->set mapping at keys.py:39", "confidence": "LIKELY", "reason": "the defect class is one global list with no country predicate while normalize.py:319-321 IS country-scoped; des and D091 four French street words are both symptoms", "note": "no score delta claimed"}
+ ],
+
+ "gaps": [
+  "all mass is token occurrences in the top-4000 listed set, never rows; 0 means 'not in the top 4000'",
+  "build_profile.py flattens comma-components, so no co-occurrence test was possible - this is why des is LIKELY not CONFIRMED and hts/mtn/ctr are SPECULATIVE rather than rejected",
+  "defect_1 and the premise-refutation are structural claims from quoted code, not measured score deltas; no F0.5 change is claimed for any recommendation",
+  "is_in membership cost flagged as a possible hot-loop issue is a GAP - profile has no timing field",
+  "Class A 184450 is a ceiling on removable mass, not a predicted gain; no recall or key-level data exists in the profile to convert mass into score",
+  "state-skip mass 4240547 is an UPPER BOUND (normalize.py:333 matches a whole component)"
+ ],
+
+ "constraints_respected": {
+  "read_only_dataset_and_upstream": true,
+  "no_network": true,
+  "no_tsv_opened": true,
+  "files_written": ["analysis_out/findings/D092_mine_ADDR_GENERIC_US.md", "analysis_out/findings/D092_mine_ADDR_GENERIC_US.json"],
+  "scratch_location": "%TEMP% only"
+ }
+}

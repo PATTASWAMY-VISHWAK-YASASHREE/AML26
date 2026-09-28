@@ -1,0 +1,1504 @@
+{
+    "task":  "D088",
+    "title":  "mine evidence to extend LEET for US",
+    "country":  "US",
+    "generated_by":  "analysis agent c04; PowerShell over analysis_out/profile/*.json; no raw TSV read; no network",
+    "verdict":  "NO CHANGE. The written guard _LEET_GUARD_RE in patch_upstream/src/normalize.py:296-298 already covers 4336 of 4336 US corrupted occurrences and wrongly exempts 0 of 131 legitimate leet types. No fourth US class and no fourth guard alternative.",
+    "headline":  "US = 74.4% of all LEET damage (4336 of 5828). Full US mixed-token census: 133 types / 90100 occ. Exactly 2 corrupt, both already guarded. NEW defect N5: ADDR_CANON_COMMON has first-\u003e1st but NAME_CANON has no ordinal entry, stranding 61747 US name occurrences against 32278 address-side.",
+    "denominators":  {
+                         "trigger":  "normalize.py:279 - name token containing both a letter and a digit",
+                         "source":  "name_tokens[US] aggregated over all six profile files; 5065 distinct types in the union of six top-4000 windows",
+                         "us_mixed_types":  133,
+                         "us_mixed_occ":  90100,
+                         "india_mixed_types":  127,
+                         "india_mixed_occ":  80735,
+                         "france_mixed_types":  24,
+                         "france_mixed_occ":  5307,
+                         "all_mixed_types":  284,
+                         "all_mixed_occ":  176142,
+                         "reproduces_d087_d121":  true,
+                         "note":  "All three country figures match D087 section 4 / D121 section 1 exactly, recomputed independently."
+                     },
+    "us_damage":  {
+                      "total_occ":  4336,
+                      "share_of_all_countries_pct":  74.4,
+                      "token_24hr_occ":  3657,
+                      "token_24hr_share_of_us_damage_pct":  84.3,
+                      "token_1st_occ":  679,
+                      "load_bearing_occ":  85764,
+                      "load_bearing_pct":  95.19,
+                      "arithmetic":  "85764 + 4336 = 90100 (US mixed total); 4336 / 5828 = 74.4%; 3657 / 4336 = 84.3%"
+                  },
+    "guard":  {
+                  "regex":  "^(?:\\d+(?:er|ere|eme|e)|\\d+(?:st|nd|rd|th)|\\d+hr)$",
+                  "location":  "patch_upstream/src/normalize.py:296-298, applied at :322",
+                  "us_types_matched":  2,
+                  "us_occ_matched":  4336,
+                  "us_types_wrongly_exempted":  0,
+                  "us_occ_wrongly_exempted":  0,
+                  "alternatives_breakdown":  [
+                                                 {
+                                                     "alternative":  "\\d+(?:er|ere|eme|e)",
+                                                     "us_types":  0,
+                                                     "us_occ":  0,
+                                                     "note":  "French-only; contributes nothing to the US"
+                                                 },
+                                                 {
+                                                     "alternative":  "\\d+(?:st|nd|rd|th)",
+                                                     "us_types":  1,
+                                                     "us_occ":  679,
+                                                     "note":  "1st"
+                                                 },
+                                                 {
+                                                     "alternative":  "\\d+hr",
+                                                     "us_types":  1,
+                                                     "us_occ":  3657,
+                                                     "note":  "24hr; sole member of its family"
+                                                 }
+                                             ],
+                  "verdict_no_fourth_alternative":  true,
+                  "verdict_no_fourth_alternative_reason":  "Every shape family the work order named is empty in the US. A 4th alternative can only add false exemptions."
+              },
+    "per_digit_us":  [
+                         {
+                             "key":  "0",
+                             "load_bearing_types":  53,
+                             "load_bearing_occ":  34401,
+                             "damage_types":  0,
+                             "damage_occ":  0,
+                             "damage_pct":  0
+                         },
+                         {
+                             "key":  "1",
+                             "load_bearing_types":  46,
+                             "load_bearing_occ":  28216,
+                             "damage_types":  1,
+                             "damage_occ":  679,
+                             "damage_pct":  2.3
+                         },
+                         {
+                             "key":  "3",
+                             "load_bearing_types":  0,
+                             "load_bearing_occ":  0,
+                             "damage_types":  0,
+                             "damage_occ":  0,
+                             "damage_pct":  null
+                         },
+                         {
+                             "key":  "4",
+                             "load_bearing_types":  0,
+                             "load_bearing_occ":  0,
+                             "damage_types":  1,
+                             "damage_occ":  3657,
+                             "damage_pct":  100
+                         },
+                         {
+                             "key":  "5",
+                             "load_bearing_types":  19,
+                             "load_bearing_occ":  14302,
+                             "damage_types":  0,
+                             "damage_occ":  0,
+                             "damage_pct":  0
+                         },
+                         {
+                             "key":  "6",
+                             "load_bearing_types":  7,
+                             "load_bearing_occ":  4933,
+                             "damage_types":  0,
+                             "damage_occ":  0,
+                             "damage_pct":  0
+                         },
+                         {
+                             "key":  "7",
+                             "load_bearing_types":  0,
+                             "load_bearing_occ":  0,
+                             "damage_types":  0,
+                             "damage_occ":  0,
+                             "damage_pct":  null
+                         },
+                         {
+                             "key":  "8",
+                             "load_bearing_types":  6,
+                             "load_bearing_occ":  3912,
+                             "damage_types":  0,
+                             "damage_occ":  0,
+                             "damage_pct":  0
+                         }
+                     ],
+    "zero_plain_form_test":  {
+                                 "definition":  "A mixed token is corrupt if its LEET output does not exist as a plain name token in the same country name column.",
+                                 "us_mixed_types_tested":  133,
+                                 "us_types_with_no_plain_form":  2,
+                                 "offenders":  [
+                                                   {
+                                                       "token":  "24hr",
+                                                       "out":  "2ahr",
+                                                       "occ":  3657
+                                                   },
+                                                   {
+                                                       "token":  "1st",
+                                                       "out":  "lst",
+                                                       "occ":  679
+                                                   }
+                                               ],
+                                 "clean_ratio_min":  0.00049,
+                                 "clean_ratio_median":  0.0105,
+                                 "clean_ratio_max":  0.0189,
+                                 "clean_types":  131,
+                                 "note":  "Degenerate separation: both defects have ZERO denominator, not merely a high ratio. No US class can hide in the gap."
+                             },
+    "shape_families":  {
+                           "name_side_units":  "1 type 24hr 3657 (known)",
+                           "name_side_model_digit_lead":  "9 types 9590 (8 genuine leet + 1st)",
+                           "name_side_model_alpha_lead":  "2 types 1124 (c0, dd5)",
+                           "name_side_versions":  "0",
+                           "name_side_resolutions_4k_1080p":  "0",
+                           "name_side_year_suffixes_2k_98":  "0",
+                           "name_side_fractions_1of2":  "0",
+                           "name_side_grades":  "1 type c0 582 (correct)",
+                           "name_side_suite_designators":  "1 type 0f 1345 (correct leet)",
+                           "name_side_two_or_more_digits":  "1 type 24hr 3657",
+                           "addr_side_suite_designators":  "8 types 8877 (1a 1745, 2a 1627, 2b 1468, 1b 1403, 3a 1167, 3b 798, 1c 448, 2c 221)",
+                           "addr_side_two_or_more_digits":  "108 types 342968",
+                           "absent_everywhere":  "A4, S20, X1, 4K, 1080p, v2, 3d, 5kg, 30min, 100g, 2k, 98, 1of2, ste 1b, apt 4a - zero types and zero occurrences in BOTH US columns within the measured window"
+                       },
+    "ambiguous":  {
+                      "token":  "0f",
+                      "leet_out":  "of",
+                      "occ":  1345,
+                      "class":  "c_ambiguous_but_leave_translating",
+                      "reasoning":  "Sole member of the ^\\d+[a-z]$ shape in the US mixed population. Target is a NAME_STOP function word so the token is dropped from core regardless - translation is behaviourally inert. Exempting it would let 0f survive into keys.py:33 nt and create a spurious blocking key. No guard alternative should match ^\\d+[a-z]$ because that shape also covers the 8877-occ address suite designators.",
+                      "status":  "CONFIRMED correct leet; flagged as the one arguable case rather than forced"
+                  },
+    "new_defect_N5":  {
+                          "title":  "first/1st name-side divergence: ADDR_CANON_COMMON has first-\u003e1st, NAME_CANON has no ordinal entry",
+                          "status":  "CONFIRMED (asymmetry) / SPECULATIVE (fix direction)",
+                          "code_evidence":  {
+                                                "addr_side":  "normalize.py:184 ADDR_CANON_COMMON contains first-\u003e1st, second-\u003e2nd, third-\u003e3rd, fourth-\u003e4th, fifth-\u003e5th; consulted at normalize.py:347 inside normalize_address",
+                                                "name_side":  "normalize.py:109-142 NAME_CANON (34 lines, read in full) contains NO ordinal entry; consulted at normalize.py:281 inside _name_tokens"
+                                            },
+                          "us_name_occ":  {
+                                              "first":  61068,
+                                              "lst":  679,
+                                              "1st":  679,
+                                              "second":  3720,
+                                              "third":  7531,
+                                              "fourth":  3907,
+                                              "fifth":  7298,
+                                              "2nd":  0,
+                                              "3rd":  0,
+                                              "4th":  0
+                                          },
+                          "us_addr_occ":  {
+                                              "first":  15800,
+                                              "1st":  16478,
+                                              "lst":  0,
+                                              "second":  15184,
+                                              "third":  14029,
+                                              "fourth":  13704,
+                                              "fifth":  11551,
+                                              "2nd":  19721,
+                                              "3rd":  19019,
+                                              "4th":  19461
+                                          },
+                          "addr_side_converged_1st_occ":  32278,
+                          "addr_side_arithmetic":  "15800 (first, canon-mapped) + 16478 (literal 1st) = 32278",
+                          "name_side_stranded_occ":  61747,
+                          "name_side_arithmetic":  "61068 (first) + 679 (lst) = 61747",
+                          "ratio_stranded_over_addr":  1.91,
+                          "ratio_vs_1st_corruption":  90.9,
+                          "key_mechanism":  "keys.py:33-34 builds name keys from LEET/canon-processed ncore; keys.py:39-43 builds address keys from raw atoks; the kind-0 key at keys.py:60 XORs the two (th ^ (ah // 2)) so it can only form when a name token and an address token agree. features.py:128-129 uses SEPARATE idf tables (name_idf vs addr_idf), so the address side can never rescue the name side.",
+                          "guard_does_not_fix_it":  true,
+                          "guard_note":  "Even WITH the guard applied, name-side 1st (679) and name-side first (61068) are still two different tokens. The guard fixes the corruption, not the divergence. Necessary but not sufficient.",
+                          "cross_check_D084":  "D084 (c03) independently measured that first-\u003e1st is NOT in the no-fusion canon class, because 1st occurs 16478 times on the US address side. That confirms the address half of the pipeline works; the defect is the missing mirror in NAME_CANON. Not in tension with D084 do-not-extend verdict.",
+                          "explicitly_not_proposed":  "No NAME_CANON edit is proposed as part of the LEET fix. NAME_CANON is consulted at :281 AFTER translate at :280, so an ordinal entry there would only ever see already-leeted tokens. Different table, different risk surface."
+                      },
+    "us_addr_side":  {
+                         "mixed_types":  145,
+                         "mixed_occ":  519989,
+                         "ordinal_types":  137,
+                         "ordinal_occ":  511112,
+                         "non_ordinal_types":  8,
+                         "non_ordinal_occ":  8877,
+                         "arithmetic":  "511112 + 8877 = 519989 (US addr mixed total)"
+                     },
+    "per_file":  {
+                     "train_s1":  {
+                                      "us_rows":  1323633,
+                                      "us_name_tokens":  4617935,
+                                      "mixed_types":  1,
+                                      "mixed_occ":  425,
+                                      "guard_exempt_types":  1,
+                                      "guard_exempt_occ":  425
+                                  },
+                     "train_s2":  {
+                                      "us_rows":  3016817,
+                                      "us_name_tokens":  10713782,
+                                      "mixed_types":  119,
+                                      "mixed_occ":  27009,
+                                      "guard_exempt_types":  2,
+                                      "guard_exempt_occ":  1089
+                                  },
+                     "train_s3":  {
+                                      "us_rows":  3170056,
+                                      "us_name_tokens":  11522038,
+                                      "mixed_types":  124,
+                                      "mixed_occ":  30696,
+                                      "guard_exempt_types":  2,
+                                      "guard_exempt_occ":  1136
+                                  },
+                     "test_s1":  {
+                                     "us_rows":  663106,
+                                     "us_name_tokens":  2311785,
+                                     "mixed_types":  1,
+                                     "mixed_occ":  218,
+                                     "guard_exempt_types":  1,
+                                     "guard_exempt_occ":  218
+                                 },
+                     "test_s2":  {
+                                     "us_rows":  1871330,
+                                     "us_name_tokens":  6843339,
+                                     "mixed_types":  106,
+                                     "mixed_occ":  14953,
+                                     "guard_exempt_types":  2,
+                                     "guard_exempt_occ":  690
+                                 },
+                     "test_s3":  {
+                                     "us_rows":  1945701,
+                                     "us_name_tokens":  7243924,
+                                     "mixed_types":  113,
+                                     "mixed_occ":  16799,
+                                     "guard_exempt_types":  2,
+                                     "guard_exempt_occ":  778
+                                 },
+                     "TOTAL":  {
+                                   "us_rows":  11990643,
+                                   "us_name_tokens":  43252803,
+                                   "mixed_types":  133,
+                                   "mixed_occ":  90100,
+                                   "guard_exempt_types":  2,
+                                   "guard_exempt_occ":  4336
+                               }
+                 },
+    "powershell_gotcha":  "A @{} hashtable keyed on a numeric-looking token such as 149 AUTO-COERCES the key to Int64, and -cmatch then silently returns $false. My first three family scans reported 0 US name-side types for every family, which is obviously wrong given 24hr is in hand. Fix: prefix every key with _ and strip on read. All numbers here use the prefixed form.",
+    "limits":  [
+                   "Top-4000 truncation: every type list is a FLOOR. 8-18% of name-token mass is outside the window (D121 coverage table). Every 0-type result means not in the measured window, never does not occur.",
+                   "Truncation is not uniform across files: train_s1 and test_s1 each expose only 1 US mixed type. Single-file reads are UNSAFE for this question; the six-file union recovers all 133.",
+                   "Token OCCURRENCES, not rows. No row count is quoted for any finding. Per-row impact of the 4336 US corruptions is NOT derivable from this profile.",
+                   "build_profile.py:111,127 applies TOKEN_RE [a-z0-9]+ to the raw lowercased string with NO accent stripping, and computes addr_tokens per comma-component (:126-127) then sums. Component structure is not visible.",
+                   "ADDR_CANON_COMMON is not applied by the profiler, so us_addr_occ.first=15800 is the RAW count. The post-canon figure 32278 is an INFERENCE from reading normalize.py:347.",
+                   "No raw TSV was read (hard constraint). Nothing is verified against source rows.",
+                   "Not collected, named as gaps not estimated: rows-per-token; untruncated tail mass; which US names containing first use it as an ordinal vs a brand word; any scored-run evidence for whether a NAME_CANON ordinal entry helps or hurts."
+               ],
+    "not_re_derived":  [
+                           "postal/pin guard",
+                           "pin_eq",
+                           "alt_tset",
+                           "US_STATES/IN_STATES/FR_REGIONS expansion",
+                           "France blocking caps",
+                           "address component order",
+                           "ligature defect",
+                           "retracted French function-word finding",
+                           "D084 ADDR_CANON_COMMON verdict (read and cross-checked, not re-derived)",
+                           "D087 4l adjudication"
+                       ],
+    "us_mixed_tokens":  [
+                            {
+                                "token":  "gr0up",
+                                "leet_out":  "group",
+                                "occ":  589,
+                                "plain_out_occ":  438519,
+                                "ratio":  0.0013,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5trategic",
+                                "leet_out":  "strategic",
+                                "occ":  662,
+                                "plain_out_occ":  52470,
+                                "ratio":  0.0126,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "fami1y",
+                                "leet_out":  "family",
+                                "occ":  1395,
+                                "plain_out_occ":  99491,
+                                "ratio":  0.014,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "anch0r",
+                                "leet_out":  "anchor",
+                                "occ":  689,
+                                "plain_out_occ":  49254,
+                                "ratio":  0.014,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5tate",
+                                "leet_out":  "state",
+                                "occ":  732,
+                                "plain_out_occ":  56429,
+                                "ratio":  0.013,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "continenta1",
+                                "leet_out":  "continental",
+                                "occ":  592,
+                                "plain_out_occ":  56227,
+                                "ratio":  0.0105,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "ur0logy",
+                                "leet_out":  "urology",
+                                "occ":  543,
+                                "plain_out_occ":  42110,
+                                "ratio":  0.0129,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "ch0ice",
+                                "leet_out":  "choice",
+                                "occ":  623,
+                                "plain_out_occ":  48279,
+                                "ratio":  0.0129,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "8ay",
+                                "leet_out":  "bay",
+                                "occ":  697,
+                                "plain_out_occ":  52779,
+                                "ratio":  0.0132,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5ignature",
+                                "leet_out":  "signature",
+                                "occ":  573,
+                                "plain_out_occ":  45280,
+                                "ratio":  0.0127,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "ass0ciation",
+                                "leet_out":  "association",
+                                "occ":  144,
+                                "plain_out_occ":  44105,
+                                "ratio":  0.0033,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c0",
+                                "leet_out":  "co",
+                                "occ":  582,
+                                "plain_out_occ":  370789,
+                                "ratio":  0.0016,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "cardio1ogy",
+                                "leet_out":  "cardiology",
+                                "occ":  612,
+                                "plain_out_occ":  57976,
+                                "ratio":  0.0106,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "j0hnson",
+                                "leet_out":  "johnson",
+                                "occ":  724,
+                                "plain_out_occ":  48743,
+                                "ratio":  0.0149,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c1inic",
+                                "leet_out":  "clinic",
+                                "occ":  1042,
+                                "plain_out_occ":  157602,
+                                "ratio":  0.0066,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5ecure",
+                                "leet_out":  "secure",
+                                "occ":  595,
+                                "plain_out_occ":  43363,
+                                "ratio":  0.0137,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "behavi0ral",
+                                "leet_out":  "behavioral",
+                                "occ":  143,
+                                "plain_out_occ":  44161,
+                                "ratio":  0.0032,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "6roup",
+                                "leet_out":  "group",
+                                "occ":  1179,
+                                "plain_out_occ":  438519,
+                                "ratio":  0.0027,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5afe",
+                                "leet_out":  "safe",
+                                "occ":  690,
+                                "plain_out_occ":  50904,
+                                "ratio":  0.0136,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "si1ver",
+                                "leet_out":  "silver",
+                                "occ":  483,
+                                "plain_out_occ":  65713,
+                                "ratio":  0.0074,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "0f",
+                                "leet_out":  "of",
+                                "occ":  1345,
+                                "plain_out_occ":  308735,
+                                "ratio":  0.0044,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c0ntinental",
+                                "leet_out":  "continental",
+                                "occ":  636,
+                                "plain_out_occ":  56227,
+                                "ratio":  0.0113,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5urgical",
+                                "leet_out":  "surgical",
+                                "occ":  369,
+                                "plain_out_occ":  47215,
+                                "ratio":  0.0078,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "regiona1",
+                                "leet_out":  "regional",
+                                "occ":  677,
+                                "plain_out_occ":  69563,
+                                "ratio":  0.0097,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "regi0nal",
+                                "leet_out":  "regional",
+                                "occ":  730,
+                                "plain_out_occ":  69563,
+                                "ratio":  0.0105,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5upreme",
+                                "leet_out":  "supreme",
+                                "occ":  598,
+                                "plain_out_occ":  43827,
+                                "ratio":  0.0136,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "va1ley",
+                                "leet_out":  "valley",
+                                "occ":  777,
+                                "plain_out_occ":  97283,
+                                "ratio":  0.008,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "n0se",
+                                "leet_out":  "nose",
+                                "occ":  793,
+                                "plain_out_occ":  41998,
+                                "ratio":  0.0189,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "heart1and",
+                                "leet_out":  "heartland",
+                                "occ":  669,
+                                "plain_out_occ":  50485,
+                                "ratio":  0.0133,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c0astal",
+                                "leet_out":  "coastal",
+                                "occ":  572,
+                                "plain_out_occ":  93118,
+                                "ratio":  0.0061,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c0lonial",
+                                "leet_out":  "colonial",
+                                "occ":  546,
+                                "plain_out_occ":  50213,
+                                "ratio":  0.0109,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "w0mens",
+                                "leet_out":  "womens",
+                                "occ":  567,
+                                "plain_out_occ":  43673,
+                                "ratio":  0.013,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "6rand",
+                                "leet_out":  "grand",
+                                "occ":  567,
+                                "plain_out_occ":  45275,
+                                "ratio":  0.0125,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5uperior",
+                                "leet_out":  "superior",
+                                "occ":  560,
+                                "plain_out_occ":  51053,
+                                "ratio":  0.011,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "b1ue",
+                                "leet_out":  "blue",
+                                "occ":  617,
+                                "plain_out_occ":  70245,
+                                "ratio":  0.0088,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "cardi0logy",
+                                "leet_out":  "cardiology",
+                                "occ":  683,
+                                "plain_out_occ":  57976,
+                                "ratio":  0.0118,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "netw0rk",
+                                "leet_out":  "network",
+                                "occ":  315,
+                                "plain_out_occ":  40147,
+                                "ratio":  0.0078,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "nati0nal",
+                                "leet_out":  "national",
+                                "occ":  650,
+                                "plain_out_occ":  57987,
+                                "ratio":  0.0112,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "metr0",
+                                "leet_out":  "metro",
+                                "occ":  786,
+                                "plain_out_occ":  92880,
+                                "ratio":  0.0085,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "r0cky",
+                                "leet_out":  "rocky",
+                                "occ":  859,
+                                "plain_out_occ":  55109,
+                                "ratio":  0.0156,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "f0ot",
+                                "leet_out":  "foot",
+                                "occ":  683,
+                                "plain_out_occ":  45209,
+                                "ratio":  0.0151,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "cust0m",
+                                "leet_out":  "custom",
+                                "occ":  664,
+                                "plain_out_occ":  45947,
+                                "ratio":  0.0145,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5mith",
+                                "leet_out":  "smith",
+                                "occ":  806,
+                                "plain_out_occ":  61486,
+                                "ratio":  0.0131,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "visi0n",
+                                "leet_out":  "vision",
+                                "occ":  945,
+                                "plain_out_occ":  55424,
+                                "ratio":  0.0171,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "6reat",
+                                "leet_out":  "great",
+                                "occ":  770,
+                                "plain_out_occ":  54783,
+                                "ratio":  0.0141,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "a1lied",
+                                "leet_out":  "allied",
+                                "occ":  757,
+                                "plain_out_occ":  56549,
+                                "ratio":  0.0134,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "nationa1",
+                                "leet_out":  "national",
+                                "occ":  627,
+                                "plain_out_occ":  57987,
+                                "ratio":  0.0108,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "gl0bal",
+                                "leet_out":  "global",
+                                "occ":  647,
+                                "plain_out_occ":  90075,
+                                "ratio":  0.0072,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "physica1",
+                                "leet_out":  "physical",
+                                "occ":  818,
+                                "plain_out_occ":  54878,
+                                "ratio":  0.0149,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "6reen",
+                                "leet_out":  "green",
+                                "occ":  717,
+                                "plain_out_occ":  58640,
+                                "ratio":  0.0122,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "p1atinum",
+                                "leet_out":  "platinum",
+                                "occ":  441,
+                                "plain_out_occ":  47720,
+                                "ratio":  0.0092,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "r0yal",
+                                "leet_out":  "royal",
+                                "occ":  409,
+                                "plain_out_occ":  47687,
+                                "ratio":  0.0086,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "onco1ogy",
+                                "leet_out":  "oncology",
+                                "occ":  148,
+                                "plain_out_occ":  45641,
+                                "ratio":  0.0032,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5ummit",
+                                "leet_out":  "summit",
+                                "occ":  826,
+                                "plain_out_occ":  97174,
+                                "ratio":  0.0085,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "harb0r",
+                                "leet_out":  "harbor",
+                                "occ":  803,
+                                "plain_out_occ":  93455,
+                                "ratio":  0.0086,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c1ean",
+                                "leet_out":  "clean",
+                                "occ":  572,
+                                "plain_out_occ":  47897,
+                                "ratio":  0.0119,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "pi0neer",
+                                "leet_out":  "pioneer",
+                                "occ":  619,
+                                "plain_out_occ":  47432,
+                                "ratio":  0.0131,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "dermat0logy",
+                                "leet_out":  "dermatology",
+                                "occ":  549,
+                                "plain_out_occ":  44794,
+                                "ratio":  0.0123,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "l1c",
+                                "leet_out":  "llc",
+                                "occ":  1119,
+                                "plain_out_occ":  2306237,
+                                "ratio":  0.0005,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "diam0nd",
+                                "leet_out":  "diamond",
+                                "occ":  604,
+                                "plain_out_occ":  44343,
+                                "ratio":  0.0136,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5ervice",
+                                "leet_out":  "service",
+                                "occ":  1357,
+                                "plain_out_occ":  129953,
+                                "ratio":  0.0104,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "va1ue",
+                                "leet_out":  "value",
+                                "occ":  480,
+                                "plain_out_occ":  47476,
+                                "ratio":  0.0101,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "8lue",
+                                "leet_out":  "blue",
+                                "occ":  758,
+                                "plain_out_occ":  70245,
+                                "ratio":  0.0108,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "0rthopedic",
+                                "leet_out":  "orthopedic",
+                                "occ":  430,
+                                "plain_out_occ":  43346,
+                                "ratio":  0.0099,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "high1and",
+                                "leet_out":  "highland",
+                                "occ":  752,
+                                "plain_out_occ":  96536,
+                                "ratio":  0.0078,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "beac0n",
+                                "leet_out":  "beacon",
+                                "occ":  90,
+                                "plain_out_occ":  47017,
+                                "ratio":  0.0019,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "federa1",
+                                "leet_out":  "federal",
+                                "occ":  781,
+                                "plain_out_occ":  58987,
+                                "ratio":  0.0132,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "8etter",
+                                "leet_out":  "better",
+                                "occ":  661,
+                                "plain_out_occ":  48486,
+                                "ratio":  0.0136,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "precisi0n",
+                                "leet_out":  "precision",
+                                "occ":  717,
+                                "plain_out_occ":  51185,
+                                "ratio":  0.014,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "h0rizon",
+                                "leet_out":  "horizon",
+                                "occ":  664,
+                                "plain_out_occ":  51796,
+                                "ratio":  0.0128,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "uro1ogy",
+                                "leet_out":  "urology",
+                                "occ":  447,
+                                "plain_out_occ":  42110,
+                                "ratio":  0.0106,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "dd5",
+                                "leet_out":  "dds",
+                                "occ":  542,
+                                "plain_out_occ":  55440,
+                                "ratio":  0.0098,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "ank1e",
+                                "leet_out":  "ankle",
+                                "occ":  272,
+                                "plain_out_occ":  41461,
+                                "ratio":  0.0066,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "a1liance",
+                                "leet_out":  "alliance",
+                                "occ":  155,
+                                "plain_out_occ":  50766,
+                                "ratio":  0.0031,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5mart",
+                                "leet_out":  "smart",
+                                "occ":  615,
+                                "plain_out_occ":  48592,
+                                "ratio":  0.0127,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c1ear",
+                                "leet_out":  "clear",
+                                "occ":  532,
+                                "plain_out_occ":  44619,
+                                "ratio":  0.0119,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "6ulf",
+                                "leet_out":  "gulf",
+                                "occ":  518,
+                                "plain_out_occ":  49983,
+                                "ratio":  0.0104,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "6olden",
+                                "leet_out":  "golden",
+                                "occ":  386,
+                                "plain_out_occ":  64002,
+                                "ratio":  0.006,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "de1ta",
+                                "leet_out":  "delta",
+                                "occ":  635,
+                                "plain_out_occ":  51984,
+                                "ratio":  0.0122,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "metropo1itan",
+                                "leet_out":  "metropolitan",
+                                "occ":  564,
+                                "plain_out_occ":  55383,
+                                "ratio":  0.0102,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5terling",
+                                "leet_out":  "sterling",
+                                "occ":  406,
+                                "plain_out_occ":  51231,
+                                "ratio":  0.0079,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "piedm0nt",
+                                "leet_out":  "piedmont",
+                                "occ":  718,
+                                "plain_out_occ":  51171,
+                                "ratio":  0.014,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c0rporation",
+                                "leet_out":  "corporation",
+                                "occ":  685,
+                                "plain_out_occ":  138862,
+                                "ratio":  0.0049,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "a1l",
+                                "leet_out":  "all",
+                                "occ":  692,
+                                "plain_out_occ":  54275,
+                                "ratio":  0.0127,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "re1iable",
+                                "leet_out":  "reliable",
+                                "occ":  571,
+                                "plain_out_occ":  48460,
+                                "ratio":  0.0118,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "se1ect",
+                                "leet_out":  "select",
+                                "occ":  253,
+                                "plain_out_occ":  48427,
+                                "ratio":  0.0052,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "denta1",
+                                "leet_out":  "dental",
+                                "occ":  1652,
+                                "plain_out_occ":  106308,
+                                "ratio":  0.0155,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "j0nes",
+                                "leet_out":  "jones",
+                                "occ":  427,
+                                "plain_out_occ":  37092,
+                                "ratio":  0.0115,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "fr0ntier",
+                                "leet_out":  "frontier",
+                                "occ":  753,
+                                "plain_out_occ":  50637,
+                                "ratio":  0.0149,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "dermato1ogy",
+                                "leet_out":  "dermatology",
+                                "occ":  366,
+                                "plain_out_occ":  44794,
+                                "ratio":  0.0082,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5ervices",
+                                "leet_out":  "services",
+                                "occ":  2707,
+                                "plain_out_occ":  257069,
+                                "ratio":  0.0105,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "g1obal",
+                                "leet_out":  "global",
+                                "occ":  584,
+                                "plain_out_occ":  90075,
+                                "ratio":  0.0065,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "metr0politan",
+                                "leet_out":  "metropolitan",
+                                "occ":  640,
+                                "plain_out_occ":  55383,
+                                "ratio":  0.0116,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "roya1",
+                                "leet_out":  "royal",
+                                "occ":  321,
+                                "plain_out_occ":  47687,
+                                "ratio":  0.0067,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "orth0pedic",
+                                "leet_out":  "orthopedic",
+                                "occ":  154,
+                                "plain_out_occ":  43346,
+                                "ratio":  0.0036,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "crysta1",
+                                "leet_out":  "crystal",
+                                "occ":  428,
+                                "plain_out_occ":  44604,
+                                "ratio":  0.0096,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "6lobal",
+                                "leet_out":  "global",
+                                "occ":  796,
+                                "plain_out_occ":  90075,
+                                "ratio":  0.0088,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5ilver",
+                                "leet_out":  "silver",
+                                "occ":  649,
+                                "plain_out_occ":  65713,
+                                "ratio":  0.0099,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c1assic",
+                                "leet_out":  "classic",
+                                "occ":  496,
+                                "plain_out_occ":  45264,
+                                "ratio":  0.011,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "coasta1",
+                                "leet_out":  "coastal",
+                                "occ":  559,
+                                "plain_out_occ":  93118,
+                                "ratio":  0.006,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "tota1",
+                                "leet_out":  "total",
+                                "occ":  406,
+                                "plain_out_occ":  49037,
+                                "ratio":  0.0083,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "keyst0ne",
+                                "leet_out":  "keystone",
+                                "occ":  713,
+                                "plain_out_occ":  50914,
+                                "ratio":  0.014,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "1st",
+                                "leet_out":  "lst",
+                                "occ":  679,
+                                "plain_out_occ":  0,
+                                "ratio":  null,
+                                "guard_exempt":  true,
+                                "class":  "b_real_token_guard_exempt"
+                            },
+                            {
+                                "token":  "inn0vative",
+                                "leet_out":  "innovative",
+                                "occ":  302,
+                                "plain_out_occ":  48238,
+                                "ratio":  0.0063,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "e1ite",
+                                "leet_out":  "elite",
+                                "occ":  596,
+                                "plain_out_occ":  47197,
+                                "ratio":  0.0126,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "qua1ity",
+                                "leet_out":  "quality",
+                                "occ":  570,
+                                "plain_out_occ":  48148,
+                                "ratio":  0.0118,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "m0untain",
+                                "leet_out":  "mountain",
+                                "occ":  850,
+                                "plain_out_occ":  58186,
+                                "ratio":  0.0146,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c0mmunity",
+                                "leet_out":  "community",
+                                "occ":  304,
+                                "plain_out_occ":  31662,
+                                "ratio":  0.0096,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "capita1",
+                                "leet_out":  "capital",
+                                "occ":  1013,
+                                "plain_out_occ":  82771,
+                                "ratio":  0.0122,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "hea1th",
+                                "leet_out":  "health",
+                                "occ":  1576,
+                                "plain_out_occ":  203854,
+                                "ratio":  0.0077,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "gu1f",
+                                "leet_out":  "gulf",
+                                "occ":  139,
+                                "plain_out_occ":  49983,
+                                "ratio":  0.0028,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "co1onial",
+                                "leet_out":  "colonial",
+                                "occ":  370,
+                                "plain_out_occ":  50213,
+                                "ratio":  0.0074,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "ass0ciates",
+                                "leet_out":  "associates",
+                                "occ":  1817,
+                                "plain_out_occ":  266314,
+                                "ratio":  0.0068,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "superi0r",
+                                "leet_out":  "superior",
+                                "occ":  255,
+                                "plain_out_occ":  51053,
+                                "ratio":  0.005,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "at1antic",
+                                "leet_out":  "atlantic",
+                                "occ":  823,
+                                "plain_out_occ":  59907,
+                                "ratio":  0.0137,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5elect",
+                                "leet_out":  "select",
+                                "occ":  144,
+                                "plain_out_occ":  48427,
+                                "ratio":  0.003,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "surgica1",
+                                "leet_out":  "surgical",
+                                "occ":  291,
+                                "plain_out_occ":  47215,
+                                "ratio":  0.0062,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "patri0t",
+                                "leet_out":  "patriot",
+                                "occ":  764,
+                                "plain_out_occ":  53466,
+                                "ratio":  0.0143,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "8est",
+                                "leet_out":  "best",
+                                "occ":  561,
+                                "plain_out_occ":  49205,
+                                "ratio":  0.0114,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "chir0practic",
+                                "leet_out":  "chiropractic",
+                                "occ":  853,
+                                "plain_out_occ":  52919,
+                                "ratio":  0.0161,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "c0m",
+                                "leet_out":  "com",
+                                "occ":  2855,
+                                "plain_out_occ":  403355,
+                                "ratio":  0.0071,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "24hr",
+                                "leet_out":  "2ahr",
+                                "occ":  3657,
+                                "plain_out_occ":  0,
+                                "ratio":  null,
+                                "guard_exempt":  true,
+                                "class":  "b_real_token_guard_exempt"
+                            },
+                            {
+                                "token":  "c0rp",
+                                "leet_out":  "corp",
+                                "occ":  1022,
+                                "plain_out_occ":  471416,
+                                "ratio":  0.0022,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5tar",
+                                "leet_out":  "star",
+                                "occ":  685,
+                                "plain_out_occ":  48925,
+                                "ratio":  0.014,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "g0lden",
+                                "leet_out":  "golden",
+                                "occ":  434,
+                                "plain_out_occ":  64002,
+                                "ratio":  0.0068,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "0ptimal",
+                                "leet_out":  "optimal",
+                                "occ":  150,
+                                "plain_out_occ":  44163,
+                                "ratio":  0.0034,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "8right",
+                                "leet_out":  "bright",
+                                "occ":  804,
+                                "plain_out_occ":  64992,
+                                "ratio":  0.0124,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "5pecialists",
+                                "leet_out":  "specialists",
+                                "occ":  786,
+                                "plain_out_occ":  85077,
+                                "ratio":  0.0092,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "m0dern",
+                                "leet_out":  "modern",
+                                "occ":  92,
+                                "plain_out_occ":  45223,
+                                "ratio":  0.002,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "wi1liams",
+                                "leet_out":  "williams",
+                                "occ":  396,
+                                "plain_out_occ":  41222,
+                                "ratio":  0.0096,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "t0tal",
+                                "leet_out":  "total",
+                                "occ":  270,
+                                "plain_out_occ":  49037,
+                                "ratio":  0.0055,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "8eacon",
+                                "leet_out":  "beacon",
+                                "occ":  431,
+                                "plain_out_occ":  47017,
+                                "ratio":  0.0092,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            },
+                            {
+                                "token":  "ster1ing",
+                                "leet_out":  "sterling",
+                                "occ":  150,
+                                "plain_out_occ":  51231,
+                                "ratio":  0.0029,
+                                "guard_exempt":  false,
+                                "class":  "a_genuine_leet_keep_translating"
+                            }
+                        ]
+}

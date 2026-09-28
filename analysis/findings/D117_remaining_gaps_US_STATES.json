@@ -1,0 +1,139 @@
+{
+  "task_id": "D117",
+  "title": "remaining gaps in US_STATES",
+  "verdict": "CONFIRMED_NEGATIVE_WITH_ONE_EXCEPTION",
+  "headline": "US_STATES needs no dictionary expansion. Exhaustive scans of the six-file US address token union (4510 distinct tokens) find zero unhandled state spellings, zero unhandled two-letter state codes, and zero misspellings. One small real exception: 'del' is unhandled (D074 wrongly claimed it resolves), plus the already-known 'penn'.",
+  "deliverable_md": "analysis_out/findings/D117_remaining_gaps_US_STATES.md",
+  "arithmetic": {
+    "us_rows_union_6_files": 11990643,
+    "us_rows_derivation": "1323633 + 3016817 + 3170056 + 663106 + 1871330 + 1945701 = 11990643",
+    "india_rows_union": 10544085,
+    "france_rows_union": 1694445,
+    "france_rows_derivation": "0 + 0 + 0 + 259452 + 703378 + 731615 = 1694445 (France absent from all three train files)",
+    "us_addr_token_union_distinct": 4510,
+    "literal_entries": 52,
+    "runtime_entries_after_selfmap": 104,
+    "single_word_keys": 40,
+    "multi_word_keys": 12,
+    "single_word_names_present_in_union": "38 of 40",
+    "single_word_name_occurrences_union": 4240547,
+    "single_word_names_absent": ["hawaii", "mississippi"],
+    "selfmap_codes_present_as_input_tokens": "45 of 52",
+    "selfmap_code_occurrences_union": 7354018,
+    "selfmap_codes_absent": ["hi", "mi", "ms", "nv", "nh", "nj", "pr"],
+    "two_char_alpha_tokens_total": 33,
+    "two_char_alpha_occurrences_total": 4001717,
+    "two_char_alpha_tokens_that_are_states": 0,
+    "edit_distance_le_1_nonkey_tokens": 6,
+    "edit_distance_le_1_occurrences": 154515,
+    "del_occurrences_union": 10711,
+    "del_derivation": "1168 + 2520 + 2756 + 646 + 1779 + 1842 = 10711",
+    "penn_occurrences_union": 3084,
+    "penn_derivation": "334 + 801 + 822 + 163 + 467 + 497 = 3084",
+    "del_plus_penn": "10711 + 3084 = 13795",
+    "del_pct_of_us_rows": 0.0893,
+    "penn_pct_of_us_rows": 0.0257,
+    "del_plus_penn_pct_of_us_rows": 0.115,
+    "washington_occurrences_union": 267075,
+    "washington_pct_of_us_rows": 2.2274,
+    "dc_occurrences_union": 35681,
+    "dc_pct_of_us_rows": 0.2976,
+    "district_occurrences_union": 27527,
+    "columbia_occurrences_union": 58751,
+    "york_occurrences_union": 384608,
+    "carolina_occurrences_union": 354636,
+    "wy_occurrences_union": 14214,
+    "way_occurrences_union": 270664,
+    "top4000_floor_per_file": {
+      "train_s1": 201,
+      "train_s2": 407,
+      "train_s3": 440,
+      "test_s1": 101,
+      "test_s2": 258,
+      "test_s3": 274
+    },
+    "absence_bound": "A token absent from all six top-4000 lists occurs fewer than 101 times in test_s1 and fewer than 201 in train_s1, i.e. under ~1681 summed across all six files. 'Absent' never means 'does not occur'."
+  },
+  "source_quotes": {
+    "us_states_literal": "_upstream/src/normalize.py:216-229",
+    "selfmap_loop": "_upstream/src/normalize.py:250-254",
+    "selfmap_loop_text": "STATE_MAPS = {\"US\": US_STATES, \"India\": IN_STATES, \"France\": FR_REGIONS}\n# abbreviations are canonical themselves\nfor _m in (US_STATES, IN_STATES):\n    for _v in list(_m.values()):\n        _m.setdefault(_v, _v)",
+    "selfmap_omits_fr_regions": "The loop tuple is (US_STATES, IN_STATES) only; FR_REGIONS is absent, which is the separate D070/D073 defect and is not US_STATES' problem.",
+    "country_scoped_lookup": "_upstream/src/normalize.py:318 -> smap = STATE_MAPS.get(country, {})",
+    "last_match_wins": "_upstream/src/normalize.py:333-335 -> if ck in smap: state = smap[ck]; continue  (no break, so the last matching component overwrites)",
+    "lowercasing": "_upstream/src/normalize.py:317 -> s = strip_accents(s).lower()",
+    "wy_canon_hijack": "_upstream/src/normalize.py:176 in ADDR_CANON_COMMON -> \"way\": \"way\", \"wy\": \"way\",",
+    "topn": "build_profile.py:27 TOPN = 4000",
+    "token_regex": "build_profile.py:28 TOKEN_RE = re.compile(r\"[a-z0-9]+\")",
+    "addr_split": "build_profile.py:31 ADDR_SPLIT = re.compile(r\"[,;]\")",
+    "flat_counter": "build_profile.py:126-127 splits on [,;] and pushes [a-z0-9]+ matches into one flat Counter, discarding component boundaries",
+    "prune": "build_profile.py:45-48 prune(c, keep_min=1) deletes count <= 1 tokens"
+  },
+  "new_findings": [
+    {
+      "id": "NEW-1",
+      "claim": "'del' is an unhandled token; D074's claim that it resolves is FALSE.",
+      "confidence": "CONFIRMED",
+      "evidence": "del in_literal=False, in_runtime104=False. US_STATES holds 'delaware'->'de' (literal) and 'de'->'de' (self-map). 'del' is a different string from the code 'de'.",
+      "contradicts": "D074 section 11"
+    },
+    {
+      "id": "NEW-2",
+      "claim": "Exhaustive: none of the 33 two-character alphabetic US address tokens (4001717 occurrences) is a state abbreviation.",
+      "confidence": "CONFIRMED"
+    },
+    {
+      "id": "NEW-3",
+      "claim": "Exhaustive edit-distance<=1 scan: 6 non-key tokens (154515 occurrences) are within one edit of a state name, all ordinary English words (main, indian, fontana, mine, marine, marina). No misspelled state exists.",
+      "confidence": "CONFIRMED"
+    },
+    {
+      "id": "NEW-4",
+      "claim": "The self-map loop is load-bearing for US_STATES: 45 of 52 canonical codes appear as input tokens for 7354018 occurrences. Unlike FR_REGIONS, it has real effect here.",
+      "confidence": "CONFIRMED"
+    },
+    {
+      "id": "NEW-5",
+      "claim": "The Washington/DC collision is real: 'district of columbia'->dc and 'washington'->'wa' share the US bucket and last-match-wins has no positional guard. A DC row written '..., Washington, DC 20001' resolves to the wrong state wa. Exposure bounded above by dc occurrences, <=35681 rows (<=0.2976%), and that bound is loose.",
+      "confidence": "CONFIRMED_BEHAVIOUR_SPECULATIVE_ROWCOUNT",
+      "note": "This is a normalize_address matcher defect, not a dictionary-content defect. No US_STATES entry would fix it."
+    },
+    {
+      "id": "NEW-6",
+      "claim": "Case sensitivity is a non-issue: normalize.py:317 lowercases all input and build_profile.py:110,113 lowercases before tokenising, so the profile cannot represent an uppercase token at all.",
+      "confidence": "CONFIRMED"
+    }
+  ],
+  "independently_confirmed": [
+    "52 literal entries, 52 distinct values, 104 runtime entries, 0 self-maps missing (D074)",
+    "50 states + dc + pr; 40 single-word + 12 multi-word keys (D074)",
+    "wy->way is the ONLY non-identity ADDR_CANON_COMMON collision among the 104 runtime keys; the four other hits mt, fl, ct, ne are identity (D074)",
+    "zero occurrences of hand-picked misspellings calif, fla, mass, tenn, wisc, minn, conn, colo, okla, ariz (D074 section 11, strengthened by NEW-3)",
+    "penn unmapped at 3084 union occurrences (D075)",
+    "45/52 codes present, 7 absent (D074 section 10)",
+    "US_STATES unreachable from France and India rows (D074 section 3)"
+  ],
+  "france_relevance": {
+    "verdict": "NEAR_ZERO",
+    "reason": "France is the scored country and is absent from training (0 France rows in train_s1/2/3; 1694445 France rows all in test). US_STATES is country-keyed at normalize.py:318 and is unreachable from any France row, so no finding in this report can move the France score.",
+    "us_state_names_in_france_addr_union": "maine=645, texas=216",
+    "largest_overlaps_are_ordinary_french_words": "de=1050023, la=481231, which are not US states here",
+    "recommendation": "Deprioritise this dictionary for the France objective; the France dictionaries hold the remaining value."
+  },
+  "recommendations": [
+    {"rank": 1, "action": "Do NOT add states, territories or abbreviations to US_STATES.", "confidence": "CONFIRMED"},
+    {"rank": 2, "action": "Optionally add 'del'->'de' and 'penn'->'pa' (13795 occurrences, 0.115% of US rows).", "confidence": "LIKELY"},
+    {"rank": 3, "action": "Do NOT touch the self-maps; all 52 are present and load-bearing.", "confidence": "CONFIRMED"},
+    {"rank": 4, "action": "Fix the positional matcher instead (require a state match to be the final component or be followed only by a postcode). Highest-value US item, ahead of any dictionary edit.", "confidence": "CONFIRMED_BEHAVIOUR"},
+    {"rank": 5, "action": "Deprioritise US_STATES for the France objective.", "confidence": "CONFIRMED"}
+  ],
+  "gaps": [
+    "All negatives are bounded by TOPN=4000 truncation, not absolute. Absence from the top 4000 is never proof of non-occurrence.",
+    "prune() deletes count<=1 tokens, so singletons are invisible system-wide and cannot be bounded at 1.",
+    "The 12 multi-word keys are structurally unmeasurable: TOKEN_RE=[a-z0-9]+ stores 'new york' as 'new' and 'york' separately and no bigram or component field exists. No claim is made about multi-word coverage.",
+    "No row-level counts: addr_tokens is a flat Counter with component boundaries discarded, so every figure is a token occurrence or an explicitly labelled upper bound on rows.",
+    "Cannot confirm del/penn appear as standalone state components rather than inside street names, so the fix is LIKELY not CONFIRMED.",
+    "Did not re-derive the France pin guard or the FR_REGIONS resolution rate, per the work order."
+  ],
+  "bottom_line": "This dictionary is fine for this dataset; the remaining defect is theoretical only, with one small real exception ('del', plus the already-known 'penn'). Every state token the data contains is already a canonical key. The only live US defect is in normalize_address's positional logic, not in the dictionary."
+}

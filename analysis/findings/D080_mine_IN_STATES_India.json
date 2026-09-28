@@ -1,0 +1,170 @@
+{
+  "task_id": "D080",
+  "family": "B-dictionary",
+  "title": "mine evidence to extend IN_STATES for India",
+  "deliverable": "analysis_out/findings/D080_mine_IN_STATES_India.md",
+  "headline": "IN_STATES needs no extension for India. All 28 states and 9 UT/NCT codes are already keys (37 distinct values, 86 effective keys); three independent mining sweeps over the visible India address vocabulary return ZERO unhandled state-shaped token above the 1,979-occurrence truncation floor. The one NEW defect found is NOT in IN_STATES: LEET['@'] and LEET['$'] at normalize.py:256 are structurally unreachable dead entries.",
+  "verdict": "no_change_needed_for_IN_STATES_india",
+  "new_defect_found": true,
+  "new_defect": "LEET['@'] and LEET['$'] (normalize.py:256) can never fire: _non_alnum = [^a-z0-9]+ (normalize.py:269) splits them away before the translate at normalize.py:280. Severity cosmetic. Correct fix is a pre-split substitution at normalize.py:273, not a larger LEET table.",
+  "denominators": {
+    "india_rows_all_six_files": 10544085,
+    "source": "sum(country_rows['India']) over train_s1..3,test_s1..3; cross-checked against sum(by_country['India']['rows'])",
+    "india_visible_addr_token_mass": 97463176,
+    "india_visible_name_token_mass": 29151826,
+    "token_mass_is_lower_bound": true,
+    "reason_lower_bound": "build_profile.py:27 TOPN=4000 caps each per-file list; build_profile.py:45-48 also prunes count<=1 every 8 chunks",
+    "note": "Every India rate in this report uses the six-file sum as denominator. No single-source rate is quoted."
+  },
+  "integrity_checks": {
+    "rows_eq_sum_country_rows": "6/6 files pass",
+    "by_country_rows_eq_sum_len_hist": "18/18 file-country pairs pass"
+  },
+  "in_states_structure": {
+    "literal_pairs": 49,
+    "distinct_canonical_values": 37,
+    "effective_keys_after_self_map_loop": 86,
+    "k_equals_v_pairs": 0,
+    "self_map_loop_line": 252,
+    "state_codes_covered": 28,
+    "state_codes": ["ap","ar","as","br","cg","ga","gj","hr","hp","jh","ka","kl","mp","mh","mn","ml","mz","nl","od","pb","rj","sk","tn","tg","tr","up","uk","wb"],
+    "ut_nct_codes_covered": 9,
+    "ut_nct_codes": ["an","ch","dd","dl","dn","jk","la","ld","py"],
+    "completeness": "all 28 Indian states and all 9 UT/NCT codes are present. No state-level addition is possible.",
+    "len_le_3_keys_unusable_by_learn_translit": 41,
+    "len_gt_3_keys": 45
+  },
+  "truncation_floor": {
+    "per_file_last_token_count": {"train_s1": 182, "train_s2": 394, "train_s3": 362, "test_s1": 166, "test_s2": 459, "test_s3": 416},
+    "per_file_last_token": {"train_s1": "nawab", "train_s2": "ngar", "train_s3": "1502", "test_s1": "mushahari", "test_s2": "aruna", "test_s3": "19b"},
+    "sum_of_floors": 1979,
+    "interpretation": "a token absent from all six lists has a true six-file total < 1979. 'measured 0' means below an unstated threshold, not absent."
+  },
+  "measurability_partition_of_86_effective_keys": {
+    "canonical_codes_37": {"measurable_present": 27, "mass": 3188831, "below_floor_10": ["cg","jh","jk","ld","ml","mz","nl","py","tr","uk"]},
+    "single_word_name_keys_35": {"measurable_present": 17, "mass": 5749145, "below_floor_18": ["assam","chattisgarh","chhattisgarh","jharkhand","ladakh","lakshadweep","manipur","meghalaya","mizoram","nagaland","or","pondicherry","puducherry","sikkim","tripura","ut","uttarakhand","uttaranchal"]},
+    "multiword_keys_14": {"measurable_as_unigram": 0, "note": "structurally impossible; they contain a space. Their 0 is NOT a measurement."},
+    "total_measurable_keys": 44,
+    "total_unmeasurable_keys": 42,
+    "grain_note": "differs from D078's '36 of 86 below the floor'; D078 counted a different grain. Mine = 28 directly-measured zeros + 14 structurally unmeasurable."
+  },
+  "measured_mass_already_captured": {
+    "code_keys_mass": 3188831,
+    "code_keys_per_1k_rows": 302.43,
+    "name_keys_mass": 5749145,
+    "name_keys_per_1k_rows": 545.30,
+    "total_mass": 8937976,
+    "total_as_pct_of_visible_token_mass": 9.17,
+    "IMPORTANT": "UPPER BOUNDS on state matches, not match counts. addr_tokens is a unigram bag with no component structure; normalize.py:333 requires the WHOLE comma-component to equal the key."
+  },
+  "top_measurable_name_keys": {
+    "delhi": 2621031, "maharashtra": 1104757, "karnataka": 410672, "gujarat": 335446,
+    "telangana": 283530, "haryana": 218443, "rajasthan": 188237, "kerala": 181552,
+    "bihar": 141819, "punjab": 85621, "keralam": 67682, "orissa": 57491,
+    "odisha": 40791, "tamilnadu": 4567, "chandigarh": 4436, "ts": 2187, "goa": 883
+  },
+  "top_measurable_code_keys": {
+    "mh": 700244, "dl": 432705, "ka": 275043, "up": 269710, "tn": 226332,
+    "wb": 205206, "gj": 205186, "tg": 160192, "hr": 128707, "rj": 114311,
+    "kl": 101292, "mp": 85555, "br": 82237, "ap": 67426, "pb": 46654,
+    "od": 40056, "ch": 8598, "ar": 6730, "sk": 5447, "la": 4473,
+    "ga": 4030, "mn": 3750, "an": 3647, "dd": 3048, "dn": 2879,
+    "as": 2743, "hp": 2630
+  },
+
+  "extension_candidates_found": {
+    "count": 0,
+    "status": "NO CONFIRMED / LIKELY CANDIDATES",
+    "sweeps_run": [
+      {"name": "gazetteer", "result": "every Indian state/UT name is already a key or measures 0", "status": "negative result at resolution limit, not proof of zero"},
+      {"name": "fuzzy (cutoff 0.85, count>=2000, unhandled only)", "hits": 16, "all_false_positives": true, "top_hits": {"punjabi": 9706, "nagari": 6326, "gola": 3798, "naidu": 3383, "aman": 2912}, "note": "demonyms and city fragments, not state variants"},
+      {"name": "geography-suffix (167 tokens ending pur/pradesh/garh/nagar/bad/gram/circle/zone/region/taluk/mandi/district/block/ward/sector, count>=1500)", "result": "overwhelmingly cities and localities; NOT ONE is a state. Adding them would be actively wrong."}
+    ]
+  },
+  "leet_findings": {
+    "unreachable_entries": ["@", "$"],
+    "proof": "normalize.py:269 _non_alnum=[^a-z0-9]+ guarantees tokens matching ^[a-z0-9]+$ only; verified by executing a byte-exact replica of _name_tokens over aXc for all ASCII alphanumeric X: zero tokens containing @ or $",
+    "reachable_digits": ["0","1","3","4","5","6","7","8"],
+    "india_leet_eligible_name_tokens_distinct": 127,
+    "india_leet_eligible_name_tokens_occurrences": 80735,
+    "top_examples": {"5ervices": 5407, "c0m": 2873, "8rothers": 2386, "br0thers": 2000, "f0undation": 1734, "c0": 1698, "de1hi": 1674, "5olutions": 1448, "s0lutions": 1442, "techn0logies": 1327, "techno1ogies": 1288, "so1utions": 1287},
+    "missing_digits_2_and_9_exposure_in_names": {"distinct_tokens": 1, "token": "2nd", "occurrences": 253, "total_other_exposure": 79482},
+    "india_addr_mixed_alpha_digit_distinct": 160,
+    "india_addr_mixed_alpha_digit_occurrences": 2087204,
+    "recommendation": "do NOT add 2/9 to LEET and do NOT apply LEET to addresses. b3 (105589) would become bg."
+  },
+  "component_structure": {
+    "india_rows_no_comma": 234802,
+    "india_rows_addr_empty": 234798,
+    "non_empty_single_component_india_rows": 4,
+    "rate": "0.0000380%",
+    "conclusion": "the state-lookup precondition (>=2 comma components) is effectively universal for India. This is the OPPOSITE of the France s2/s3 situation."
+  },
+  "india_pin_finding": {
+    "dig6_total_all_six_files": 2237,
+    "dig6_per_1k_rows": 0.2122,
+    "dig5_total": 100265,
+    "dig5_per_1k_rows": 9.51,
+    "num_digits_total": 46008263,
+    "num_digits_per_row": 4.363,
+    "alpha_only_addr": 655039,
+    "pct_rows_with_at_least_one_digit": 93.79,
+    "pure_digit_tokens_of_length_5_or_6_in_any_top4000": 0,
+    "finding": "the India pin signal is effectively dead. 93.79% of India addresses contain digits yet only 2237 standalone 6-digit numbers exist in 10,544,085 rows.",
+    "inference_marked": "the digits present are house/floor/plot/sector numbers, not 6-digit PIN codes",
+    "not_claimed": "NOT claiming the len==6 guard is wrong for India; claiming it has almost nothing to capture either way"
+  },
+  "confirms_as_non_defect": {
+    "odisha": {"in_states": "od", "addr_canon_common": "orissa", "india_occ": 40791},
+    "keralam": {"in_states": "kl", "addr_canon_common": "kerala", "india_occ": 67682},
+    "canon_targets": {"orissa": 57491, "kerala": 181552},
+    "why_safe": "normalize.py:333-335 runs the state lookup and `continue`s, so the component never reaches the canon loop at normalize.py:342-349. Both routes land on the same canonical value.",
+    "measured_as": "set intersection, not asserted"
+  },
+  "d078_refinement": {
+    "claim": "'jammu & kashmir' (normalize.py:239) is unreachable because normalize.py:331 replaces & with ' and ' before the lookup",
+    "confirmed": true,
+    "severity_correction": "NET USER-FACING LOSS IS ZERO. The twin key 'jammu and kashmir' is on the same line and DOES match the transformed input 'Jammu & Kashmir' -> ck='jammu and kashmir' -> jk.",
+    "measured_stake": {"jammu": 0, "kashmir": 0, "note": "both below the 1979 floor"},
+    "does_not_retract_d078": true
+  },
+  "india_district_finding": {
+    "districts_probed": 100,
+    "districts_above_floor": 82,
+    "top": {"pune": 574946, "hyderabad": 477654, "howrah": 232678, "gurgaon": 184772, "noida": 170497, "coimbatore": 120122, "ernakulam": 108468, "indore": 107909, "nagpur": 96788, "faridabad": 75204, "nashik": 68224, "kanpur": 63370, "thiruvananthapuram": 59960, "bhopal": 50675, "kozhikode": 47197, "daskroi": 24013},
+    "subdivision_vocabulary": {"parganas": 73085, "region": 70887, "dist": 56836, "district": 35210, "circle": 33391, "mandi": 24851, "daskroi": 24013, "taluk": 21865, "zone": 18181, "ward": 116285, "block": 511622},
+    "recommendation": "belongs in a district/city table or a city feature, NEVER in IN_STATES",
+    "defect_asserted": false,
+    "why_not": "no co-occurrence data; cannot show a district-bearing address also carries its state. The France department gap cannot be assumed to transfer to India."
+  },
+  "abbreviation_collision_risk": {
+    "english_word_2letter_keys": {"as": 2743, "an": 3647, "or": 0, "ut": 0},
+    "sum": 6390,
+    "pct_of_visible_token_mass": 0.0066,
+    "verdict": "quantified and dismissed. normalize.py:333 needs the WHOLE component to equal the key, so the reachable set is a strict subset of 6390.",
+    "us_india_collisions_7": ["ar","ga","la","mn","or","tn","ut"],
+    "india_occurrences": {"la": 4473, "ar": 6730, "ga": 4030, "mn": 3750, "or": 0, "ut": 0, "tn": 226332},
+    "d079_total_india_mass_not_rederived": 248315
+  },
+  "bears_on_already_checked": {
+    "REFUTED-1": "NOT supported. My France dig5/row: test_s1 0.0042, test_s2 0.0051, test_s3 0.0053, vs US 0.1097-0.1101 and India 0.0028-0.0114. Matches the work order's quoted 0.004/0.005. REFUTED-1 STANDS AS REFUTED.",
+    "REFUTED-2": "Out of scope, untouched. I quote no French resolution rate and do NOT reconcile the 71.10% vs 97.4380% contradiction. One cross-cutting note: India's component structure is near-perfect (4 exceptions in 10.5M rows), so the France s2/s3 problem is a VOCABULARY problem, not a component-splitting problem."
+  },
+  "gaps": [
+    "No component structure in the profile => no state-resolution rate is derivable. Every state-key count is an upper bound. This is the single largest limitation.",
+    "42 of 86 effective keys unmeasurable (10 codes + 18 names below floor, 14 multiword structurally unmeasurable). Not estimated.",
+    "No co-occurrence data => the district finding cannot be upgraded to a defect claim.",
+    "Semicolon prevalence unmeasurable; has_comma records ',' only. D078 Defect H remains open and is the one mechanism that could break the 4-exception component result.",
+    "Indic script is invisible: TOKEN_RE=[a-z0-9]+ and translit_text is not applied by the profile builder. Indic-script addresses contribute zero tokens; all counts biased downward by an unquantified amount.",
+    "Truncation is two-edged: counts are lower bounds AND the prune(count<=1) runs periodically, so the true floor is above 1979."
+  ],
+  "recommendations": [
+    {"priority": 0, "action": "DO NOT add anything to IN_STATES for India", "expected_effect": "zero gain, and any edit enlarges the D079 collision surface"},
+    {"priority": 1, "action": "Delete LEET['@'] and LEET['$'], or implement the intent as a pre-split replacement at normalize.py:273", "expected_effect": "cosmetic; removes a misleading dead table entry; zero behavioural risk"},
+    {"priority": 2, "action": "Record the India district vocabulary as an owned follow-up for a district/city table, NOT IN_STATES; close the component-structure profile gap first", "expected_effect": "unquantified; do not size this fix from this report"},
+    {"priority": 3, "action": "Do NOT extend LEET with 2/9 and do NOT apply LEET to addresses", "expected_effect": "net-negative; would endanger 859099 occurrences of address token '2' and corrupt b3 -> bg"},
+    {"priority": 4, "action": "NO CHANGE to the len>3 guard in learn_translit.py", "expected_effect": "41 of 86 keys stay unreachable; out of scope, flagged only"},
+    {"priority": 5, "action": "NO CHANGE to or->od / ut->uk, and no removal of the dead 'jammu & kashmir' key", "expected_effect": "churn only; both measure 0 Indian occurrences and the & twin covers the input"},
+    {"priority": 6, "action": "Add a whole-component histogram to build_profile.py", "expected_effect": "highest-leverage item; currently every 'does X resolve' question in the project is unanswerable"}
+  ]
+}

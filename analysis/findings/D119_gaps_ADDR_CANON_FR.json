@@ -1,0 +1,192 @@
+{
+  "id": "D119",
+  "title": "remaining gaps in ADDR_CANON_FR",
+  "deliverable": "analysis_out/findings/D119_gaps_ADDR_CANON_FR.md",
+  "authoritative_artefact": "D119_gaps_ADDR_CANON_FR.md",
+  "headline": "ADDR_CANON_FR has no material gap left. The French function-word finding is real but ~37.5% smaller than established, and its stated mechanism (IDF dilution, blocking harm) is measurably weak to non-existent.",
+  "new_defect_found": true,
+  "new_defect": "normalize.py:333-335 matches a whole comma-component against FR_REGIONS then 'continue's, so the de/la of 'Pays de la Loire', 'Hauts de France', 'Pas de Calais' and 'Ile de France' never reach atoks. The established 16.40% France function-word share is therefore inflated by ~37.5%.",
+  "behavioural_defect_in_ADDR_CANON_FR": false,
+  "baseline": {
+    "source": "analysis_out/profile/test_s{1,2,3}.json, field addr_tokens.France and by_country.France.rows",
+    "fr_rows": 1694445,
+    "fr_rows_by_source": {"test_s1": 259452, "test_s2": 703378, "test_s3": 731615},
+    "listed_addr_token_mass": 11992918,
+    "listed_mass_by_source": {"test_s1": 2253877, "test_s2": 4745780, "test_s3": 4993261},
+    "distinct_tokens_union": 4441,
+    "addr_canon_common_keys": 177,
+    "addr_canon_fr_keys": 68,
+    "common_after_drop_tuple": 170,
+    "effective_france_canon": 219,
+    "tokens_per_fr_row": 7.078,
+    "reproduction_check": "de+la+du+des in test_s2 = 381880+176186+90693+82399 = 731158; 731158/4745780 = 15.41% (matches established exactly)"
+  },
+  "function_word_finding": {
+    "verdict": "CONFIRMED unhandled, but MAGNITUDE CORRECTED and MECHANISM MISDIAGNOSED. Recommend AGAINST adding to ADDR_CANON_FR.",
+    "profile_six_word_mass": 1966401,
+    "profile_six_word_pct_of_listed": 16.396,
+    "region_consumed_de": 527997,
+    "region_consumed_la": 209310,
+    "region_consumption_arithmetic": {
+      "method": "size each FR_REGIONS key by its rarest constituent, since a component match requires all its words",
+      "hauts_de_france": {"sizing_token": "hauts", "count": 289655, "de": 289655},
+      "pays_de_la_loire": {"sizing_token": "pays", "count": 207396, "de": 207396, "la": 207396},
+      "pas_de_calais": {"sizing_token": "pas", "count": 29032, "de": 29032},
+      "ile_de_france": {"sizing_token": "ile", "count": 1914, "de": 1914, "la": 1914},
+      "total_de": 527997,
+      "total_la": 209310,
+      "cross_check_1": "france 293150 vs hauts 289655 + ile 1914 = 291569 (within 0.5%)",
+      "cross_check_2": "loire 334419 vs pays 207396 + atlantique 128348 = 335744 (within 0.4%)"
+    },
+    "pipeline_visible_six_word_mass": 1229094,
+    "pipeline_visible_six_word_pct": 10.248,
+    "overstatement_pct": 37.5,
+    "per_source_pipeline_visible": {
+      "test_s2_profile_four_word": 731158,
+      "test_s2_profile_pct": 15.41,
+      "test_s2_region_consumed": 230650,
+      "test_s2_pipeline_visible_pct": 10.68
+    },
+    "bound_note": "527997/209310 are UPPER bounds on consumption, so pipeline-visible share is a RANGE [10.25%, 16.40%], point estimate 10.25%. Not an exact figure.",
+    "second_order": "non-de/la FR_REGIONS component tokens total 2205764, so the profile denominator is also inflated; both corrections push the true share in the same direction.",
+    "idf_bound": {
+      "formula": "idf = ln(n/df) per (country,tok), n = 1694445 France rows, df <= occurrences",
+      "tokens": {
+        "de": {"occ": 1050023, "idf_lower_bound": 0.4785},
+        "la": {"occ": 481231, "idf_lower_bound": 1.2588},
+        "du": {"occ": 220355, "idf_lower_bound": 2.0399},
+        "des": {"occ": 199183, "idf_lower_bound": 2.1409},
+        "le": {"occ": 11924, "idf_lower_bound": 4.9566},
+        "les": {"occ": 3685, "idf_lower_bound": 6.1308},
+        "rue_handled": {"occ": 728583, "idf_lower_bound": 0.844},
+        "moulin_unhandled": {"occ": 7048, "idf_lower_bound": 5.4824},
+        "rare_occ_3": {"occ": 3, "idf_lower_bound": 13.244}
+      },
+      "ceiling_ln_n_1": 14.343,
+      "fill_null_imputed_idf": 12.0,
+      "conclusion": "de already carries at most 0.4785/13.244 = 3.6% of a rare token's weight. The 'dilutes IDF' rationale is largely self-neutralised."
+    },
+    "blocking_analysis": {
+      "source_lines": "keys.py:39 filters ADDR_GENERIC; keys.py:42 requires len>=3 for alph tokens; S1_MAXCAP=300 at keys.py:26",
+      "de": {"len": 2, "in_ADDR_GENERIC": false, "makes_blocking_key": false, "reason": "len<3", "occ": 1050023},
+      "la": {"len": 2, "in_ADDR_GENERIC": false, "makes_blocking_key": false, "reason": "len<3", "occ": 481231},
+      "du": {"len": 2, "in_ADDR_GENERIC": false, "makes_blocking_key": false, "reason": "len<3", "occ": 220355},
+      "le": {"len": 2, "in_ADDR_GENERIC": false, "makes_blocking_key": false, "reason": "len<3", "occ": 11924},
+      "les": {"len": 3, "in_ADDR_GENERIC": false, "makes_blocking_key": true, "occ": 3685, "dropped_reason": "df 3685 > S1_MAXCAP 300"},
+      "des": {"len": 3, "in_ADDR_GENERIC": true, "makes_blocking_key": false, "reason": "already in ADDR_GENERIC at keys.py:16", "occ": 199183},
+      "conclusion": "ALL SIX are already inert for candidate generation. Adding them buys ZERO recall. The 'blocking caps are healthy' finding is unaffected."
+    },
+    "collision_risk": {
+      "work_order_example": "Rue de la Paix vs Rue de la Reine",
+      "response": "Not a real risk: deleting de/la leaves rue paix vs rue reine, still distinct. The discriminating token is the odonym name, which always survives.",
+      "genuine_residual_class": "article-bearing commune names (Le Mans / Mans)",
+      "measured_exposure_tokens": 15609,
+      "measured_exposure_pct": 0.130,
+      "why_low": "normalize.py:342 removes apostrophes, so l'Eglise -> leglise; most French articles are elided into the following word"
+    },
+    "surviving_justification": "Unweighted a_len/a_inter/a_jac/a_cont (features.py:112,123-124) and a_ratio/a_tsort/a_tset/a_partial (features.py:83-86) ARE compressed. Worked example: {rue,de,la,paix,bordeaux} vs {rue,de,la,liberation,bordeaux} gives a_cont 4/5=0.800 for a non-match; after deletion 2/3=0.667, while a true match stays 1.000. Real but UNMEASUREED in effect - no pair data in profile.",
+    "final_recommendation": "DECLINED for ADDR_CANON_FR. Correct home is a stopword filter on the atoks string in features.py and stage2.py, not 6 entries in a street-type table."
+  },
+  "street_type_gaps": {
+    "note": "All counts are s1+s2+s3 from addr_tokens.France, top 4000 only. Absence means NOT IN THE TOP 4000, never 'does not occur'.",
+    "group_A_unambiguous_way_types": {
+      "total": 26447,
+      "pct_of_listed_mass": 0.2205,
+      "mark": "CONFIRMED unhandled",
+      "tokens": {
+        "cour": 9403, "clos": 3588, "passage": 3167, "lotissement": 1788,
+        "mail": 1731, "chaussee": 1125, "hameau": 1067, "esplanade": 878,
+        "sentier": 618, "ruelle": 593, "parvis": 587, "sente": 562,
+        "venelle": 481, "entree": 445, "rond": 411, "passerelle": 261,
+        "allees": 187
+      }
+    },
+    "group_B_likely_ambiguous_noun_sense": {
+      "total": 40002,
+      "pct_of_listed_mass": 0.3335,
+      "mark": "LIKELY",
+      "tokens": {
+        "moulin": 7048, "parc": 4244, "pont": 3866, "port": 3825,
+        "fontaine": 3553, "cite": 2546, "gare": 1735, "jardin": 1644,
+        "chateau": 1640, "tour": 1465, "chapelle": 1366, "domaine": 1194,
+        "palais": 1124, "canal": 1004, "universite": 879, "villa": 594,
+        "promenade": 536, "faculte": 337, "halle": 291, "manoir": 288,
+        "campus": 261
+      }
+    },
+    "group_AB_combined": {"total": 66449, "pct_of_listed_mass": 0.554},
+    "largest_unhandled_candidate": {"tok": "cour", "mass": 9403, "pct": 0.078, "note": "still smaller than already-handled 'place' 13363"},
+    "handled_for_scale": {
+      "rue": 728583, "saint": 141364, "avenue": 126497, "boulevard": 38275,
+      "impasse": 21102, "route": 17932, "allee": 17779, "chemin": 15244,
+      "place": 13363, "cours": 8761, "quai": 8089, "sainte": 7486,
+      "square": 4933, "residence": 4748, "faubourg": 3046, "fort": 1923,
+      "batiment": 1978, "lieu": 181, "zone": 26
+    },
+    "not_street_types_do_not_add": {
+      "teste": {"mass": 72268, "is": "La Teste-de-Buch, a commune near Bordeaux"},
+      "buch": {"mass": 72331, "is": "same compound"},
+      "cap": {"mass": 61600, "is": "Cap Ferret, headland/commune"},
+      "ferret": {"mass": 60275, "is": "same compound"},
+      "evidence": "near-exact pairing teste 72268 vs buch 72331 and cap 61600 vs ferret 60275 is the signature of hyphenated compounds split by TOKEN_RE=[a-z0-9]+ at build_profile.py:28. The pipeline also splits them (it strips accents at normalize.py:317, not hyphens), so these are real pipeline tokens - but they are place names.",
+      "also_excluded_name_elements": {"moulin": 7048, "fontaine": 3553, "jardin": 1644, "chateau": 1640, "tour": 1465, "chapelle": 1366, "palais": 1124},
+      "also_excluded_shared_or_state": {"maine": {"fr": 645, "us": 16849}, "canal": {"fr": 1004, "us": 2895, "in": 5491}},
+      "also_excluded_business_name_nouns_fr_only": {"chevaux": 416, "cheval": 385, "renard": 315, "lapin": 203, "rat": 231, "bouvier": 81, "poulain": 242, "tonkin": 263, "toile": 90, "laine": 90, "peau": 23},
+      "headline": "teste + cap = 133868 = 1.116% of listed mass, LARGER than the entire Group A + Group B street-type gap (66449 = 0.554%) combined."
+    }
+  },
+  "tokenizer_mismatch": {
+    "mechanism": "build_profile.py:28 tokenises the RAW address; normalize.py:317 applies strip_accents FIRST. Accents are separators in the profile and removed in the pipeline.",
+    "accent_split_evidence": {
+      "chaussee": {"head_fragment_chauss": 2372, "merged_form": 1125, "true_pipeline_mass_estimate": 3497, "undercount_factor": 3.1},
+      "cite": {"head_fragment_cit": 5580, "merged_form": 2546},
+      "chateau": {"head_fragment_ch": 12774, "merged_form": 1640},
+      "eglise": {"head_fragment_glise": 378, "merged_form": 747},
+      "ecole": {"head_fragment_col": 125, "merged_form": 1560},
+      "egalite": {"head_fragment_galit": 97, "merged_form": 575},
+      "marche": {"head_fragment_march": 450, "merged_form": 370},
+      "sante": {"head_fragment_sant": 80, "merged_form": 250}
+    },
+    "consequence": "chaussee is the worst-sized Group A candidate: 3.1x undercount. Practical rule: treat any candidate evidenced by a token of 4 characters or fewer as unverified.",
+    "per_source_form_stability": {
+      "s2_over_s3_ratio_range": "0.86-1.08 for every Group A/B candidate, so the written form is stable across query sources",
+      "s1_over_s2_ratio": "uniformly ~0.41, a ROW-COUNT artefact (259452/703378 = 0.369), NOT a form change",
+      "exceptions": "chaussee s1/s2 = 0.138 and cite 0.117, low because their fragments chauss/cit concentrate in s1"
+    }
+  },
+  "ranked_recommendations": [
+    {"rank": 1, "proposal": "Add \"cour\": \"crs\" to ADDR_CANON_FR", "evidence": "cour 9403 unhandled vs cours 8761 -> crs handled; the long form is mapped, the abbreviation is not", "impact_tokens": 9403, "impact_pct": 0.078, "mark": "LIKELY"},
+    {"rank": 2, "proposal": "Add self-maps: passage, lotissement, hameau, esplanade, sentier, ruelle, parvis, venelle, mail, allees, passerelle, rond", "evidence": "Group A section 3.2", "impact_tokens": 17044, "impact_pct": 0.142, "mark": "CONFIRMED unhandled / LIKELY useful"},
+    {"rank": 3, "proposal": "Add chaussee:chaussee but re-derive its size after fixing build_profile.py", "evidence": "true mass ~3497 not 1125, a 3.1x undercount", "mark": "LIKELY"},
+    {"rank": 4, "proposal": "Add clos, sente, entree", "evidence": "Group A but each is also a common noun", "impact_tokens": 4595, "impact_pct": 0.038, "mark": "SPECULATIVE"},
+    {"rank": 5, "proposal": "Group B: parc, pont, port, cite, gare, villa, campus etc", "evidence": "noun sense dominates for several; moulin/fontaine/jardin are name elements", "impact_tokens": 40002, "impact_pct": 0.334, "mark": "SPECULATIVE"},
+    {"rank": 6, "proposal": "DO NOT add de/la/le/les to ADDR_CANON_FR", "evidence": "IDF already discounts them ~28x, they cannot reach blocking at all, and la/le/les carry an article-collision class of 15609 tokens (0.13%)", "mark": "DECLINED"},
+    {"rank": 7, "proposal": "DO NOT add teste, buch, cap, ferret, moulin, fontaine, jardin, chateau, canal, maine, or any animal/colour noun", "evidence": "place names, name elements, or shared with US/India", "mark": "CONFIRMED NEGATIVE"},
+    {"rank": 8, "proposal": "Fix build_profile.py:28 to apply strip_accents before findall", "evidence": "corrects chauss/cit/ch/galit/col and re-sizes every short token; prerequisite for trusting future mining of this table", "mark": "CONFIRMED - highest value per line"},
+    {"rank": 9, "proposal": "Add a state_resolved per-country counter to the profile builder", "evidence": "would have made section 1 exact instead of a range", "mark": "SPECULATIVE"}
+  ],
+  "no_change_needed": {
+    "dead_keys": ["avn", "bld", "boul", "chem", "fbg", "fg", "lieudit", "numero", "null", "prof", "za", "zi", "zac"],
+    "count": 13,
+    "rationale": "inert, zero cost, and they make the table look complete. Do not delete: churn for no measurable gain."
+  },
+  "gaps_and_limits": [
+    "No pair-level data in the profile, so the effect of function-word deletion on a_cont/a_jac cannot be measured. This is why recommendation 6 is declined rather than promoted.",
+    "The section 1 region-consumption figures are upper bounds, so the pipeline-visible function-word share is a RANGE [10.25%, 16.40%], not a point.",
+    "Component boundaries are destroyed by build_profile.py:126; region-component consumption is inferred from token co-occurrence, not observed directly.",
+    "Street-type vs noun sense is not decidable from token counts; the Group A/B split is linguistic judgement, marked as such.",
+    "addr_tokens is the top 4000 per country per file and build_profile.py:130-133 prunes hapax tokens, so no 'does not occur' claim is made anywhere.",
+    "Train-side France is unmeasurable: by_country.France.rows = 0 in all three train files.",
+    "No raw *.tsv was opened and no network was used. All figures come from analysis_out/profile/test_s{1,2,3}.json or quoted lines of _upstream/src/*.py."
+  ],
+  "cross_check_against_already_checked": {
+    "REFUTED_1_french_postcodes": "not re-derived; this task does not touch pin. No claim either way.",
+    "REFUTED_2_FR_REGIONS_coverage": "not re-derived; NO France-wide state-resolution rate is quoted. FR_REGIONS is used only to establish which tokens are discarded before tokenisation, which is a statement about normalize.py:333-335, not about region adequacy. The 71.10%/97.44% dispute is untouched and remains open.",
+    "function_word_finding": "direction CONFIRMED, magnitude CORRECTED (16.40% -> ~10.25% pipeline-visible), mechanism MISDIAGNOSED (IDF weak, blocking nil).",
+    "D126_component_ordering": "not re-examined, as instructed.",
+    "ADDR_CANON_COMMON": "not audited; a02 owns it. Only cross-dictionary fact relied on is the overlay {**COMMON-7, **FR} at normalize.py:321."
+  }
+}
+
+
+

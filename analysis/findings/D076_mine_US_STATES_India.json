@@ -1,0 +1,171 @@
+{
+  "task_id": "D076",
+  "family": "B-dictionary",
+  "title": "mine evidence to extend US_STATES for India",
+  "headline": "India's state table needs NO extension: all 34 two-letter state codes present in India addresses resolve via the self-map loop (3,188,831/3,188,831 = 100.0%), and every IN_STATES full name that occurs is present. The real gap is ADDR_CANON_COMMON vocabulary: 1,118 distinct India address words worth 27,883,154 listed occurrences (28.6% of India address-token mass) have no entry. Two NEW defects found outside the India tables: LEET corrupts ordinals in the name field (France 1,111 occurrences = 20.9% of France's mixed name tokens), and France direction words are unhandled with 'est' actively mis-mapped to 'estate' (154,955 occurrences).",
+  "primary_number": {
+    "value": 27883154,
+    "label": "listed India address-token occurrences with no entry in ADDR_CANON_COMMON or IN_STATES",
+    "field": "addr_tokens[India] summed over all 6 profile files",
+    "arithmetic": "sum of counts of alpha-only tokens len>=3, count>=5000, absent from both tables"
+  },
+  "verdict_on_work_order": "IN_STATES is complete for this dataset. No state entries should be added.",
+  "new_defect_found": true,
+  "corpus_rows": {"US": 11990643, "India": 10544085, "France": 1694445, "total": 24229173,
+    "field": "by_country[c].rows summed over 6 profile files"},
+  "findings": {
+    "F2_india_state_codes_resolve_100pct": {
+      "state_code_occurrences_total": 3188831,
+      "state_code_occurrences_resolved": 3188831,
+      "pct_resolved": 100.0,
+      "codes_probed": 34,
+      "self_map_loop": "normalize.py:250-254",
+      "idempotent": true,
+      "in_states_key_count": 86,
+      "field": "addr_tokens[India]",
+      "top_codes": {"mh": 700244, "dl": 432705, "ka": 275043, "up": 269710, "tn": 226332,
+        "wb": 205206, "gj": 205186, "tg": 160192, "hr": 128707, "rj": 114311,
+        "kl": 101292, "mp": 85555, "br": 82237, "ap": 67426, "pb": 46654, "od": 40056}
+    },
+    "F3_dead_in_states_keys": {
+      "dead_key_count": 29,
+      "total_keys": 86,
+      "dead_keys": ["assam","cg","chattisgarh","chhattisgarh","jammu & kashmir","jh",
+        "jharkhand","jk","ladakh","lakshadweep","ld","manipur","meghalaya","mizoram",
+        "ml","mz","nagaland","nl","or","pondicherry","puducherry","py","sikkim","tr",
+        "tripura","uk","ut","uttarakhand","uttaranchal"],
+      "states_reachable_only_via_code": [
+        {"state": "orissa/odisha", "code": "od", "code_occurrences": 40056},
+        {"state": "sikkim", "code": "sk", "code_occurrences": 5447},
+        {"state": "ladakh", "code": "la", "code_occurrences": 4473},
+        {"state": "manipur", "code": "mn", "code_occurrences": 3750},
+        {"state": "assam", "code": "as", "code_occurrences": 2743}
+      ],
+      "occurrences_riding_on_selfmap": 56468,
+      "field": "addr_tokens[India]"
+    },
+    "F4_india_address_vocabulary_gap": {
+      "distinct_unhandled_tokens": 1118,
+      "unhandled_occurrences": 27883154,
+      "denominator_listed_india_addr_token_occurrences": 97463176,
+      "share_pct": 28.6,
+      "denominator_is_lower_bound": true,
+      "filter": "alpha-only, len>=3, count>=5000, absent from ADDR_CANON_COMMON and IN_STATES",
+      "candidates": [
+        {"token": "block", "count": 511622, "proposed": "blk", "status": "CONFIRMED"},
+        {"token": "vihar", "count": 241837, "proposed": "vihar", "status": "CONFIRMED"},
+        {"token": "tower", "count": 221872, "proposed": "twr", "status": "LIKELY"},
+        {"token": "marg", "count": 187669, "proposed": "rd", "status": "CONFIRMED"},
+        {"token": "enclave", "count": 133566, "proposed": "encl", "status": "LIKELY"},
+        {"token": "area", "count": 129746, "proposed": "area", "status": "LIKELY"},
+        {"token": "layout", "count": 128105, "proposed": "layout", "status": "LIKELY"},
+        {"token": "ward", "count": 116285, "proposed": "ward", "status": "LIKELY"},
+        {"token": "society", "count": 115572, "proposed": "soc", "status": "LIKELY"},
+        {"token": "gali", "count": 106324, "proposed": "ln", "status": "CONFIRMED"},
+        {"token": "chs", "count": 104022, "proposed": "soc", "status": "LIKELY"},
+        {"token": "market", "count": 112259, "proposed": "mkt", "status": "LIKELY"},
+        {"token": "bagh", "count": 67177, "proposed": "garden", "status": "LIKELY"},
+        {"token": "chowk", "count": 66635, "proposed": "sq", "status": "LIKELY"},
+        {"token": "sr", "count": 61360, "proposed": "south", "status": "LIKELY"},
+        {"token": "tal", "count": 57402, "proposed": "taluk", "status": "CONFIRMED"},
+        {"token": "sy", "count": 54640, "proposed": "sector", "status": "LIKELY"},
+        {"token": "extension", "count": 54317, "proposed": "extn", "status": "LIKELY"},
+        {"token": "gate", "count": 42108, "proposed": "gate", "status": "LIKELY"}
+      ],
+      "field": "addr_tokens[India]"
+    },
+    "F5_new_defect_leet_ordinal_corruption": {
+      "is_new": true,
+      "code_ref": "normalize.py:279-281 (_name_tokens applies LEET to any alpha+digit token)",
+      "leet_mapped_chars": "$01345678@",
+      "leet_unmapped_digits": ["2", "9"],
+      "corrupted_occurrences_total": 2171,
+      "by_country": {
+        "France": {"corrupted": 1111, "mixed_name_token_occurrences": 5307, "pct_of_mixed": 20.93, "rows": 1694445, "pct_of_rows": 0.066},
+        "US": {"corrupted": 679, "mixed_name_token_occurrences": 90100, "pct_of_mixed": 0.8},
+        "India": {"corrupted": 381, "mixed_name_token_occurrences": 80735, "pct_of_mixed": 0.5}
+      },
+      "tokens": [
+        {"country": "France", "token": "3eme", "count": 748, "after_leet": "eeme", "nonword": true},
+        {"country": "France", "token": "1er", "count": 131, "after_leet": "ler", "nonword": true},
+        {"country": "France", "token": "3e", "count": 121, "after_leet": "ee", "nonword": false},
+        {"country": "France", "token": "1ere", "count": 102, "after_leet": "lere", "nonword": false},
+        {"country": "France", "token": "7eme", "count": 9, "after_leet": "teme", "nonword": true},
+        {"country": "India", "token": "1st", "count": 381, "after_leet": "lst", "nonword": true},
+        {"country": "US", "token": "1st", "count": 679, "after_leet": "lst", "nonword": true}
+      ],
+      "path_disagreement": {
+        "note": "normalize_address does NOT apply LEET, so identical strings normalise differently on name vs address paths",
+        "verified": "LEET not in normalize_address.__code__.co_names",
+        "france_addr_1er": 1963, "france_addr_3eme": 350,
+        "france_name_1er": 131, "france_name_3eme": 748
+      },
+      "field": "name_tokens[country]"
+    },
+    "F6_new_defect_france_direction_words": {
+      "is_new": true,
+      "code_ref": "ADDR_CANON_FR normalize.py:199-214; canon built at normalize.py:321",
+      "removal_tuple": ["st","ste","dr","n","s","e","w"],
+      "unmapped_occurrences": 154955,
+      "wrongly_mapped_occurrences": 469,
+      "words": [
+        {"word": "nord", "france_count": 152011, "canon_fr": null, "status": "UNMAPPED"},
+        {"word": "sud", "france_count": 1254, "canon_fr": null, "status": "UNMAPPED"},
+        {"word": "ouest", "france_count": 1221, "canon_fr": null, "status": "UNMAPPED"},
+        {"word": "est", "france_count": 469, "canon_fr": "estate", "status": "WRONGLY_MAPPED"}
+      ],
+      "root_cause": "'est' is not in the removal tuple, so ADDR_CANON_COMMON['est']='estate' (normalize.py:186) survives into the French canon",
+      "note": "nord is a FR_REGIONS key -> hdf, so it resolves as a whole-component state but is never canonicalised as a token inside a longer component",
+      "field": "addr_tokens[France]"
+    },
+    "F7_invariant_rows_eq_addrempty_plus_hascomma": {
+      "cells_tested": 15,
+      "cells_holding": 10,
+      "cells_breaking": 5,
+      "breaking_cells": [
+        {"file": "test_s2", "country": "France", "rows": 703378, "addr_empty": 21537, "has_comma": 681661, "comma_free_nonempty": 180},
+        {"file": "test_s3", "country": "France", "rows": 731615, "addr_empty": 21541, "has_comma": 709921, "comma_free_nonempty": 153},
+        {"file": "test_s2", "country": "India", "rows": 2312565, "addr_empty": 52764, "has_comma": 2259799, "comma_free_nonempty": 2},
+        {"file": "train_s3", "country": "India", "rows": 2115547, "addr_empty": 64948, "has_comma": 2050598, "comma_free_nonempty": 1},
+        {"file": "test_s3", "country": "India", "rows": 2405000, "addr_empty": 59240, "has_comma": 2345759, "comma_free_nonempty": 1}
+      ],
+      "total_comma_free_rows": 337,
+      "of_which_france": 333,
+      "other_invariants_verified": {
+        "len_hist_sums_to_rows": "all 15 cells",
+        "country_rows_sums_to_rows": "all 6 files"
+      },
+      "field": "by_country[c].rows, .addr_empty, .has_comma"
+    }
+  },
+  "recommendations": [
+    {"priority": 1, "action": "Do NOT extend IN_STATES", "effect": "no change; 100% of state-code occurrences already resolve and 29/86 keys are dead"},
+    {"priority": 1, "action": "Add France direction words nord/sud/ouest/est to ADDR_CANON_FR and add 'est' to the removal tuple at normalize.py:321", "effect": "covers 154,955 occurrences, 469 currently wrongly mapped to 'estate'"},
+    {"priority": 1, "action": "Guard LEET in _name_tokens against ordinal tokens", "effect": "fixes 2,171 occurrences corpus-wide, 1,111 French"},
+    {"priority": 1, "action": "Extend ADDR_CANON_COMMON with top India region words (marg,gali,tal,block,vihar,tower,ward,layout,enclave,society,chs,chowk,bagh,sy,sr,market)", "effect": "recovers a large share of 27,883,154 unhandled occurrences; validate on held-out split first"},
+    {"priority": 2, "action": "Add FR_REGIONS to the self-map loop at normalize.py:252", "effect": "zero measured score effect; correctness only"},
+    {"priority": 3, "action": "Investigate the 337 non-empty comma-free address rows (333 French)", "effect": "structural edge case; each becomes a single address component"}
+  ],
+  "gaps": [
+    "Token denominators are lower bounds: build_profile.py prunes count<=1 every 8 chunks and truncates to TOPN=4000, so 28.6% is an upper bound on the unhandled share",
+    "No component-level field, so token co-occurrence cannot be proven; F4 pairing claims are LIKELY not CONFIRMED except where the existing table asserts the relationship",
+    "No co-occurrence counts of any kind; only marginal token frequencies are derivable",
+    "The identity of the 337 comma-free rows is unknown (no address text in the profile)",
+    "All France rows are in test_s{1,2,3}; no France training data exists to validate against"
+  ],
+  "self_corrections": [
+    "First LEET probe tested 'd in LEET' on a str.maketrans dict (ordinal keys) and wrongly concluded all digits were unmapped. Reading actual LEET keys [36,48,49,51,52,53,54,55,56,64] = '$01345678@' showed only 2 and 9 are unmapped and the real defect is over-eager mapping of 1 and 3."
+  ],
+  "already_checked_respected": {
+    "refuted_1_france_postcode_loss": "not re-derived. My France findings are token-level LEET and direction-word defects, orthogonal to the pin guard. I do NOT support refuted-1.",
+    "refuted_2_fr_region_gap": "not re-derived. F3 corroborates only that the self-map loop is load-bearing for India, consistent with refuted-2's zero-measurable-effect conclusion for France."
+  },
+  "inputs_read": ["train_s1.json","train_s2.json","train_s3.json","test_s1.json","test_s2.json","test_s3.json"],
+  "constraints_respected": {
+    "dataset_read_only": true,
+    "upstream_read_only": true,
+    "only_profile_jsons_read": true,
+    "network_access": "none",
+    "files_written": ["analysis_out/findings/D076_mine_US_STATES_India.md", "analysis_out/findings/D076_mine_US_STATES_India.json"]
+  }
+}

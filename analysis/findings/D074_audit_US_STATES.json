@@ -1,0 +1,249 @@
+{
+  "task_id": "D074",
+  "family": "B-dictionary",
+  "title": "audit current US_STATES",
+  "question_answered": "Entry count, distinct canonical values, and structural defects (missing self-maps, empty values, overlaps, country scoping) of US_STATES as it exists today. Source lines quoted; no changes proposed to the dictionary.",
+  "source": "_upstream/src/normalize.py lines 216-229 (literal), 250-254 (self-map loop), 318/331-335 (matcher). Read-only: file text exec'd in memory with polars stubbed; no import, no __pycache__ written; no raw TSV opened.",
+  "headline": "US_STATES is structurally perfect: 52 literal entries, 52 distinct canonical values, zero duplicate/empty/malformed entries, all 50 states + dc + pr present, and all 52 self-maps present at runtime (104 entries). The missing-self-map defect is FR_REGIONS-only. Every real defect is in the MATCHING rule at normalize.py:333 (whole-component exact match), not in the dictionary contents. The worst is NEW: a city component equal to a single-word state name is consumed as the state AND deleted from the token stream, and can make a wrong state appear.",
+  "entry_count": {
+    "literal": 52,
+    "runtime_after_selfmap_loop": 104,
+    "source_line_range": "216-229",
+    "extraction_method": "exec of file text truncated immediately before 'STATE_MAPS = {' to capture the pre-loop literal"
+  },
+  "distinct_canonical_values": 52,
+  "coverage": {
+    "reference_state_codes": 50,
+    "states_missing": [],
+    "extra_codes_beyond_50": ["dc", "pr"],
+    "arithmetic": "50 reference codes - 0 missing = 50 present; set difference = [dc, pr]"
+  },
+  "key_shape": {
+    "single_word_keys": 40,
+    "multi_word_keys": 12,
+    "multi_word_key_list": ["district of columbia","new hampshire","new jersey","new mexico","new york","north carolina","north dakota","puerto rico","rhode island","south carolina","south dakota","west virginia"],
+    "multi_word_note": "These can never appear as a single addr_tokens entry because build_profile.py:28 defines TOKEN_RE = [a-z0-9]+. Their absence from addr_tokens is a tokenisation artifact, not a data gap."
+  },
+  "self_maps": {
+    "in_literal": 0,
+    "at_runtime": 52,
+    "codes_lacking_selfmap": [],
+    "loop_source": "normalize.py:252-254  for _m in (US_STATES, IN_STATES): for _v in list(_m.values()): _m.setdefault(_v, _v)",
+    "state_maps_aliases_same_object": true,
+    "comparison": {
+      "US_STATES": {"literal": 52, "runtime": 104, "lacking_selfmap": []},
+      "IN_STATES": {"literal": 49, "runtime": 86, "lacking_selfmap": []},
+      "FR_REGIONS": {"literal": 14, "runtime": 14, "lacking_selfmap": ["hdf", "idf", "naq", "pdl"]}
+    },
+    "conclusion": "The known missing-self-map defect applies to FR_REGIONS only. US_STATES self-maps are complete."
+  },
+  "integrity_checks_all_zero": {
+    "duplicate_values": 0,
+    "empty_values": 0,
+    "empty_keys": 0,
+    "whitespace_anomalies": 0,
+    "non_string_values": 0,
+    "non_lowercase_keys": 0,
+    "keys_altered_by_ck_cleaner": 0
+  },
+  "overlaps_and_scoping": {
+    "US_keys_inter_IN_keys": [],
+    "US_values_inter_IN_values": ["ar", "ga", "la", "mn", "tn"],
+    "US_keys_inter_FR_keys": [],
+    "US_values_inter_FR_values": [],
+    "country_scoping": "STATE_MAPS is country-keyed at normalize.py:318 (smap = STATE_MAPS.get(country, {})). US_STATES is unreachable from France or India rows. SOUND - do not change.",
+    "US_state_names_in_france_token_stream": {"maine": [114, 244, 287], "texas": [38, 90, 88], "order": ["test_s1", "test_s2", "test_s3"]},
+    "US_state_names_in_india_token_stream": "none in any split",
+    "US_codes_that_are_ADDR_CANON_COMMON_keys": {"ct": "ct", "fl": "fl", "mt": "mt", "ne": "ne", "wy": "way"},
+    "US_codes_corrupted_by_ADDR_CANON_COMMON": {"wy": "way"},
+    "US_literal_keys_inter_NAME_CANON_keys": [],
+    "US_runtime_keys_inter_NAME_CANON_keys": ["co", "de", "la", "md", "pa"],
+    "name_canon_verdict": "not a defect - NAME_CANON applies to business names (normalize.py:281), ADDR_CANON_COMMON to addresses (normalize.py:347); they never meet"
+  },  "structural_defects": [
+    {
+      "id": "A",
+      "name": "whole-component exact match loses the state when a ZIP shares the component",
+      "severity": "high",
+      "confidence": "CONFIRMED",
+      "evidence": "normalize.py:333 `if ck in smap` tests the ENTIRE component only",
+      "hits_full_names_too": true,
+      "demos": [
+        {"input": "175 Boulevard, Miami, FL", "state": "fl", "toks": ["175","blvd","miami"]},
+        {"input": "175 Boulevard, Miami, FL 33101", "state": "", "toks": ["175","blvd","miami","fl","33101"]},
+        {"input": "500 Peachtree St, Atlanta, Georgia", "state": "ga", "toks": ["500","peachtree","st","atlanta"]},
+        {"input": "500 Peachtree St, Atlanta, Georgia 30303", "state": "", "toks": ["500","peachtree","st","atlanta","georgia","30303"]},
+        {"input": "123 Main St, Springfield, Illinois 62704", "state": "", "toks": ["123","main","st","springfield","illinois","62704"]},
+        {"input": "123 Main St, Springfield, IL 62704", "state": "", "toks": ["123","main","st","springfield","il","62704"]}
+      ],
+      "exposure_metric": "by_country[US].dig5 / rows (OCCURRENCES per row, not a row fraction)",
+      "exposure": {"test_s1": 0.1098, "test_s2": 0.1097, "test_s3": 0.1101},
+      "arithmetic": "72802/663106=0.1098; 205296/1871330=0.1097; 214300/1945701=0.1101",
+      "row_level_impact": "GAP - not measurable; addr_tokens discards component boundaries. build_profile.py:115 makes dig5 an occurrence count, so the affected row share is <= 0.1098 and unknown."
+    },
+    {
+      "id": "B",
+      "name": "bare-word components consumed as states and DELETED from the token stream",
+      "severity": "high",
+      "confidence": "CONFIRMED behaviour, LIKELY as a real-data problem",
+      "mechanism": "the matched component is `continue`d at normalize.py:335 so its tokens are never emitted; city_comps is emptied too",
+      "affected_two_letter_codes": ["in", "or", "de", "la", "co", "md", "pa", "me"],
+      "demos": [
+        {"input": "12 High St, in", "state": "in", "toks": ["12","high","st"], "deleted": "in"},
+        {"input": "12 High St, or", "state": "or", "toks": ["12","high","st"], "deleted": "or"},
+        {"input": "12 High St, de", "state": "de", "toks": ["12","high","st"], "deleted": "de"},
+        {"input": "12 High St, la", "state": "la", "toks": ["12","high","st"], "deleted": "la"},
+        {"input": "12 High St, co", "state": "co", "toks": ["12","high","st"], "deleted": "co"},
+        {"input": "12 High St, md", "state": "md", "toks": ["12","high","st"], "deleted": "md"},
+        {"input": "12 High St, pa", "state": "pa", "toks": ["12","high","st"], "deleted": "pa"},
+        {"input": "12 High St, me", "state": "me", "toks": ["12","high","st"], "deleted": "me"}
+      ],
+      "raw_token_occurrences": {
+        "in": [24898, 68183, 3117], "or": [15092, 41455, 1842], "md": [20137, 55045, 2288],
+        "de": [5225, 14353, 2821], "me": [6062, 16607, 694], "la": [4359, 11838, 6523],
+        "co": [2937, 7397, 1885], "pa": [6036, 16461, 759],
+        "order": ["test_s1", "test_s2", "test_s3"], "total": [84746, 231339, 19929],
+        "field": "addr_tokens['US']"
+      },
+      "row_level_impact": "GAP - token occurrences are not misfire counts"
+    },
+    {
+      "id": "C",
+      "name": "ADDR_CANON_COMMON hijacks the wy state code (wy -> way)",
+      "severity": "low-medium",
+      "confidence": "CONFIRMED",
+      "evidence": "normalize.py:176 \"way\": \"way\", \"wy\": \"way\", in ADDR_CANON_COMMON",
+      "demos": [
+        {"input": "12 Elm St, wy", "state": "wy", "toks": ["12","elm","st"]},
+        {"input": "12 Elm St, wy 10001", "state": "", "toks": ["12","elm","st","way","10001"]}
+      ],
+      "occurrences": {"wy": [1336, 3675, null], "way": [15385, 41996, 43822], "order": ["test_s1","test_s2","test_s3"]},
+      "absent_note": "wy absent in test_s3 means count <= floor 274, NOT zero"
+    },    {
+      "id": "D",
+      "name": "NEW: a city component equal to a single-word state name is eaten, producing a WRONG state",
+      "severity": "high",
+      "confidence": "CONFIRMED behaviour, LIKELY real-data problem; row count is a GAP",
+      "mechanism": "40 of the 52 keys are single-word state names, many of which are common US city names; the component is matched and then `continue`d, so the city token is deleted from toks AND city_comps",
+      "demos": [
+        {"input": "100 Main St, Washington", "state": "wa", "toks": ["100","main","st"], "city": []},
+        {"input": "100 Main St, Georgia", "state": "ga", "toks": ["100","main","st"], "city": []},
+        {"input": "100 Main St, Texas", "state": "tx", "toks": ["100","main","st"], "city": []},
+        {"input": "100 Main St, Virginia", "state": "va", "toks": ["100","main","st"], "city": []},
+        {"input": "100 Main St, Oklahoma", "state": "ok", "toks": ["100","main","st"], "city": []},
+        {"input": "100 Main St, Indiana", "state": "in", "toks": ["100","main","st"], "city": []},
+        {"input": "1 A St, Paris, Texas", "state": "tx", "toks": ["1","a","st","paris"], "city": ["paris"]}
+      ],
+      "compound_failure_three_errors_one_row": {
+        "input": "500 Peachtree St, Washington, Georgia 30303",
+        "state": "wa",
+        "truth": "the row is Georgia (ga)",
+        "toks": ["500","peachtree","st","georgia","30303"],
+        "city": [],
+        "errors": ["wrong state (wa instead of ga)", "city token 'washington' deleted from toks", "true state ga not captured because of defect A"]
+      },
+      "headline_claim": "Appending one ZIP to a Georgia address flips the resolved state from ga to wa and destroys the city field. A postcode can change the resolved state to a different, WRONG one - strictly worse than a missing state.",
+      "exposure_occurrences": {
+        "city_like_19_names_total": [16317, 42731, 831109],
+        "washington": [6830, 18051, 76647],
+        "texas": [343, 898, 183097],
+        "virginia": [2248, 5953, 109625],
+        "indiana": [306, 806, 68790],
+        "oklahoma": [null, 271, 31397],
+        "order": ["test_s1", "test_s2", "test_s3"],
+        "field": "addr_tokens['US']"
+      },
+      "row_level_impact": "GAP - build_profile.py:126-127 discards component boundaries, so a 'washington' occurrence may be the state, the city, or a street name. Deliberately not converted to a row count."
+    },
+    {
+      "id": "E",
+      "name": "NEW: no break - the LAST matching component wins, so the result is position-dependent",
+      "severity": "medium",
+      "confidence": "CONFIRMED behaviour",
+      "mechanism": "normalize.py:334 assigns state = smap[ck] on every match with no break, so a later match silently overwrites an earlier one",
+      "demos": [
+        {"input": "1 A St, Washington, Texas", "state": "tx"},
+        {"input": "1 A St, Texas, Washington", "state": "wa"},
+        {"input": "1 A St, Virginia, West Virginia", "state": "wv"},
+        {"input": "1 A St, New Delhi, Delhi", "country": "India", "state": "dl"},
+        {"input": "1 A St, Orissa, Odisha", "country": "India", "state": "od"}
+      ],
+      "note": "Last-wins is defensible under a canonical convention but is currently coincidental, not enforced. Reordering two components flips the resolved state."
+    },
+    {
+      "id": "F",
+      "name": "NEW: punctuated D.C. yields a confidently WRONG state instead of an empty one",
+      "severity": "medium",
+      "confidence": "CONFIRMED",
+      "mechanism": "the ck cleaner turns 'D.C.' into 'd c', which is not a key, so the real state is lost - but the preceding component 'Washington' still matches and emits wa",
+      "demos": [
+        {"input": "100 Main St, Washington, D.C.", "state": "wa", "toks": ["100","main","st","d","c"], "city": ["d c"]},
+        {"input": "100 Main St, Washington, DC", "state": "dc", "toks": ["100","main","st"], "city": []}
+      ],
+      "generalisation": "When a real state component fails to match, defect D converts the failure from an empty state into a wrong state."
+    }
+  ],  "vocabulary_exposure": {
+    "us_rows": {"test_s1": 663106, "test_s2": 1871330, "test_s3": 1945701},
+    "country_sum_equals_rows": true,
+    "country_sum_arithmetic_test_s1": "663106+259452+809986 = 1732544 = rows",
+    "has_comma_rate": {"test_s1": 1.0, "test_s2": 0.9706, "test_s3": 0.9716},
+    "code_tokens_present": {"test_s1": 45, "test_s2": 45, "test_s3": 38, "of": 52},
+    "code_token_occurrences": {"test_s1": 680728, "test_s2": 1876297, "test_s3": 154358},
+    "codes_absent_from_top4000": {
+      "test_s1": ["hi","mi","ms","nh","nj","nv","pr"],
+      "test_s2": ["hi","mi","ms","nh","nj","nv","pr"],
+      "test_s3": ["ak","ga","hi","id","mi","ms","nh","nj","nv","pr","ri","sc","sd","wy"]
+    },
+    "single_word_state_names_present": {"test_s1": 32, "test_s2": 32, "test_s3": 38, "of": 40},
+    "single_word_state_name_occurrences": {"test_s1": 19188, "test_s2": 50448, "test_s3": 1557020},
+    "dig5_per_row": {"test_s1": 0.1098, "test_s2": 0.1097, "test_s3": 0.1101},
+    "dig6_per_row": {"test_s1": 0.0012, "test_s2": 0.0143, "test_s3": 0.0138},
+    "top4000_floor_count": {"test_s1": 101, "test_s2": 258, "test_s3": 274},
+    "absent_means": "count <= top-4000 floor, NOT zero occurrences (build_profile.py:27 TOPN=4000, prune() lines 45-49 drops count<=1 every 8 chunks)",
+    "correction_to_prior_draft": "A pre-existing draft of D074 claimed '45 of 52' code tokens present for all three test splits. Recount gives 45/45/38; test_s3 has 14 absent codes, not 7. Its test_s3 occurrence figure (154358) was correct, so the error was in the type count only."
+  },
+  "dictionary_gaps": {
+    "unmapped_aliases_observed": {
+      "penn": {"test_s1": 163, "test_s2": 467, "test_s3": 497, "in_US_STATES": false, "confidence": "LIKELY", "note": "standard PA abbreviation; surrounding component not recoverable from the profile"}
+    },
+    "zero_occurrence_aliases_probed": ["calif","fla","mass","tenn","tex","ariz","colo","conn","wisc","minn","miss","mont","okla"],
+    "del_resolves": {"counts": [646, 1779, 1842], "reason": "'del' is already the Delaware code in US_STATES"},
+    "missing_territories": ["guam","american samoa","us virgin islands","northern mariana islands","us minor outlying islands"],
+    "missing_territories_absent_from_all_test_splits": true
+  },
+  "france_relevance": {
+    "note": "The France-side analogue of defect B, flagged because France is the scored country. FR_REGIONS conclusions belong to D070/D073; this task only establishes the mechanism.",
+    "mechanism_demo": {"input": "5 Rue Lafayette, Paris", "country": "France", "state": "idf", "toks": ["5","rue","lafayette"], "city": [], "note": "FR_REGIONS maps paris->idf, so a standalone Paris component is consumed and the city token deleted"},
+    "paris_occurrences_in_france_addr_tokens": {"test_s1": 388, "test_s2": 952, "test_s3": 923},
+    "row_count_claimed": false,
+    "why_not": "a 'paris' token occurrence is not proof of a standalone Paris component; addr_tokens discards component boundaries"
+  },
+  "recommendations": [
+    {"rank": 1, "action": "Do NOT add states to US_STATES - 50/50 + dc + pr present and clean; the dictionary is not the bottleneck", "confidence": "CONFIRMED"},
+    {"rank": 2, "action": "Only dictionary change worth considering: penn -> pa (163/467/497 occurrences). No action on the five missing territories - absent from every test split", "confidence": "LIKELY / SPECULATIVE"},
+    {"rank": 3, "action": "Fix defect D first - require a state match to be the final component or be followed only by a postcode, so a city named after a state cannot yield a wrong state or be deleted", "confidence": "CONFIRMED behaviour, row effect SPECULATIVE"},
+    {"rank": 4, "action": "Fix defect A - after the whole-component test fails, also try a trailing '<code|name> <5-digit>' pattern", "confidence": "CONFIRMED occurrence, SPECULATIVE recovered count"},
+    {"rank": 5, "action": "Make last-wins explicit (defect E) by breaking on the first positional match or asserting the matched component is last", "confidence": "CONFIRMED"},
+    {"rank": 6, "action": "Fix the wy -> way collision (defect C) in ADDR_CANON_COMMON", "confidence": "CONFIRMED"},
+    {"rank": 7, "action": "Explicitly NOT recommended: touching US_STATES self-maps (already 52/52 at runtime) or mirroring US_STATES onto FR_REGIONS (owned by D070, zero measured effect per the work order)", "confidence": "CONFIRMED"}
+  ],
+  "gaps": [
+    "Row-level misfire counts for defects A, B, D and E: build_profile.py:126-127 splits on [,;] and pushes [a-z0-9]+ matches into one flat Counter, discarding component boundaries. The profile cannot distinguish a standalone state component from a word inside a longer component. Not estimated.",
+    "dig5/dig6 are occurrence totals (build_profile.py:115), not row counts, so the affected row share for defect A is bounded above by dig5/rows but unavailable exactly.",
+    "The 12 multi-word state names are structurally invisible to addr_tokens and cannot be validated.",
+    "'Absent' from top-4000 never means zero occurrences, so no rate was computed from an absent token.",
+    "Whether French or Indian addresses contain a component matching a US_STATES key was not tested at component level; the inference that they cannot match rests on the country-keyed lookup, not on measurement.",
+    "features.py / keys.py were not examined, so whether any of these defects change the final submission is unproven."
+  ],
+  "refuted_findings_not_rederived": {
+    "france_pin_guard": "not re-derived; France dig5/row 0.0042/0.0051/0.0053 vs US 0.1098/0.1097/0.1101 is consistent with its refutation",
+    "fr_regions_too_thin": "not re-derived; confirmed only that FR_REGIONS self-maps are absent (hdf, idf, naq, pdl) and that it has zero key and zero value overlap with US_STATES"
+  },
+  "constraints_respected": {
+    "raw_tsv_never_opened": true,
+    "upstream_read_only": true,
+    "upstream_git_state_unchanged": "normalize.py was read and exec'd from memory only; no import, no __pycache__ written",
+    "network_access": "none",
+    "memory": "only the compact profile JSONs (575-885 KB) were read; never a raw TSV",
+    "files_written": 2
+  }
+}

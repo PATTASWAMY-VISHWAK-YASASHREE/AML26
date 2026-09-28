@@ -1,0 +1,176 @@
+{
+  "task_id": "D073",
+  "family": "B-dictionary",
+  "title": "mine evidence to extend FR_REGIONS for France",
+  "headline": "The inherited claim that FR_REGIONS resolves state for 100% of France rows holds only for test_source1, which is 15.31% of French rows. At most 1,204,739 of 1,694,445 France test rows (71.10%) can resolve a state; 489,706 (28.90%) provably cannot, and a maximal French gazetteer recovers only 14,892 (0.88%). Root cause: test_s2/test_s3 encode French geography with DEPARTMENT names, not region names, and the departments they use are mostly absent from FR_REGIONS.",
+  "new_defect_found": true,
+  "most_important_number": 489706,
+  "most_important_number_meaning": "France test rows that provably cannot resolve any state via FR_REGIONS (28.90% of 1,694,445)",
+
+  "method": {
+    "state_resolution_rule": "normalize_address (normalize.py:314-353) matches state only on an exact whole-comma-component match: ck = re.sub(r'[^a-z0-9& ]+',' ',c).replace('&',' and '); ck = ' '.join(ck.split()); if ck in smap",
+    "profile_alignment": "build_profile.py:126-127 splits address on ADDR_SPLIT [,;] before counting addr_tokens, so profile token counts are the token multiset of the same components",
+    "bound": "union bound: rows containing key <= min(token counts of key); summing over all 14 keys gives UB, an over-estimate. Per file resolvable <= min(UB, rows) and unresolved >= max(rows-UB, 0); the clamp is required because test_s1's UB (261,705) exceeds its row count (259,452)",
+    "caveat": "component structure is discarded by the builder, so these are upper bounds on resolvable rows, not direct counts"
+  },
+
+  "france_rows": {
+    "test_s1": 259452,
+    "test_s2": 703378,
+    "test_s3": 731615,
+    "total": 1694445,
+    "s1_share_pct": 15.31,
+    "s2_s3_share_pct": 84.69,
+    "note": "France appears only in test_*; all three train_s* country_rows contain only US and India"
+  },
+
+  "union_bound_per_file": [
+    {"file": "test_s1.json", "france_rows": 259452, "union_bound": 261705, "max_resolvable": 259452, "unresolved": 0, "unresolved_pct": 0.0, "bound": "vacuous (UB > rows), clamped to 0"},
+    {"file": "test_s2.json", "france_rows": 703378, "union_bound": 457385, "max_resolvable": 457385, "unresolved": 245993, "unresolved_pct": 34.97, "bound": "binding"},
+    {"file": "test_s3.json", "france_rows": 731615, "union_bound": 487902, "max_resolvable": 487902, "unresolved": 243713, "unresolved_pct": 33.31, "bound": "binding"},
+    {"file": "TOTAL", "france_rows": 1694445, "union_bound": null, "max_resolvable": 1204739, "unresolved": 489706, "unresolved_pct": 28.90, "bound": "binding"}
+  ],
+
+  "inherited_claim_reassessment": {
+    "claim": "state resolves for 100.00% of France rows (259,452 / 259,452, zero unmatched)",
+    "verdict": "TRUE for test_s1, FALSE for test_s2 and test_s3",
+    "evidence": "101,521 + 85,197 + 72,734 = 259,452 exactly equals the test_s1 France row count; the prior agent's three region counts are s1-only token counts",
+    "my_s1_token_counts": {"hauts": 101717, "nouvelle": 85311, "aquitaine": 85268, "pays": 72812},
+    "action": "re-scope REFUTED-2, do not delete: core claim wrong for 84.69% of French rows",
+    "refuted_1_pin_guard": "not re-derived; nothing in this task bears on it"
+  },
+
+  "root_cause_evidence": {
+    "description": "s1 encodes regions, s2/s3 encode departments",
+    "field": "addr_tokens[France]",
+    "gironde": {"s1": 62, "s2": 75104, "s3": 75621},
+    "nord": {"s1": 200, "s2": 75362, "s3": 76449},
+    "calais": {"s1": 15967, "s2": 55273, "s3": 57522},
+    "atlantique": {"s1": 253, "s2": 63697, "s3": 64398},
+    "hauts": {"s1": 101717, "s2": 88519, "s3": 99419},
+    "pays": {"s1": 72812, "s2": 63086, "s3": 71498},
+    "somme": {"s1": 333, "s2": 807, "s3": 833},
+    "landes": {"s1": 116, "s2": 292, "s3": 313},
+    "paris": {"s1": 388, "s2": 952, "s3": 923},
+    "region_name_coverage_pct": {"s1": 100.0, "s2": 32.11, "s3": 34.71}
+  },
+
+  "maximal_gazetteer_test": {
+    "candidates_tried": 37,
+    "clamp": "per-file min(UB, rows) / max(rows-UB, 0), same as union_bound_per_file",
+    "per_file": [
+      {"file": "test_s1.json", "union_bound": 264824, "max_resolvable": 259452, "unresolved": 0},
+      {"file": "test_s2.json", "union_bound": 464605, "max_resolvable": 464605, "unresolved": 238773},
+      {"file": "test_s3.json", "union_bound": 495574, "max_resolvable": 495574, "unresolved": 236041}
+    ],
+    "max_resolvable_total": 1219631,
+    "unresolved_total": 474814,
+    "unresolved_pct": 28.02,
+    "rows_recovered_vs_current": 14892,
+    "recovered_pct_of_france_rows": 0.88,
+    "conclusion": "extending FR_REGIONS is not the lever for the bulk of the gap"
+  },
+
+  "recommended_additions": [
+    {"key": "marne", "min_token_s2": 994, "pct_s2_france_rows": 0.141, "status": "CONFIRMED"},
+    {"key": "lorraine", "min_token_s2": 825, "pct_s2_france_rows": 0.117, "status": "LIKELY", "caveat": "also a street name (Rue de Lorraine)"},
+    {"key": "alsace", "min_token_s2": 744, "pct_s2_france_rows": 0.106, "status": "LIKELY", "caveat": "also a street name"},
+    {"key": "bretagne", "min_token_s2": 505, "pct_s2_france_rows": 0.072, "status": "CONFIRMED"},
+    {"key": "val de marne", "min_token_s2": 445, "pct_s2_france_rows": 0.063, "status": "CONFIRMED"},
+    {"key": "centre val de loire", "min_token_s2": 343, "pct_s2_france_rows": 0.049, "status": "LIKELY", "caveat": "centre also a generic noun"},
+    {"key": "gard", "min_token_s2": 305, "pct_s2_france_rows": 0.043, "status": "LIKELY", "caveat": "also an ordinary French word"},
+    {"key": "normandie", "min_token_s2": 288, "pct_s2_france_rows": 0.041, "status": "CONFIRMED"},
+    {"key": "basse normandie", "min_token_s2": 288, "pct_s2_france_rows": 0.041, "status": "CONFIRMED"},
+    {"key": "bourgogne", "min_token_s2": 273, "pct_s2_france_rows": 0.039, "status": "CONFIRMED"},
+    {"key": "maine et loire", "min_token_s2": 244, "pct_s2_france_rows": 0.035, "status": "CONFIRMED"},
+    {"key": "auvergne", "min_token_s2": 213, "pct_s2_france_rows": 0.030, "status": "CONFIRMED"},
+    {"key": "haute marne", "min_token_s2": 208, "pct_s2_france_rows": 0.030, "status": "CONFIRMED"},
+    {"key": "haute normandie", "min_token_s2": 208, "pct_s2_france_rows": 0.030, "status": "CONFIRMED"},
+    {"key": "grand est", "min_token_s2": 189, "pct_s2_france_rows": 0.027, "status": "LIKELY", "caveat": "grand also a common street word"},
+    {"key": "cote d or", "min_token_s2": 157, "pct_s2_france_rows": 0.022, "status": "LIKELY"},
+    {"key": "val d oise", "min_token_s2": 148, "pct_s2_france_rows": 0.021, "status": "LIKELY"},
+    {"key": "vosges", "min_token_s2": 145, "pct_s2_france_rows": 0.021, "status": "LIKELY"},
+    {"key": "haute garonne", "min_token_s2": 102, "pct_s2_france_rows": 0.015, "status": "LIKELY"},
+    {"key": "bas rhin", "min_token_s2": 94, "pct_s2_france_rows": 0.013, "status": "LIKELY"},
+    {"key": "haut rhin", "min_token_s2": 94, "pct_s2_france_rows": 0.013, "status": "LIKELY"},
+    {"key": "rhin et moselle", "min_token_s2": 91, "pct_s2_france_rows": 0.013, "status": "LIKELY"},
+    {"key": "moselle", "min_token_s2": 91, "pct_s2_france_rows": 0.013, "status": "LIKELY"},
+    {"key": "vienne", "min_token_s2": 82, "pct_s2_france_rows": 0.012, "status": "LIKELY"},
+    {"key": "picardie", "min_token_s2": 79, "pct_s2_france_rows": 0.011, "status": "LIKELY"},
+    {"key": "jura", "min_token_s2": 65, "pct_s2_france_rows": 0.009, "status": "LIKELY"}
+  ],
+
+  "do_not_add_zero_evidence": {
+    "already_in_table_but_zero_occurrences": ["vendee", "aisne"],
+    "absent_entirely": ["corse", "occitanie", "var", "rhone", "alpes", "herault", "dordogne", "charente", "creuse", "sarthe", "mayenne", "tarn", "essonne", "yvelines", "isere", "loiret", "manche", "cotes d armor", "finistere", "morbihan"],
+    "zero_because_one_token_absent": {
+      "champagne ardenne": "ardenne=0",
+      "midi pyrenees": "pyrenees=0",
+      "seine et marne": "seine=0",
+      "seine saint denis": "seine=0",
+      "hauts de seine": "seine=0",
+      "franche comte": "franche=0",
+      "provence alpes cote d azur": "alpes=0, azur=0",
+      "languedoc roussillon": "languedoc=0",
+      "charente maritime": "charente=0",
+      "deux sevres": "sevres=0",
+      "poitou charentes": "both 0"
+    },
+    "consequence": "seine=0 means NO department containing Seine can ever match; Ile-de-France reachable only via paris (952 rows in s2, 0.056%)"
+  },
+
+  "accent_absence_probes": {"pyr": 0, "rh": 0, "union": 0, "rault": 0, "note": "confirms accented Pyrenees/Rhone/Reunion/Herault genuinely absent, not merely fragmented by the accent-blind tokenizer"},
+
+  "self_map_finding": {
+    "code": "normalize.py:252 for _m in (US_STATES, IN_STATES) -- omits FR_REGIONS",
+    "code_occurrences": {"hdf": 0, "naq": 0, "pdl": 0, "idf": 0, "idfr": 0},
+    "verdict": "confirmed zero measurable effect, consistent with inherited finding; future-proofing only"
+  },
+
+  "secondary_finding_function_words": {
+    "status": "CONFIRMED",
+    "field": "addr_tokens, test_s2",
+    "france": {"listed_token_mass": 4745780, "de_la_du_des": 731158, "pct": 15.41, "one_char_alpha": 367602, "one_char_pct": 7.75},
+    "US": {"listed_token_mass": 8135308, "de_la_du_des": 30270, "pct": 0.37, "one_char_alpha": 115030, "one_char_pct": 1.41},
+    "India": {"listed_token_mass": 21702626, "de_la_du_des": 1569, "pct": 0.01, "one_char_alpha": 2192887, "one_char_pct": 10.10},
+    "top_france_addr_tokens_all3": {"de": 1050023, "la": 481231, "du": 220355, "des": 199183},
+    "defect": "ADDR_CANON_FR has no entries for de, la, du, des, le, les, d, l, e, s, a, c, p, f, h, m, g; France is 42x the US function-word rate",
+    "impact": "16.3% of all French address token mass enters the IDF-weighted qa/sa features (features.py:120-123), diluting IDF weighting for every French pair",
+    "recommendation": "add de, la, du, des, le, les -> \"\" to ADDR_CANON_FR"
+  },
+
+  "accent_fragmentation_caveat": {
+    "issue": "build_profile.py:28 TOKEN_RE=[a-z0-9]+ runs on raw lower() WITHOUT accent stripping, but normalize_address DOES strip accents",
+    "examples": {"tablissements": 31387, "cole": 29147, "societe": 22105, "deleves": 12527, "dical": 11342},
+    "consequence": "any recommended dictionary key must be written accent-stripped and lower-case to match the pipeline, not the profile"
+  },
+
+  "leetspeak_finding": {
+    "status": "CONFIRMED",
+    "verdict": "clean negative -- no change needed",
+    "field": "name_tokens[France], all three test files",
+    "tokens_with_digit": 64,
+    "total_occurrences": 8826,
+    "pct_of_france_rows": 0.52,
+    "top": {"4l": 1943, "3eme": 748, "5arl": 637, "5as": 417, "41": 278, "c1ub": 190, "amica1e": 136, "mais0n": 118, "uni0n": 87, "5asu": 85, "c0mite": 75, "ass0ciation": 75, "rati0n": 61, "tab1issements": 56, "li1le": 54},
+    "conclusion": "LEET (normalize.py:256) already covers every observed mixed-alpha-digit token; sequential numbers correctly stay digits"
+  },
+
+  "gaps": [
+    "component boundaries discarded by build_profile.py:126-127; all numbers are upper bounds on resolvable rows, not direct counts",
+    "street-name vs toponym ambiguity unresolved for lorraine, alsace, normandie, grand est, gard, centre (marked LIKELY not CONFIRMED)",
+    "accent-blind tokenisation could mask low-frequency accented toponyms; cannot bound",
+    "France absent from all train_s* files, so cross-country false-positive risk of new FR_REGIONS keys on US rows is untested; 'nord' is the real collision risk (French dept AND English 'north' AND common US street name); US 'nord' count not measured",
+    "no precision measurement possible -- can bound rows that COULD resolve, never rows that WOULD falsely resolve"
+  ],
+
+  "arithmetic_invariants_verified": [
+    "sum(len_hist.values()) == rows for every country in all 6 profile files (True in all cases)",
+    "101521 + 85197 + 72734 = 259452 = test_s1 France rows (confirms inherited claim is s1-scoped)"
+  ],
+
+  "files_written": [
+    "analysis_out/findings/D073_mine_FR_REGIONS_France.md",
+    "analysis_out/findings/D073_mine_FR_REGIONS_France.json"
+  ]
+}

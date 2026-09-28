@@ -1,0 +1,206 @@
+{
+  "task": "D083",
+  "title": "audit current ADDR_CANON_COMMON",
+  "deliverable": "analysis_out/findings/D083_audit_ADDR_CANON_COMMON.md",
+  "status": "complete",
+  "scope": "_upstream/src/normalize.py lines 153-198 (ADDR_CANON_COMMON), 199-214 (ADDR_CANON_FR), 314-353 (normalize_address)",
+  "data_sources": ["analysis_out/profile/test_s1.json", "analysis_out/profile/test_s2.json", "analysis_out/profile/test_s3.json"],
+  "data_fields_used": ["addr_tokens[country]", "name_tokens[country]", "country_rows"],
+  "profile_semantics": {
+    "addr_tokens": "Counter of tokens per address component, top 4000 per country per file (build_profile.py:27,126-127,140)",
+    "name_tokens": "Counter of name tokens, top 4000 per country per file",
+    "caveats": [
+      "top-4000 truncation: a zero means 'not in the top 4000', never 'does not occur'",
+      "TOKEN_RE does not strip accents (build_profile.py:28) while normalize.py:317 does, so accented tokens are fragmented",
+      "no component-position field, so street/city/region role is inferred not measured",
+      "prune() (build_profile.py:45-49) drops count==1 tokens during the stream"
+    ]
+  },
+  "dictionary_counts": {
+    "entries": 177,
+    "distinct_keys": 177,
+    "duplicate_keys": 0,
+    "distinct_canonical_values": 81,
+    "distinct_non_empty_canonical_values": 80,
+    "keys_with_empty_value": 15,
+    "canonical_values_that_are_not_keys": 18,
+    "canonical_values_that_are_not_keys_list": ["", "1st", "2nd", "3rd", "4th", "5th", "ahmedabad", "belgaum", "chennai", "kerala", "kochi", "kolkata", "mangalore", "mysore", "orissa", "pune", "thiruvananthapuram", "visakhapatnam"],
+    "empty_value_keys": ["number", "no", "nos", "num", "h", "hno", "house", "door", "plot", "flat", "shop", "null", "na", "none", "nil"],
+    "method": "PowerShell regex over lines 154-197 of normalize.py, 177 pairs matched"
+  },
+  "consumption_semantics": {
+    "lookup": "normalize.py:347  t = canon.get(t, t)",
+    "empty_deletes_token": "normalize.py:348  if t:",
+    "single_pass_no_cascade": true,
+    "identity_fallback": true,
+    "self_map_loop_present": false,
+    "self_map_loop_lines": "normalize.py:252-254 (US_STATES, IN_STATES only)"
+  },
+  "self_map_finding": {
+    "verdict": "NOT_A_DEFECT",
+    "reason": "canon.get(t,t) at line 347 is an identity fallback, so a missing self-map is a no-op. Contrast FR_REGIONS, consumed via the membership test at line 333 (if ck in smap) with no fallback, where a missing self-map does lose the match.",
+    "measured_confirmation": {"token_1st_India_addr_tokens": 157535, "token_2nd_India_addr_tokens": 167919, "both_absent_from_key_set": true},
+    "do_not_port_fr_regions_verdict": true
+  },
+  "empty_value_finding": {
+    "verdict": "CONFIRMED_HARMLESS",
+    "deliberate_token_deletion": "normalize.py:348",
+    "by_country": {
+      "India": {"token_slots": 51134252, "deleted_mass": 4927131, "rate_pct": 9.64, "slot_sum": "8617430+21702626+20814196"},
+      "US": {"token_slots": 20533409, "deleted_mass": 118742, "rate_pct": 0.58, "slot_sum": "3189237+8135308+9208864"},
+      "France": {"token_slots": 11992918, "deleted_mass_common_only": 78438, "rate_pct_common_only": 0.65, "plus_n_via_fr_line_213": 106424, "true_french_deletion_mass": 184862, "true_rate_pct": 1.54}
+    },
+    "largest_single_key": {"key": "h", "India_count": 487371, "note": "only bare-token empty key (Block H); no evidence it carries identity"},
+    "flagged_for_followup": true
+  },
+  "defects": [
+    {
+      "id": "D1",
+      "class": "concept_split",
+      "confidence": "CONFIRMED",
+      "statement": "'apartment' and 'apt' -> 'apt' but 'apartments' and 'apts' -> 'apts'; singular and plural of one word become two features",
+      "source_lines": [174, 185],
+      "mass": {"India_total_split": 127071, "India_to_apt": 78996, "India_to_apts": 48075, "US_to_apt": 56968, "France_to_apt": 1872},
+      "token_counts": {"apartment": {"India": 60630, "US": 30573, "France": 0}, "apt": {"India": 18366, "US": 26395, "France": 1872}, "apartments": {"India": 35906, "US": "not_in_top_4000", "France": 0}, "apts": {"India": 12169, "US": "not_in_top_4000", "France": 0}}
+    },
+    {
+      "id": "D2",
+      "class": "concept_split",
+      "confidence": "CONFIRMED",
+      "statement": "'mount' -> 'mt' but 'mountain' -> 'mtn'",
+      "source_lines": [169],
+      "mass": {"US_to_mt": 46556, "US_to_mtn": 20426, "India_mount": 5317},
+      "token_counts": {"mount": {"US": 18939, "India": 5317}, "mt": {"US": 27617}, "mountain": {"US": 20426}}
+    },
+    {
+      "id": "D3",
+      "class": "concept_split",
+      "confidence": "CONFIRMED",
+      "statement": "'cross' -> 'cross' but 'crossing' -> 'xing'",
+      "source_lines": [179, 181],
+      "mass": {"split_mass_India_plus_US": 9230, "India_crossing": 4668, "US_crossing": 4562, "India_cross": 112540, "US_cross": 4396, "US_xing": 830}
+    },
+    {
+      "id": "D4",
+      "class": "country_scoping",
+      "confidence": "LIKELY",
+      "statement": "'est' -> 'estate' is an India abbreviation applied to France, where 'est' is the French word for east; ADDR_CANON_FR has no 'est' entry so line 321 leaves the COMMON mapping in force",
+      "source_lines": [186, 321],
+      "mass": {"France_est": 469, "rate_pct_of_french_addr_tokens": 0.004, "India_est": 4691},
+      "per_file": {"test_s1": 76, "test_s2": 189, "test_s3": 204},
+      "inference_flag": "direction reading of 'est' is inferred; profile has no component-position field"
+    },
+    {
+      "id": "G1",
+      "class": "structural_gap",
+      "confidence": "CONFIRMED_CODE / NOT_MEASURED_IN_DATA",
+      "statement": "normalize.py:321 filters seven KEYS, not seven VALUES; nine sibling keys still emit the dropped values in France",
+      "source_lines": [321],
+      "sibling_keys": {"street": "st", "str": "st", "strt": "st", "suite": "ste", "north": "n", "south": "s", "so": "s", "east": "e", "west": "w"},
+      "france_top4000_occurrences_of_those_nine": 0,
+      "label": "not in the top 4000"
+    }
+  ],
+  "france_drop_list_trace": {
+    "source_line": 321,
+    "dropped_keys": ["st", "ste", "dr", "n", "s", "e", "w"],
+    "per_key": {
+      "st": {"common": "st", "fr": "saint", "fr_line": 207, "france_occurrences": 25454, "net": "REAL_CHANGE"},
+      "ste": {"common": "ste", "fr": "sainte", "fr_line": 207, "france_occurrences": 591, "net": "REAL_CHANGE"},
+      "n": {"common": "n", "fr": "", "fr_line": 213, "france_occurrences": 106424, "net": "REAL_CHANGE_DELETED"},
+      "dr": {"common": "dr", "fr": "dr", "fr_line": 208, "france_occurrences": 256, "net": "no_op_same_target"},
+      "s": {"common": "s", "fr": null, "france_occurrences": 12701, "net": "no_op_identity_map"},
+      "e": {"common": "e", "fr": null, "france_occurrences": 45410, "net": "no_op_identity_map"},
+      "w": {"common": "w", "fr": null, "france_occurrences": 104, "net": "no_op_identity_map"}
+    },
+    "keys_that_actually_change_behaviour": ["st", "ste", "n"],
+    "no_op_occurrences": 58215,
+    "no_op_arithmetic": "12701 + 45410 + 104 = 58215 French token occurrences behave identically with or without the drop",
+    "conclusion": "of the 7-key drop mechanism only 3 keys change behaviour; the other 4 are no-ops because s/e/w were identity maps with no ADDR_CANON_FR entry"
+  },
+  "country_scoped_diffs": {
+    "bld": {"common": "bldg", "common_line": 175, "fr": "blvd", "fr_line": 201, "note": "only key whose meaning changes by country; correct for French; 0 occurrences in France top 4000"},
+    "india_city_aliases_in_common_table": {
+      "keys": ["bengaluru", "bombay", "gurugram", "trivandrum", "calcutta", "madras", "poona", "odisha", "keralam", "ahmadabad", "vishakhapatnam", "vizag", "mysuru", "mangaluru", "cochin", "belagavi", "kozhikode"],
+      "source_lines": [190, 195],
+      "india_rewrite_mass": 353055,
+      "india_rewrite_mass_note": "sum of the 17 alias keys; calicut->calicut 6589 is a separate redundant self-map",
+      "us_occurrences": 0,
+      "france_occurrences": 0,
+      "verdict": "country-scoping defect in structure, zero measured effect outside India"
+    },
+    "odisha_keralam_vs_in_states": {
+      "common": {"odisha": "orissa", "keralam": "kerala"},
+      "common_lines": [192, 193],
+      "in_states": {"odisha": "od", "orissa": "od", "keralam": "kl", "kerala": "kl"},
+      "in_states_lines": [236, 237],
+      "india_counts": {"odisha": 22014, "orissa": 29133, "keralam": 35979, "kerala": 92647},
+      "verdict": "GAP_NOT_MEASURED: profile has no component-position field so standalone-vs-embedded cannot be split"
+    },
+    "plc_cross_dict": {"common": "pl", "common_line": 161, "name_canon": "plc", "name_canon_line": 115, "addr_token_occurrences_all_countries": 0, "verdict": "latent"}
+  },
+  "not_defects_recorded": [
+    {"family": "road/rd -> rd vs route/rte/rt -> rte", "reason": "genuinely different street types", "US_road": 448002, "US_rd": 378562, "India_road": 1107409, "India_rd": 80914},
+    {"family": "place -> pl vs plaza -> plz", "reason": "different types"},
+    {"family": "highway -> hwy / expressway -> expy / freeway -> fwy", "reason": "SPECULATIVE, do not change; each is a conventional distinct US street name", "US_hwy": 27100, "US_hwy_abbrev": 14999, "US_expy": 146, "US_fwy": 885},
+    {"family": "terrace->ter, square->sq, place->pl, 5x avenue->ave, center/centre/ctr->ctr", "reason": "correctly merged"}
+  ],
+  "coverage": {
+    "metric": "token rate: canon hits / total addr_tokens[country] slots, per test file, summed over 3 files",
+    "India": {"hits_by_file": [2502632, 6447423, 6130139], "slots_by_file": [8617430, 21702626, 20814196], "hits_total": 15080194, "slots_total": 51134252, "rate_pct": 29.49, "distinct_keys_fired": [119, 123, 123]},
+    "US": {"hits_by_file": [887473, 2187234, 2596973], "slots_by_file": [3189237, 8135308, 9208864], "hits_total": 5671680, "slots_total": 20533409, "rate_pct": 27.62, "distinct_keys_fired": [83, 85, 92]},
+    "France": {"hits_by_file": [79144, 270459, 279133], "slots_by_file": [2253877, 4745780, 4993261], "hits_total": 628736, "slots_total": 11992918, "rate_pct": 5.24, "distinct_keys_fired": [31, 32, 32], "ratio_vs_india": 5.63}
+  },
+  "france_common_keys_that_fire": {
+    "count": 32,
+    "of_total_keys": 177,
+    "tokens": {"apt": 1872, "av": 57361, "ave": 21614, "avenue": 126497, "bd": 25273, "blvd": 6046, "boulevard": 38275, "centre": 967, "col": 125, "dr": 256, "e": 45410, "est": 469, "fort": 1923, "h": 5020, "n": 106424, "na": 1397, "ne": 6465, "no": 72021, "pl": 12989, "place": 13363, "point": 938, "rd": 641, "route": 17932, "rte": 11995, "s": 12701, "se": 556, "sq": 458, "square": 4933, "st": 25454, "ste": 591, "ter": 7896, "village": 770, "w": 104}
+  },
+  "city_and_name_collisions": {
+    "france_city_collision": {
+      "verdict": "NONE_FOUND",
+      "france_top4000_union_distinct_tokens": 4441,
+      "method": "intersected the 32 firing ADDR_CANON_COMMON keys against the dominant French place tokens in the same field",
+      "dominant_place_tokens": {"bordeaux": 277474, "nantes": 238748, "lille": 221585, "tourcoing": 115914, "dunkerque": 111538, "roubaix": 107111, "nazaire": 88016, "pessac": 81815, "teste": 72268, "buch": 72331, "rignac": 51156, "pornic": 50117, "herblain": 44846, "merignac": 14416},
+      "intersection": [],
+      "nearest_calls": {"fort": 1923, "point": 938, "village": 770, "col": 125},
+      "gap": "no component-position field, so street vs city role is inferred"
+    },
+    "business_name_interference": {
+      "verdict": "NONE",
+      "reason": "normalize_name uses NAME_CANON at line 281, never ADDR_CANON_COMMON, so a street-type word inside a name is not rewritten by this dictionary",
+      "france_name_token_counts_for_context": {"s": 136182, "centre": 56194, "e": 35433, "st": 2561, "h": 1181}
+    },
+    "cross_dictionary_vocabulary_split": {
+      "verdict": "REAL_SPLIT_NO_RECOMMENDATION",
+      "pairs": [
+        {"token": "center/centre/ctr", "address": "ctr", "address_line": 178, "name": "center", "name_line": 124, "us_addr_occurrences_of_center_plus_centre": 16119},
+        {"token": "st", "address": "st (US) / saint (FR)", "address_line": 154, "name": "saint", "name_line": 131, "note": "deliberate"},
+        {"token": "ste", "address": "ste (US) / sainte (FR)", "address_line": 174, "name": "sainte", "name_line": 131, "note": "deliberate"},
+        {"token": "plc", "address": "pl", "address_line": 161, "name": "plc", "name_line": 115}
+      ]
+    }
+  },
+  "french_street_types_unmapped_in_data": {
+    "label": "present in the top 4000 of addr_tokens[France] (union of 3 test files); absence is not proof of absence",
+    "tokens": {"appartement": 4307, "appt": 5113, "passage": 3167, "pont": 3866, "clos": 3588, "cite": 2546, "parc": 4244, "port": 3825, "gare": 1735, "mail": 1731, "lotissement": 1788, "hameau": 1067, "esplanade": 878, "parvis": 587, "villa": 594, "promenade": 536, "venelle": 481, "sentier": 618, "rond": 411, "mont": 577, "montagne": 385, "sud": 1254, "ouest": 1221},
+    "handled_counterpart_apt": 1872,
+    "non_exhaustive_upper_bound": 44519,
+    "headline_gap": "France has three surface forms for 'apartment' - apt (mapped 1872), appt (unmapped 5113), appartement (unmapped 4307) - and the map handles the least frequent one",
+    "zero_count_candidates": {"rondpoint": 0, "carrefour": 0, "traverse": 0, "appartements": 0, "bvd": 0, "boul": 0, "bld": 0, "lieux": 0},
+    "correctly_handled_by_addr_canon_fr": ["rue", "r", "avenue", "av", "boulevard", "bd", "boul", "chemin", "ch", "chem", "che", "impasse", "imp", "place", "pl", "route", "rte", "allee", "all", "al", "square", "sq", "faubourg", "fbg", "fg", "cours", "crs", "quai", "q", "qu", "saint", "sainte", "general", "gen", "gal", "docteur", "dr", "professeur", "prof", "marechal", "mal", "president", "pres", "residence", "res", "batiment", "bat", "bis", "b", "ter", "t", "lieu", "lieudit", "zone", "za", "zi", "zac", "no", "n", "numero", "null", "na"],
+    "accent_caveat": "profile TOKEN_RE does not strip accents while normalize.py:317 does, so accented street types are fragmented and these counts are lower bounds"
+  },
+  "gaps": [
+    "no component-position field in the profile (street vs city vs region role is inferred)",
+    "top-4000 truncation: every zero means 'not in the top 4000'",
+    "accent fragmentation in profile tokenization",
+    "no France rows in train (country_rows contains only US and India), so all France figures are test-only",
+    "row-level rates not derivable; all rates here are token-level over addr_tokens totals"
+  ],
+  "contradictions_with_settled_findings": "none",
+  "settled_findings_confirmed": [
+    "ADDR_CANON_COMMON empty mappings are behaviourally harmless (measured 4,927,131 India / 118,742 US / 78,438 France deletions, all numbering or dwelling-type words)",
+    "the France w/e/s differences are behaviourally harmless and effectively a no-op (58,215 occurrences; identity maps with no ADDR_CANON_FR entry)"
+  ]
+}

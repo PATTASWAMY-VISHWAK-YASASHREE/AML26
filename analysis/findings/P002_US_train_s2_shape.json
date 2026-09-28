@@ -1,0 +1,129 @@
+{
+  "task_id": "P002",
+  "family": "A-profile",
+  "title": "[US] train_s2: shape, null rates, length distribution",
+  "headline": "US train_s2 is 3,016,817 rows (59.9215% of the 5,034,616-row file) and is clean on every integrity axis: name_empty=0, prefix_bad=0, len_hist sums exactly to rows. New finding: has_comma (2,905,696) equals rows-addr_empty (3,016,817-111,121) EXACTLY, so 100.00% of non-empty US addresses contain a comma and has_comma is fully redundant with addr_empty for US. The invariant holds in all 6 US slices and breaks only on 333 France + 3 India test rows.",
+  "profile_source": "analysis_out/profile/train_s2.json",
+  "builder_semantics_source": "build_profile.py (lines 79-136)",
+  "slice": {
+    "split": "train",
+    "source": 2,
+    "cols": ["entity_id", "business_name", "business_address", "country"],
+    "file_rows": 5034616,
+    "us_rows": 3016817,
+    "india_rows": 2017799,
+    "us_share_of_file": 0.599215,
+    "us_share_pct": 59.9215,
+    "countries_present": ["India", "US"],
+    "france_present": false
+  },
+  "null_and_integrity_rates": {
+    "denominator": 3016817,
+    "name_empty": {"count": 0, "rate": 0.0, "pct": 0.0},
+    "addr_empty": {"count": 111121, "rate": 0.036834, "pct": 3.6834},
+    "prefix_bad": {"count": 0, "rate": 0.0, "pct": 0.0},
+    "has_comma": {"count": 2905696, "rate": 0.963166, "pct": 96.3166},
+    "has_digit_name": {"count": 193041, "rate": 0.063988, "pct": 6.3988},
+    "alpha_only_addr": {"count": 184605, "rate": 0.061192, "pct": 6.1192},
+    "dig5": {"count": 323824, "rate": 0.10734, "pct": 10.734},
+    "dig6": {"count": 42026, "rate": 0.013931, "pct": 1.3931}
+  },
+  "lengths": {
+    "name_chars_total": 71059009,
+    "addr_chars_total": 95123286,
+    "mean_name_chars": 23.5543,
+    "mean_addr_chars_all_rows": 31.531,
+    "mean_addr_chars_nonempty_only": 32.7368,
+    "mean_name_tokens_per_row": 3.5514,
+    "name_tokens_total": 10713782,
+    "num_digits_total": 11317142,
+    "addr_digits_per_row": 3.7514,
+    "addr_digit_share_of_chars_pct": 11.8973,
+    "num_digits_scope": "address only (build_profile.py:114 uses ba, not bn)"
+  },
+  "len_hist": {
+    "sum": 3016817,
+    "sum_equals_rows": true,
+    "median_bucket": "20-29",
+    "pct_at_or_below_29": 76.5576,
+    "pct_at_or_below_49": 99.549,
+    "bucket_implied_mean_range": [19.01, 28.01],
+    "buckets": {
+      "0": {"range": "0-9", "count": 91611, "pct": 3.0367, "cum_pct": 3.0367},
+      "10": {"range": "10-19", "count": 959916, "pct": 31.8188, "cum_pct": 34.8555},
+      "20": {"range": "20-29", "count": 1258076, "pct": 41.7021, "cum_pct": 76.5576},
+      "30": {"range": "30-39", "count": 583593, "pct": 19.3447, "cum_pct": 95.9023},
+      "40": {"range": "40-49", "count": 110015, "pct": 3.6467, "cum_pct": 99.549},
+      "50": {"range": "50-59", "count": 12496, "pct": 0.4142, "cum_pct": 99.9632},
+      "60": {"range": "60-69", "count": 1040, "pct": 0.0345, "cum_pct": 99.9977},
+      "70": {"range": "70-79", "count": 69, "pct": 0.0023, "cum_pct": 100.0},
+      "80": {"range": "80-89", "count": 1, "pct": 0.0, "cum_pct": 100.0}
+    }
+  },
+  "new_finding": {
+    "id": "has_comma_equals_nonempty_address",
+    "statement": "In US train_s2, has_comma (2,905,696) == rows - addr_empty (3,016,817 - 111,121 = 2,905,696) exactly. Since no empty string can contain a comma, this proves 100.00% of non-empty US addresses contain at least one comma.",
+    "arithmetic": "3016817 - 111121 = 2905696; has_comma = 2905696; difference = 0",
+    "cross_slice_test": {
+      "note": "deficit = (rows - addr_empty) - has_comma; 0 means every non-empty address has a comma",
+      "slices": [
+        {"slice": "train_s1", "country": "US", "nonempty": 1323633, "has_comma": 1323633, "deficit": 0},
+        {"slice": "train_s2", "country": "US", "nonempty": 2905696, "has_comma": 2905696, "deficit": 0},
+        {"slice": "train_s3", "country": "US", "nonempty": 3059088, "has_comma": 3059088, "deficit": 0},
+        {"slice": "test_s1", "country": "US", "nonempty": 663106, "has_comma": 663106, "deficit": 0},
+        {"slice": "test_s2", "country": "US", "nonempty": 1816223, "has_comma": 1816223, "deficit": 0},
+        {"slice": "test_s3", "country": "US", "nonempty": 1890384, "has_comma": 1890384, "deficit": 0},
+        {"slice": "test_s1", "country": "France", "nonempty": 259452, "has_comma": 259452, "deficit": 0},
+        {"slice": "test_s2", "country": "France", "nonempty": 681841, "has_comma": 681661, "deficit": 180, "deficit_pct": 0.0264},
+        {"slice": "test_s3", "country": "France", "nonempty": 710074, "has_comma": 709921, "deficit": 153, "deficit_pct": 0.0215},
+        {"slice": "test_s2", "country": "India", "nonempty": 2259801, "has_comma": 2259799, "deficit": 2, "deficit_pct": 0.0001},
+        {"slice": "test_s3", "country": "India", "nonempty": 2345760, "has_comma": 2345759, "deficit": 1, "deficit_pct": 0.0}
+      ],
+      "us_slices_with_zero_deficit": 6,
+      "us_slices_tested": 6,
+      "verdict": "Invariant is exact for every US slice in the whole dataset. Broken only by 180+153 France and 2+1 India test rows."
+    },
+    "implication_status": "INFERENCE",
+    "implication": "has_comma is a redundant feature for US - it is an exact alias of address-emptiness and carries no additional discriminative information. Any downstream feature or quality gate keyed on 'address contains a comma' should be audited. NOT confirmed as an actual defect: I did not search the feature builder."
+  },
+  "statistical_power": {
+    "n": 3016817,
+    "method": "95% binomial Wald CI, 1.96*sqrt(p(1-p)/n)",
+    "sufficient_to_conclude": true,
+    "ci_halfwidth": {
+      "addr_empty": 0.000213,
+      "has_digit_name": 0.000276,
+      "dig5": 0.000349,
+      "dig6": 0.000132,
+      "alpha_only_addr": 0.00027
+    },
+    "max_ci_halfwidth_pp": 0.035,
+    "note": "All rates pinned to within +/-0.04 percentage points; rarest measured feature (dig6) still has 42,026 supporting rows."
+  },
+  "consistency_checks": [
+    {"check": "sum(len_hist) == rows", "pass": true, "detail": "3016817 == 3016817"},
+    {"check": "exact mean name_chars/rows within bucket-implied range", "pass": true, "detail": "23.5543 in [19.01, 28.01]"},
+    {"check": "US + India rows == file rows", "pass": true, "detail": "3016817 + 2017799 = 5034616"},
+    {"check": "dig5/dig6 ratio", "pass": true, "detail": "323824/42026 = 7.71"}
+  ],
+  "already_checked_disposition": {
+    "REFUTED-1_french_postal_pin": "NOT re-derived. My data is consistent with the refutation: US dig5/row = 0.107 in this slice, i.e. US rows are rich in 5-digit numbers, the opposite of France. No support for REFUTED-1 found.",
+    "REFUTED-2_fr_regions_too_thin": "NOT re-derived and cannot be tested here: the profile collects no state/region/city field at all. No evidence either way."
+  },
+  "gaps": [
+    "No per-component address structure (component count, order, or which component holds city/state/ZIP). Biggest gap; blocks direct testing of the French component-order question.",
+    "No state/region/city fields collected, so REFUTED-2 is untestable from the profile.",
+    "No pin field; cannot separate US ZIP+4 dig6 runs from Indian PINs per-row.",
+    "Builder strips before testing emptiness, so true-empty and whitespace-only cannot be distinguished.",
+    "name_tokens is capped at top-4000 and hapax-pruned, so no vocabulary size, TTR, or unique-business counts. The 3,681 short tokens counted are a LOWER BOUND for the 91,611 short-name rows.",
+    "No has_digit_name x len_hist cross-tab."
+  ],
+  "recommendations": [
+    {"priority": "high", "action": "Do NOT add null-handling or prefix-repair logic for US.", "rationale": "name_empty=0 and prefix_bad=0 exactly; S2- prefix is a valid zero-defect partition key.", "expected_effect": "none - recommendation is to avoid wasted effort"},
+    {"priority": "medium", "action": "Audit for and drop any feature gated on has_comma for the US path, or document it as an alias of address-emptiness.", "rationale": "provably redundant on 100% of US rows across train and test.", "status": "INFERENCE - downstream code not read", "expected_effect": "no US accuracy change; removes a feature that would mis-generalise if the invariant broke"},
+    {"priority": "none", "action": "No dictionary change warranted from this slice.", "rationale": "no normalisation gap measured; no CONFIRMED/LIKELY/SPECULATIVE entries proposed", "expected_effect": "n/a"},
+    {"priority": "medium", "action": "Collect per-component address structure for France (component count, per-component digit/alpha flags, index of component containing a 5-/6-digit number).", "rationale": "would settle the component-order question and close the largest blind spot in the profile", "expected_effect": "enables the untested French component-order analysis"}
+  ],
+  "deliverable": "analysis_out/findings/P002_US_train_s2_shape.md"
+}
+

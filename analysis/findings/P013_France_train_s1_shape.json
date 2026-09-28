@@ -1,0 +1,98 @@
+{
+ "task_id": "P013",
+ "title": "[France] train_s1: shape, null rates, length distribution",
+ "agent": "b04",
+ "family": "A-profile",
+ "status": "COMPLETE_NEGATIVE",
+ "headline": "The France slice in train_s1 is EMPTY. country_rows has no France key at all. France train share is exactly 0 of 2206821. Every France rate requested in this work order is UNDEFINED (0/0), not 0%.",
+ "profile_input": "analysis_out/profile/train_s1.json",
+ "raw_tsv_opened": false,
+ "france_train_s1": {
+  "country_rows_key_present": false,
+  "by_country_key_present": false,
+  "name_tokens_key_present": false,
+  "addr_tokens_key_present": false,
+  "france_rows": 0,
+  "france_share_of_train_s1_pct": 0.0,
+  "arithmetic": "country_rows has only US=1323633 and India=883188; 1323633+883188 = 2206821 = rows exactly, so the breakdown is complete and France is absent, not zero-valued."
+ },
+ "all_requested_france_stats": {
+  "name_empty_rate": null,
+  "addr_empty_rate": null,
+  "mean_name_length": null,
+  "mean_address_length": null,
+  "name_length_histogram": null,
+  "digit_in_name_rate": null,
+  "comma_in_address_rate": null,
+  "entity_id_prefix_validity": null,
+  "status": "UNDEFINED_OVER_ZERO_DENOMINATOR",
+  "reason": "Each is f(France)/rows(France) with rows(France)=0. 0/0 is undefined. Reporting any of these as 0% would be fabrication, and reading them as a measured rate is exactly the error behind the retracted '100% of France rows resolve a state' figure."
+ },
+ "country_rows_all_files": {
+  "train_s1": {"rows": 2206821, "US": 1323633, "India": 883188, "France": null, "sum_equals_rows": true},
+  "train_s2": {"rows": 5034616, "US": 3016817, "India": 2017799, "France": null, "sum_equals_rows": true},
+  "train_s3": {"rows": 5285603, "US": 3170056, "India": 2115547, "France": null, "sum_equals_rows": true},
+  "test_s1": {"rows": 1732544, "US": 663106, "India": 809986, "France": 259452, "sum_equals_rows": true},
+  "test_s2": {"rows": 4887273, "US": 1871330, "India": 2312565, "France": 703378, "sum_equals_rows": true},
+  "test_s3": {"rows": 5082316, "US": 1945701, "India": 2405000, "France": 731615, "sum_equals_rows": true}
+ },
+ "totals": {
+  "all_train_rows_three_sources": 12527040,
+  "france_train_rows_three_sources": 0,
+  "all_france_test_rows_three_sources": 1694445
+ },
+ "code_confirmation": [
+  {"file": "_upstream/src/crossfit.py", "line": 112, "code": "for c in (\"US\", \"India\"):", "implication": "stage-2 crossfit is hard-coded to two countries; France is never trained on. Line 122 concatenates cf_best_{c} over the same tuple.", "verified": "CONFIRMED by read"},
+  {"file": "_upstream/src/decoy_postfilter.py", "lines": "17-18", "code": "the country has no training labels (e.g. France in the test set)", "implication": "label-free France is handled by rule (b) decoy post-filtering by prior, not a learned per-country threshold", "verified": "CONFIRMED by read"}
+ ],
+ "measured_contrast": {
+  "note": "Rates are f/by_country[c].rows. France column is test_s1, the only France population that exists.",
+  "US_train_s1": {"rows": 1323633, "share_of_file_pct": 59.9805, "name_empty": 0, "name_empty_rate_pct": 0.0, "addr_empty": 0, "addr_empty_rate_pct": 0.0, "name_chars": 29735558, "mean_name_len": 22.4651, "addr_chars": 46277429, "mean_addr_len": 34.9624, "has_digit_name": 34494, "digit_in_name_rate_pct": 2.6060, "has_comma": 1323633, "comma_in_addr_rate_pct": 100.0, "prefix_bad": 0, "prefix_bad_rate_pct": 0.0, "dig5": 145393, "dig5_per_row": 0.10984, "dig6": 1656, "dig6_per_row": 0.00125, "alpha_only_addr": 1, "alpha_only_rate_pct": 0.0001, "num_digits": 5515205},
+  "India_train_s1": {"rows": 883188, "share_of_file_pct": 40.0195, "name_empty": 0, "name_empty_rate_pct": 0.0, "addr_empty": 0, "addr_empty_rate_pct": 0.0, "name_chars": 23304068, "mean_name_len": 26.3863, "addr_chars": 68623397, "mean_addr_len": 77.6996, "has_digit_name": 1091, "digit_in_name_rate_pct": 0.1235, "has_comma": 883188, "comma_in_addr_rate_pct": 100.0, "prefix_bad": 0, "prefix_bad_rate_pct": 0.0, "dig5": 2668, "dig5_per_row": 0.00302, "dig6": 182, "dig6_per_row": 0.00021, "alpha_only_addr": 77036, "alpha_only_rate_pct": 8.7225, "num_digits": 3406563},
+  "France_test_s1": {"rows": 259452, "share_of_file_pct": 14.9762, "name_empty": 0, "name_empty_rate_pct": 0.0, "addr_empty": 0, "addr_empty_rate_pct": 0.0, "name_chars": 5039314, "mean_name_len": 19.4229, "addr_chars": 12990984, "mean_addr_len": 50.0709, "has_digit_name": 2002, "digit_in_name_rate_pct": 0.7716, "has_comma": 259452, "comma_in_addr_rate_pct": 100.0, "prefix_bad": 0, "prefix_bad_rate_pct": 0.0, "dig5": 1082, "dig5_per_row": 0.00417, "dig6": 34, "dig6_per_row": 0.00013},
+  "observations": [
+    "France mean name length 19.4229 is 3.0 chars shorter than US 22.4651, the nearest train country.",
+    "France mean addr length 50.0709 is 43 percent longer than US 34.9624.",
+    "France dig5/row 0.00417 reproduces the already-checked 0.004 figure; no conflict, not re-derived."
+  ]
+ },
+ "name_length_histogram_train_s1": {
+  "key_semantics": "len_hist key = int(len(business_name)//10*10), a NAME length floored to tens",
+  "US": {"denominator": 1323633, "bins": {"0-9": 37180, "10-19": 454546, "20-29": 601278, "30-39": 208949, "40-49": 20636, "50-59": 1015, "60-69": 29}, "mode": "20-29", "bin_sum_equals_rows": true},
+  "India": {"denominator": 883188, "bins": {"0-9": 8142, "10-19": 168704, "20-29": 379327, "30-39": 296081, "40-49": 29678, "50-59": 987, "60-69": 185, "70-79": 56, "80-89": 24, "90-99": 2, "100-109": 2}, "mode": "20-29", "bin_sum_equals_rows": true},
+  "France_train_s1": null
+ },
+ "field_semantics_from_build_profile_py": {
+  "num_digits": "digits in the ADDRESS only (line 114, sum over ba). Raw digit COUNT, not rows, not name. Not used for any headline figure.",
+  "dig5_dig6": "lookaround-guarded regex (?<!\\d)\\d{5}(?!\\d) and (?<!\\d)\\d{6}(?!\\d), lines 29-30. A digit inside a longer digit run does NOT count.",
+  "has_digit_name": "separate ROW count, any digit in business_name (line 106). This is the digit-in-name field used above.",
+  "has_comma": "tests the RAW address string for a comma (line 108), not the split components.",
+  "prefix_bad": "rows where entity_id does not start with 'S{src}-' (line 94). train_s1 has source=1 so the guard is 'S1-'. Measured 0 for US, India and France test_s1.",
+  "per_country_stats": "totals across the whole slice; all rates derived by dividing by that country's rows.",
+  "name_tokens_addr_tokens": "top 4000 per country AND periodically pruned (prune(), PRUNE_EVERY=8), so counts are lower bounds. Absence means 'not in the top 4000', never 'does not occur'.",
+  "flattening": "ADDR_SPLIT=[,;] then TOKEN_RE per component (lines 126-127), so a token count is not automatically a pipeline-visible quantity.",
+  "token_counts": "token OCCURRENCES, never rows."
+ },
+ "sufficiency_to_conclude": {
+  "france_train": "UNDEFINED, not a negative result. No slice means no n and no confidence interval; no France train conclusion is available at any n because n=0.",
+  "us_india_train": "Overwhelming (1.32M / 0.88M rows). SE on the US 2.6060 percent digit-in-name rate is sqrt(0.02606*0.97394/1323633) = 0.0138pp; India's is 0.0037pp. As firm as the dataset permits.",
+  "france_test_s1": "259,452 rows, ample for its own descriptive stats; this is exactly the population the retracted 100 percent figure mis-scoped to."
+ },
+ "gaps": [
+  "Genuinely not measurable: any France TRAIN rate. Data gap, unfixable from the provided files.",
+  "Genuinely not measurable: France train name_tokens/addr_tokens tables; the keys are absent.",
+  "INFERRED not measured: that the name-length gap implies France is uncalibrated. The means are measured; the consequence is inference.",
+  "alpha_only_addr not queried for France test_s1."
+ ],
+ "not_rederived": [
+  "no-country-has-a-postal-field / pin guard",
+  "pin_eq and alt_tset dead",
+  "FR blocking caps healthy",
+  "address component order",
+  "RETRACTED French function-word 15.41 percent finding (real 10.25, mechanism self-cancelling)"
+ ],
+ "new_defect_found": false,
+ "new_defect_note": "No defect. prefix_bad=0, name_empty=0, addr_empty=0, and both len_hist bin sets reconcile exactly to rows. The only carry-forward is the denominator warning, a reporting-discipline hazard, not a code defect.",
+ "denominator_warning": "ANY France rate computed against a train-file France denominator is meaningless. This is the exact error that produced the retracted '100% of France rows resolve a state' figure. Check the denominator before accepting any France train statistic."
+}
+

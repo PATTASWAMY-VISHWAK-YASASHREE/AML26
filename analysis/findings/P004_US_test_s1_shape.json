@@ -1,0 +1,429 @@
+{
+ "task_id": "P004",
+ "family": "A-profile",
+ "title": "[US] test_s1: shape, null rates, length distribution",
+ "source_profile": "analysis_out/profile/test_s1.json",
+ "deliverable": "analysis_out/findings/P004_US_test_s1_shape.md",
+ "sidecar_note": "Generated after the fact by build_p004_sidecar.py because the .md was written without its sidecar. Every number is computed from the profile, not transcribed, and was cross-checked against the .md.",
+ "dataset_touched": false,
+ "network_used": false,
+ "upstream_modified": false,
+ "headline": "The US slice of test_source1 is 663,106 rows, 38.2735% of the 1,732,544-row file, and is clean on every integrity axis: name_empty=0, addr_empty=0, prefix_bad=0, and len_hist sums exactly to 663,106. The substantive result is that this cleanliness is a property of the SOURCE, not the country or the split: addr_empty is 0 for every country in both source-1 files (3,939,365 rows) and non-zero in all 10 source-2/3 slices (610,389 empty). Consequence for the record: the '100.00% French state resolution' figure was measured on test_s1, the one file where a comma-less address is impossible by construction (0 of 3,939,365 source-1 rows are comma-less), so it must not be quoted corpus-wide.",
+ "most_important_number": {
+  "value": 610389,
+  "unit": "rows",
+  "meaning": "Empty addresses across the 10 source-2/3 country-slices, versus exactly 0 across all 5 source-1 slices. This is the corpus-level figure an agent profiling only source 1 would miss entirely.",
+  "arithmetic": "sum of by_country[*].addr_empty over train_s2/s3 and test_s2/s3; source-1 slices sum to 0"
+ },
+ "shape": {
+  "file_rows": 1732544,
+  "file_rows_field": "rows",
+  "us_rows": 663106,
+  "india_rows": 809986,
+  "france_rows": 259452,
+  "country_sum_check": "663,106 + 809,986 + 259,452 = 1,732,544 (equals rows; no hidden country)",
+  "us_share_pct": 38.2735,
+  "us_share_arithmetic": "663,106 / 1,732,544 = 0.382735",
+  "india_share_pct": 46.7513,
+  "france_share_pct": 14.9752,
+  "countries_present": [
+   "France",
+   "India",
+   "US"
+  ],
+  "cols": [
+   "entity_id",
+   "business_name",
+   "business_address",
+   "country"
+  ]
+ },
+ "null_rates_us": {
+  "rows": 663106,
+  "name_empty": 0,
+  "name_empty_pct": 0.0,
+  "addr_empty": 0,
+  "addr_empty_pct": 0.0,
+  "prefix_bad": 0,
+  "prefix_bad_pct": 0.0,
+  "has_comma": 663106,
+  "has_comma_pct": 100.0,
+  "has_digit_name": 17142,
+  "has_digit_name_pct": 2.5851,
+  "alpha_only_addr": 1,
+  "alpha_only_addr_pct": 0.000151,
+  "dig5_occurrences": 72802,
+  "dig5_per_row": 0.109789,
+  "dig6_occurrences": 793,
+  "dig6_per_row": 0.001196,
+  "num_digits_per_row": 4.167421,
+  "assessment": "CLEAN. All three null/integrity fields are exact zeros, and all three are non-vacuous: the builder evaluates them per row (prefix_bad at build_profile.py:94 via eid.startswith('S1-'), name_empty at line 98, addr_empty at line 100). No prefix repair or null handling is warranted.",
+  "occurrence_caveat": "dig5/dig6 are OCCURRENCE counts (len(findall(...)), lines 115-116), not row counts, so 793 is an upper bound on US rows carrying a standalone 6-digit number. Reported as occurrences/row, never as a row rate."
+ },
+ "lengths_us": {
+  "name_chars": 14895554,
+  "mean_name_chars": 22.4633,
+  "mean_name_arithmetic": "14,895,554 / 663,106 = 22.4633",
+  "addr_chars": 23186242,
+  "mean_addr_chars": 34.9661,
+  "name_tokens": 2311785,
+  "name_tokens_per_name": 3.4863,
+  "num_digits": 2763442,
+  "num_digits_per_row": 4.167421,
+  "dual_denominator_note": "Because addr_empty=0 here the all-rows and non-empty denominators are IDENTICAL, so no dual-denominator caveat is needed."
+ },
+ "name_length_histogram_us": {
+  "field": "by_country.US.len_hist",
+  "buckets": [
+   {
+    "bucket": "0-9",
+    "count": 18617,
+    "pct_of_country_rows": 2.8075,
+    "cum_pct": 2.8075
+   },
+   {
+    "bucket": "10-19",
+    "count": 227566,
+    "pct_of_country_rows": 34.3182,
+    "cum_pct": 37.1257
+   },
+   {
+    "bucket": "20-29",
+    "count": 301714,
+    "pct_of_country_rows": 45.5001,
+    "cum_pct": 82.6259
+   },
+   {
+    "bucket": "30-39",
+    "count": 104345,
+    "pct_of_country_rows": 15.7358,
+    "cum_pct": 98.3616
+   },
+   {
+    "bucket": "40-49",
+    "count": 10328,
+    "pct_of_country_rows": 1.5575,
+    "cum_pct": 99.9192
+   },
+   {
+    "bucket": "50-59",
+    "count": 518,
+    "pct_of_country_rows": 0.0781,
+    "cum_pct": 99.9973
+   },
+   {
+    "bucket": "60-69",
+    "count": 18,
+    "pct_of_country_rows": 0.0027,
+    "cum_pct": 100.0
+   }
+  ],
+  "bucket_sum": 663106,
+  "bucket_sum_equals_rows": true,
+  "modal_bucket": "20-29",
+  "le_29_pct": 82.6259,
+  "ge_50_count": 536,
+  "ge_50_pct": 0.0808,
+  "consistency_check": "Bucket k spans lengths k..k+9 (len_hist is keyed by len//10*10), so name_chars is bounded to [11,880,390 , 17,848,344]; measured 14,895,554 falls inside. Histogram and character total are mutually consistent."
+ },
+ "new_finding_source1_null_free": {
+  "claim": "addr_empty == 0 in EVERY source-1 country-slice (including France) and non-zero in ALL 10 source-2/3 country-slices. A clean partition on the `source` field, not a gradual difference.",
+  "source1_slices": 5,
+  "source1_rows": 3939365,
+  "source1_empty_addresses": 0,
+  "source1_comma_less_rows": 0,
+  "source23_slices": 10,
+  "source23_rows": 20289808,
+  "source23_empty_addresses": 610389,
+  "source23_empty_pct": 3.0084,
+  "per_file": {
+   "train_s1": {
+    "US": {
+     "rows": 1323633,
+     "addr_empty": 0,
+     "dig5": 145393,
+     "dig5_per_row": 0.109844,
+     "dig6": 1656,
+     "dig6_per_row": 0.001251,
+     "comma_less": 0
+    },
+    "India": {
+     "rows": 883188,
+     "addr_empty": 0,
+     "dig5": 2668,
+     "dig5_per_row": 0.003021,
+     "dig6": 182,
+     "dig6_per_row": 0.000206,
+     "comma_less": 0
+    }
+   },
+   "train_s2": {
+    "India": {
+     "rows": 2017799,
+     "addr_empty": 57846,
+     "dig5": 22959,
+     "dig5_per_row": 0.011378,
+     "dig6": 459,
+     "dig6_per_row": 0.000227,
+     "comma_less": 0
+    },
+    "US": {
+     "rows": 3016817,
+     "addr_empty": 111121,
+     "dig5": 323824,
+     "dig5_per_row": 0.10734,
+     "dig6": 42026,
+     "dig6_per_row": 0.013931,
+     "comma_less": 0
+    }
+   },
+   "train_s3": {
+    "US": {
+     "rows": 3170056,
+     "addr_empty": 110968,
+     "dig5": 341738,
+     "dig5_per_row": 0.107802,
+     "dig6": 42321,
+     "dig6_per_row": 0.01335,
+     "comma_less": 0
+    },
+    "India": {
+     "rows": 2115547,
+     "addr_empty": 64948,
+     "dig5": 22317,
+     "dig5_per_row": 0.010549,
+     "dig6": 410,
+     "dig6_per_row": 0.000194,
+     "comma_less": 1
+    }
+   },
+   "test_s1": {
+    "US": {
+     "rows": 663106,
+     "addr_empty": 0,
+     "dig5": 72802,
+     "dig5_per_row": 0.109789,
+     "dig6": 793,
+     "dig6_per_row": 0.001196,
+     "comma_less": 0
+    },
+    "France": {
+     "rows": 259452,
+     "addr_empty": 0,
+     "dig5": 1082,
+     "dig5_per_row": 0.00417,
+     "dig6": 34,
+     "dig6_per_row": 0.000131,
+     "comma_less": 0
+    },
+    "India": {
+     "rows": 809986,
+     "addr_empty": 0,
+     "dig5": 2305,
+     "dig5_per_row": 0.002846,
+     "dig6": 159,
+     "dig6_per_row": 0.000196,
+     "comma_less": 0
+    }
+   },
+   "test_s2": {
+    "India": {
+     "rows": 2312565,
+     "addr_empty": 52764,
+     "dig5": 25554,
+     "dig5_per_row": 0.01105,
+     "dig6": 500,
+     "dig6_per_row": 0.000216,
+     "comma_less": 2
+    },
+    "France": {
+     "rows": 703378,
+     "addr_empty": 21537,
+     "dig5": 3613,
+     "dig5_per_row": 0.005137,
+     "dig6": 130,
+     "dig6_per_row": 0.000185,
+     "comma_less": 180
+    },
+    "US": {
+     "rows": 1871330,
+     "addr_empty": 55107,
+     "dig5": 205296,
+     "dig5_per_row": 0.109706,
+     "dig6": 26757,
+     "dig6_per_row": 0.014298,
+     "comma_less": 0
+    }
+   },
+   "test_s3": {
+    "India": {
+     "rows": 2405000,
+     "addr_empty": 59240,
+     "dig5": 24462,
+     "dig5_per_row": 0.010171,
+     "dig6": 527,
+     "dig6_per_row": 0.000219,
+     "comma_less": 1
+    },
+    "France": {
+     "rows": 731615,
+     "addr_empty": 21541,
+     "dig5": 3909,
+     "dig5_per_row": 0.005343,
+     "dig6": 115,
+     "dig6_per_row": 0.000157,
+     "comma_less": 153
+    },
+    "US": {
+     "rows": 1945701,
+     "addr_empty": 55317,
+     "dig5": 214300,
+     "dig5_per_row": 0.11014,
+     "dig6": 26760,
+     "dig6_per_row": 0.013753,
+     "comma_less": 0
+    }
+   }
+  },
+  "marker": "CONFIRMED",
+  "us_dig6_by_source": {
+   "source1": [
+    0.001251,
+    0.001196
+   ],
+   "source23": [
+    0.013931,
+    0.01335,
+    0.014298,
+    0.013753
+   ],
+   "us_dig5_by_source": {
+    "source1": [
+     0.109844,
+     0.109789
+    ],
+    "source23": [
+     0.10734,
+     0.107802,
+     0.109706,
+     0.11014
+    ]
+   },
+   "reading": "US dig5/row is flat across all six files (0.1073-0.1101, a 2.6% spread) but US dig6/row splits cleanly by source: ~0.0012 on source 1 versus ~0.0134-0.0143 on sources 2/3. The collapse is US-and-6-digit specific, not general source-1 sparseness."
+  }
+ },
+ "scope_correction_to_record": {
+  "figure": "100.00% French state resolution (259,452 / 259,452, zero unmatched)",
+  "measured_on": "test_s1 France rows",
+  "why_file_specific": "test_s1 is a source-1 file, in which comma-less addresses are impossible: 0 of 3,939,365 source-1 rows are comma-less, and normalize.py:333 requires a WHOLE component to equal a region key.",
+  "counter_measurements": {
+   "test_s2_france_comma_less": 180,
+   "test_s3_france_comma_less": 153
+  },
+  "verdict": "The figure is CORRECT for test_s1 and must not be quoted corpus-wide. This does NOT rehabilitate REFUTED-2 - 0.026% is immaterial next to a 14-vs-52 dictionary gap - it corrects the scope of a number carried forward as file-independent."
+ },
+ "refuted_findings": {
+  "REFUTED-1_french_postcodes": "Not re-derived, and NOT supported. France here has dig5=1,082 over 259,452 rows = 0.004170/row against US 0.109789 - a 26x gap in the direction the refutation predicts. The pin guard's impact is on US source-1 and India, not France.",
+  "REFUTED-2_fr_regions_thin": "Not re-derived and untestable here (no state/region/city field is collected), but flagged for scope: see scope_correction_to_record.",
+  "supports_either_refuted_finding": false
+ },
+ "sample_size": {
+  "n": 663106,
+  "moe_half_width_pp_at_p_0_5": 0.1203,
+  "verdict": "YES. Differences above ~0.2pp are real.",
+  "scope_caveat": "The source-1 partition is an exact-integer observation, so it is independent of sampling error entirely."
+ },
+ "gaps": [
+  "No n_comps / component-count / component-position field. Largest blind spot: build_profile.py:126 splits on [,;] only to feed the token counter and discards the component count. Without it the 180 comma-less France rows in test_s2 cannot be characterised and the component-order question is unreachable.",
+  "No state / city / region field: normalize_address outputs are never captured, so every state statement is a comma-less count or a bound derived from upstream code, never a direct measurement.",
+  "No sample strings: alpha_only_addr=1 cannot be traced to its address.",
+  "No row-level has_5digit/has_6digit boolean; dig5/dig6 are occurrence counts.",
+  "Whether source 1 is a curated or deduplicated export is unknowable from the profile; the partition is provable but its cause is not nameable.",
+  "No split weights, so nothing here establishes how the leaderboard aggregates the three test sources."
+ ],
+ "recommendations": [
+  {
+   "priority": "HIGH",
+   "action": "Never quote a per-file rate as a corpus-wide rate. Record the source-1 null-free / comma-complete property alongside the file counts in profile.log.",
+   "expected_effect": "Prevents a wrong number being carried into the record a third time: the '100.00% French state resolution' figure is a test_s1 figure, and 610,389 empty addresses exist across sources 2/3. Cost: one line."
+  },
+  {
+   "priority": "HIGH",
+   "action": "Add an n_comps field to build_profile.py recording len([c for c in ba.split(',') if c.strip()]) per row, plus the index of the component holding a 5-/6-digit run.",
+   "expected_effect": "Converts P005's <=180-row bound into a measured count and is the only way to settle the component-order question. Pure diagnostic, negligible streaming cost."
+  },
+  {
+   "priority": "MEDIUM",
+   "action": "Treat `source` as a stratification variable when reporting or tuning rates.",
+   "expected_effect": "Prevents null-handling and threshold assumptions fitted on sources 2/3 from being applied to a regime that does not contain the condition they were fitted for."
+  },
+  {
+   "priority": "NO CHANGE",
+   "action": "No null handling, prefix repair, or name handling for US test_s1.",
+   "expected_effect": "None warranted - name_empty, addr_empty and prefix_bad are all exact zeros. Manufacturing a fix would be noise."
+  },
+  {
+   "priority": "NO CHANGE",
+   "action": "No dictionary entry is warranted from this slice.",
+   "expected_effect": "This work order produced evidence about how addresses are GENERATED, not a missing normalisation token. No CONFIRMED/LIKELY/SPECULATIVE entries proposed."
+  }
+ ],
+ "confidence_markers": [
+  {
+   "claim": "US test_s1 = 663,106 rows, 38.2735% of file",
+   "marker": "CONFIRMED",
+   "basis": "rows, by_country.US.rows, arithmetic shown"
+  },
+  {
+   "claim": "name_empty = addr_empty = prefix_bad = 0",
+   "marker": "CONFIRMED",
+   "basis": "exact zeros, build_profile.py:94,98,100"
+  },
+  {
+   "claim": "len_hist sums exactly to rows",
+   "marker": "CONFIRMED",
+   "basis": "exact integer identity"
+  },
+  {
+   "claim": "country_rows sums exactly to rows",
+   "marker": "CONFIRMED",
+   "basis": "exact integer identity"
+  },
+  {
+   "claim": "addr_empty=0 in all 5 source-1 slices; 610,389 across the 10 source-2/3 slices",
+   "marker": "CONFIRMED",
+   "basis": "recomputed from all six profile files"
+  },
+  {
+   "claim": "0 comma-less addresses in any source-1 slice",
+   "marker": "CONFIRMED",
+   "basis": "rows - addr_empty - has_comma = 0 everywhere"
+  },
+  {
+   "claim": "US dig6/row splits by source while dig5/row stays flat",
+   "marker": "CONFIRMED",
+   "basis": "12-cell table, every cell re-derived"
+  },
+  {
+   "claim": "The '100.00% French state resolution' figure is test_s1-only",
+   "marker": "CONFIRMED",
+   "basis": "comma-less count is 0 in test_s1 by construction"
+  },
+  {
+   "claim": "Source 1 uses a stricter/curated generator",
+   "marker": "INFERENCE (high confidence)",
+   "basis": "four fields move together at the boundary; no generator metadata exists"
+  },
+  {
+   "claim": "Test-time address quality depends on which source file is scored",
+   "marker": "INFERENCE",
+   "basis": "follows from the partition; the profile records no split weights"
+  },
+  {
+   "claim": "Component-order / city analysis",
+   "marker": "SPECULATIVE (abandoned)",
+   "basis": "n_comps not collected"
+  }
+ ],
+ "deliverable_path": "analysis_out/findings/P004_US_test_s1_shape.md"
+}

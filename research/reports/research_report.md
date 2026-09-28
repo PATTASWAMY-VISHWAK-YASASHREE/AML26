@@ -1,0 +1,271 @@
+# Amazon ML Challenge 2026 — Research and Proxy-Validation Report
+
+Generated from the attached challenge brief, public source pages, public entity-resolution papers, and executable local proxy experiments.
+
+## Executive summary
+
+The recommended system is a deterministic, two-stage retrieve-then-rank entity-resolution pipeline:
+
+1. canonicalize business names and addresses while preserving original values;
+2. build independent S1→S2 and S1→S3 retrieval indexes;
+3. union exact, token, character-n-gram, address, postal, and fallback routes;
+4. freeze and hash the candidate pair manifest;
+5. score every frozen pair;
+6. select zero, one, or many targets per source entity;
+7. optimize S2/S3 thresholds against the official macro-F0.5 behavior after the official validator is confirmed.
+
+The most important empirical finding from the public Fodors–Zagats proxy is that blocking is a first-class model component. Rare name-token blocking recovered 112/112 known positive pairs (100%) while producing 1,186 candidate rows. Full character-gram blocking also recovered 112/112 but produced 79,868 rows. Exact name and exact address blocks were much smaller but missed 17.1% and 65.2% of positives respectively. The result supports a high-recall blocking-first design with later precision optimization.
+
+The pair models on the small sampled Fodors–Zagats labels achieved perfect test-pair F0.5, but that is not a leaderboard estimate. The supplied labels are sampled pairs, the fixed split is not entity-isolated, and unlabeled cross-table pairs are unknown rather than automatic negatives. The report therefore separates retrieval recall, pair ranking diagnostics, and policy mechanics from any future official score.
+
+## Challenge interpretation
+
+The attached brief describes business entity resolution across three sources:
+
+- S1: source/reference records with `entity_id`, `business_name`, `business_address`, and `country`;
+- S2 and S3: target records with `business_id`, business name/address, and country;
+- training links identify which S2 and S3 records correspond to an S1 entity;
+- the test set may include country shift, including France, relative to the training distribution;
+- scoring is macro F0.5 over S1 entities, so false positives are penalized more heavily than false negatives;
+- a valid S1 entity may have zero, one, or multiple target matches.
+
+The public pages and the attached PDF are not fully consistent about team size, dates, and output header spelling. Before packaging, confirm against the live portal, official sample submission, official validator, and challenge rules. Do not hard-code assumptions from secondary pages.
+
+## Research synthesis
+
+### Classical probabilistic linkage
+
+Fellegi and Sunter established the classic comparison-pattern formulation: compare fields, estimate agreement/disagreement weights, and turn match evidence into match probabilities. In a competition implementation, the practical descendant is a supervised pair classifier with calibrated probabilities and threshold tuning. The important competition-specific change is the decision objective: pair probabilities must be converted into an entity-level macro-F0.5 policy rather than optimized only with pair accuracy.
+
+Source: Fellegi, I. P. and Sunter, A. B. (1969), “A Theory for Record Linkage”, Journal of the American Statistical Association. DOI: https://doi.org/10.1080/01621459.1969.10501049
+
+### Blocking and retrieval
+
+Blocking reduces the Cartesian comparison space. Exact keys are fast but brittle; token and character indexes improve recall; posting-list frequency caps and route-specific top-K quotas control the candidate explosion. On the Fodors–Zagats proxy, rare name-token blocking achieved 100% known-positive recall with a mean of 2.23 candidates per left record, while full name/address character blocking achieved 100% recall but 149.85 candidates per left record. The practical choice is therefore recall-first blocking followed by pair ranking, not one globally tuned similarity threshold.
+
+Magellan and DeepMatcher provide useful engineering patterns for generated feature pipelines and modular entity-matching experiments. They do not remove the need to measure the target competition’s candidate contract.
+
+Sources:
+
+- Magellan: https://sites.google.com/site/anhaidgroup/useful-stuff/the-magellan-data-repository
+- DeepMatcher: https://github.com/anhaidgroup/deepmatcher
+- DeepMatcher paper: https://doi.org/10.1145/3183713.3196926
+
+### Neural and pretrained text methods
+
+DeepMatcher and Ditto show that learned text representations can improve entity matching when enough training pairs and careful negatives exist. For a 72-hour CPU/GPU-light setting, they are not the first production bet. A deterministic lexical feature pipeline is faster to debug, easier to package, and less vulnerable to country and schema shift. Pretrained encoders can be added only if the official data shows that lexical candidates and calibrated GBDT/logistic baselines leave measurable headroom.
+
+Ditto source: https://arxiv.org/abs/2004.00584
+
+### Canonicalization and address handling
+
+Normalization should be representation-preserving: keep the original string, create a casefolded/Unicode-folded form, remove punctuation for blocking, and maintain a separate token/core/compact form for scoring. Address evidence should be decomposed into house number, street tokens, locality, postal code, unit/floor, and country. Never discard the raw address when a normalized representation is generated.
+
+FEBRL is useful for synthetic stress tests because it supports controlled field corruption and missingness. It is not a substitute for the Amazon business data.
+
+FEBRL source: https://github.com/J535D165/FEBRL-fork-v0.4.2
+
+### Approximate retrieval
+
+MinHash/LSH, TF-IDF nearest neighbors, and HNSW-style approximate indexes are later-stage options. They are justified only if exact/token/character routes leave a measured recall gap or candidate scoring becomes the runtime bottleneck. An approximate index that drops known positives is worse than a larger exact candidate set because downstream classifiers cannot recover omitted pairs.
+
+## Proxy data and experimental setup
+
+The primary public proxy is the University of Mannheim CompERBench Fodors–Zagats restaurant dataset:
+
+- URL: http://data.dws.informatik.uni-mannheim.de/benchmarkmatchingtasks/datasets/foZa.html
+- records: 533 Fodors and 331 Zagat;
+- fields: subject ID, name, address, city, phone, cuisine/type;
+- supplied pair labels: 466 train, 134 validation, 66 test;
+- positive pairs: 112 total;
+- all-pair space: 176,423 pairs;
+- size: well below 1 GB.
+
+The local archive is stored at:
+
+`amazon_ml_2026_research/sources/fodors_zagats/records.zip`
+
+The four DeepMatcher/Magellan archives were also downloaded for cross-domain diagnostics:
+
+- Amazon-Google: 143 KB;
+- DBLP-ACM: 263 KB;
+- Walmart-Amazon: 984 KB;
+- Dirty Walmart-Amazon: 0.98 MB.
+
+They are useful for code tests but are not structurally equivalent business/address datasets.
+
+## Executable proxy results
+
+### Blocking ablation
+
+| Method | Known-positive recall | Candidate rows | Mean candidates/left |
+|---|---:|---:|---:|
+| Exact name | 74.11% | 84 | 0.16 |
+| Exact address | 34.82% | 54 | 0.10 |
+| Name OR exact address | 84.82% | 111 | 0.21 |
+| Name token | 100.00% | 2,637 | 4.95 |
+| Rare name token (df ≤ 20) | 100.00% | 1,186 | 2.23 |
+| Rare address token (df ≤ 20) | 96.43% | 2,528 | 4.74 |
+| Rare name OR rare address | 100.00% | 3,570 | 6.70 |
+| Full name/address character grams | 100.00% | 79,868 | 149.85 |
+
+These numbers are over the 112 union of known positive labels from the three supplied split files. They are retrieval recall measurements, not a complete truth table.
+
+### Pair-ranking diagnostic
+
+The Fodors–Zagats pair-label experiment trained logistic regression and histogram gradient boosting on the supplied train pairs, selected thresholds on validation, and evaluated on the supplied test pairs.
+
+Both models reached 1.000 pair F0.5 on the 66-row test file. This is an optimistic diagnostic because the public split is sampled and not entity-isolated. It is not evidence that the Amazon test score will be 1.0.
+
+### Policy fixture
+
+A deterministic fixture covered:
+
+- empty truth with no predicted links;
+- one true match;
+- one-to-many truth with two true links;
+- explicit empty-entity scoring policy;
+- no one-to-one assignment cap.
+
+The fixture passed. Its macro score is a mechanics check, not a dataset result.
+
+## What is verified for the Amazon solution
+
+Already implemented and tested:
+
+- Unicode-aware normalization;
+- token and character n-gram representations;
+- label-free candidate generation;
+- exact, token, and character/address blocking routes;
+- F0.5 calculation;
+- pair-model baselines;
+- validation threshold selection;
+- deterministic candidate ordering;
+- zero/one/many policy fixture;
+- leakage warning for non-entity-isolated public split.
+
+Not yet verified for Amazon:
+
+- official candidate manifest filename and required columns;
+- official output header spelling and accepted empty-set representation;
+- official validator behavior on duplicate and unknown IDs;
+- exact team-size and timing rules;
+- final score calculation if the brief and validator differ;
+- performance on the actual S1/S2/S3 volumes and France distribution;
+- final model and threshold choices on Amazon training data.
+
+## Final architecture recommendation
+
+```text
+Raw records
+   ↓
+Canonicalize (preserve raw + normalized views)
+   ↓
+Independent S2/S3 indexes
+   ├─ exact name
+   ├─ sorted/core name
+   ├─ rare name tokens
+   ├─ character n-grams
+   ├─ exact/postal address
+   ├─ address tokens
+   └─ controlled fallback
+   ↓
+Route-specific top-K + union + deduplication
+   ↓
+Freeze candidate_pairs.tsv and hash it
+   ↓
+Batch pair scoring: lexical + address + learned model
+   ↓
+Calibration and S2/S3 threshold search
+   ↓
+Zero/one/many entity decision policy
+   ↓
+Schema validation, archive, README, requirements, provenance
+```
+
+## 72-hour implementation plan
+
+### Hours 0–6: contract and reproducible baseline
+
+- Obtain the official sample submission and validator.
+- Freeze input schemas, IDs, country values, and output headers.
+- Implement raw-preserving canonicalization.
+- Produce exact normalized-name and exact-address candidate baselines.
+- Measure candidate recall and runtime on every available split.
+
+### Hours 6–18: high-recall blocking
+
+- Add rare-token and character-n-gram postings.
+- Add address token, postal-code, and house-number routes.
+- Keep route provenance per candidate.
+- Measure recall by country, missing-field pattern, and truth cardinality.
+- Choose route quotas using a recall-versus-candidate-count curve.
+
+### Hours 18–32: pair ranking
+
+- Train logistic regression and shallow GBDT baselines.
+- Add hard negatives from high-scoring nonmatches.
+- Tune thresholds using the confirmed scorer, not pair F1.
+- Keep S2 and S3 thresholds separate if their score distributions differ.
+
+### Hours 32–48: policy and robustness
+
+- Test singleton abstention and one-to-many preservation.
+- Run leave-country-out validation, especially France if available.
+- Test missing country, missing address, transliteration, punctuation, unit/floor, and reordered address fields.
+- Measure full-hit recall: every known target for an S1 entity must survive retrieval.
+
+### Hours 48–60: final package
+
+- Freeze candidate manifest and model artifact.
+- Regenerate outputs from a clean directory.
+- Run the official validator and a second independent schema checker.
+- Check deterministic reruns, input hashes, package size, and required documentation.
+
+### Hours 60–72: buffer
+
+- Repair only evidence-backed failures.
+- Keep the last known-good submission.
+- Avoid broad architectural rewrites after the candidate contract is frozen.
+
+## What I would not do
+
+- Do not force Hungarian one-to-one assignment: the brief permits multiple matches.
+- Do not treat all unlabeled cross-table pairs as negatives.
+- Do not tune only on the Fodors fixed split; its entity overlap is a known leakage trap.
+- Do not start with a transformer encoder or external business database in a 72-hour offline challenge.
+- Do not submit until the official validator, sample headers, and candidate/output contract are confirmed.
+
+## Reproduction commands
+
+From the project root:
+
+```bash
+python -m unittest amazon_ml_2026_research.work.test_fodors_benchmark -v
+python -m unittest amazon_ml_2026_research.work.test_policy_fixtures -v
+python amazon_ml_2026_research/work/fodors_benchmark.py \
+  --data-root amazon_ml_2026_research/sources/fodors_zagats \
+  --out amazon_ml_2026_research/work/fodors_results.json
+python amazon_ml_2026_research/work/fodors_ablations.py \
+  --data-root amazon_ml_2026_research/sources/fodors_zagats \
+  --out amazon_ml_2026_research/work/fodors_ablations.json
+```
+
+## Source register
+
+1. Fellegi, I. P.; Sunter, A. B. (1969). A Theory for Record Linkage. https://doi.org/10.1080/01621459.1969.10501049
+2. Christen, P. (2012). Data Matching: Concepts and Techniques for Record Linkage, Entity Resolution, and Duplicate Detection. Springer. https://doi.org/10.1007/978-3-642-31164-2
+3. Herzog, S.; Scheuren, F.; Winkler, W. (2007). The FEBRL Data Sets. https://archive.ub.uni-heidelberg.de/volltextserver/6389
+4. Papadakis, G.; Christen, P. (2011). A Survey of Blocking and Filtering Techniques for Entity Resolution. https://dl.acm.org/doi/10.1145/1993636.1993743
+5. Batela, D. (2020). A Practical Comparison of Blocking Methods for Entity Resolution. https://link.springer.com/article/10.1007/s41060-020-00183-3
+6. Sanlavsky, Y.; Gal, A.; et al. (2022). Ditto. https://arxiv.org/abs/2004.00584
+7. Mudgal, S.; et al. (2018). DeepMatcher. https://doi.org/10.1145/3183713.3196926
+8. Magellan project and data repository. https://sites.google.com/site/anhaidgroup/useful-stuff/the-magellan-data-repository
+9. FEBRL repository. https://github.com/J535D165/FEBRL-fork-v0.4.2
+10. CompERBench Fodors–Zagats task and data. http://data.dws.informatik.uni-mannheim.de/benchmarkmatchingtasks/datasets/foZa.html
+11. Amazon ML Challenge 2026 public Unstop page. https://unstop.com/hackathons/amazon-ml-challenge-2026-amazon-1743604
+12. Attached challenge brief: `C:/Users/pvish/Downloads/Emails Comms_ Amazon ML Challenge 2026.pdf`.
+
+## Evidence boundary
+
+This report intentionally separates verified local execution from unverified competition claims. The Amazon dataset was unavailable during this research run, so no Amazon predictions, official score, or final submission were produced.

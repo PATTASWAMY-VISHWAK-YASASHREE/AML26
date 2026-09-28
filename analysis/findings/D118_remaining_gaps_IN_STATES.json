@@ -1,0 +1,211 @@
+{
+  "task_id": "D118",
+  "title": "remaining gaps in IN_STATES",
+  "deliverable": "analysis_out/findings/D118_remaining_gaps_IN_STATES.md",
+  "headline": "Negative CONFIRMED. IN_STATES needs no dictionary expansion: all 28 states and all 9 UT/NCT codes are present and every alternate-spelling, ordinal, merged-territory and concatenation variant measures 0 across all six files. NEW positive finding: the self-map loop is the SOLE state-resolution mechanism for the two s3 files (98.00% of its 3,188,831 occurrences sit in train_s3+test_s3). NEW latent defect: loop-generated keys 'as' and 'an' are English function words, 2.92x the exposure of the 'ts' risk D078 flagged.",
+  "verdict": "NO CHANGE NEEDED - dictionary is complete for this corpus",
+  "new_defect_found": true,
+  "new_defect_severity": "LATENT_LOW - no behavioural change warranted, regression test only",
+  "scored_country_relevance": "NONE - France is absent from training; nothing here bears on French scoring",
+  "constraints_honoured": {
+    "read_only_upstream_and_dataset": true,
+    "only_profile_json_read": true,
+    "raw_tsv_never_opened": true,
+    "no_network": true,
+    "files_written": 2
+  },
+  "provenance": {
+    "profile_files": ["train_s1", "train_s2", "train_s3", "test_s1", "test_s2", "test_s3"],
+    "india_rows_total": 10544085,
+    "india_rows_arithmetic": "883188 + 2017799 + 2115547 + 809986 + 2312565 + 2405000 = 10544085 (sum of country_rows['India'] over six files)",
+    "matches_prior_tasks": "Matches D079 and D080 exactly; independent third confirmation",
+    "topn_cap": 4000,
+    "truncation_floors_per_file": {
+      "train_s1": 182, "train_s2": 394, "train_s3": 362,
+      "test_s1": 166, "test_s2": 459, "test_s3": 416
+    },
+    "sum_of_floors": 1979,
+    "sum_of_floors_arithmetic": "182 + 394 + 362 + 166 + 459 + 416 = 1979",
+    "zero_means": "NOT IN THE TOP 4000 - never 'does not occur'. A token absent from all six lists has a true six-file total < 1979.",
+    "unigram_caveat": "addr_tokens are unigrams, so every token count is an UPPER BOUND on state matches. normalize.py:333 requires the whole comma-component to equal the key."
+  },
+  "table_ground_truth": {
+    "source": "_upstream/src/normalize.py:230-242",
+    "literal_pairs": 49,
+    "distinct_canonical_values": 37,
+    "effective_keys_after_selfmap_loop": 86,
+    "pairs_with_k_eq_v": 0,
+    "arithmetic": "49 literal pairs + 37 loop-added canonical codes = 86 effective keys (no value is already a key, so all 37 are additions)",
+    "independently_reproduces": "D078 section 2 (49/37/86) and D080 F1",
+    "state_codes_28": "ap ar as br cg ga gj hr hp jh ka kl mp mh mn ml mz nl od pb rj sk tn tg tr up uk wb",
+    "ut_nct_codes_9": "an ch dd dl dn jk la ld py",
+    "missing_states_or_uts": 0
+  },
+  "self_map": {
+    "quote": "STATE_MAPS = {\"US\": US_STATES, \"India\": IN_STATES, \"France\": FR_REGIONS}\n# abbreviations are canonical themselves\nfor _m in (US_STATES, IN_STATES):\n    for _v in list(_m.values()):\n        _m.setdefault(_v, _v)",
+    "source_lines": "normalize.py:250-254",
+    "in_states_in_loop": true,
+    "fr_regions_in_loop": false,
+    "codes_added": "an ap ar as br cg ch dd dl dn ga gj hp hr jh jk ka kl la ld mh ml mn mp mz nl od pb py rj sk tg tn tr uk up wb",
+    "canonical_values_appear_as_input_tokens": true,
+    "total_six_file_occurrences": 3188831,
+    "reproduces_d080_f3": true
+  },
+  "finding_S1_selfmap_is_load_bearing_for_s3": {
+    "status": "CONFIRMED - NEW positive finding, highest value in this report",
+    "claim": "The self-map loop is the sole mechanism by which train_s3 and test_s3 resolve an Indian state. s1/s2 write the state in full; s3 writes the two-letter code.",
+    "selfmap_occurrences_all_six_files": 3188831,
+    "selfmap_occurrences_s3_only": 3125112,
+    "selfmap_occurrences_s1_s2_only": 63719,
+    "share_in_s3_pct": 98.00,
+    "share_arithmetic": "3125112 / 3188831 = 0.98004 -> 98.00%",
+    "per_1k_by_file": {
+      "train_s1": {"india_rows": 883188, "mass": 11089, "per_1k": 12.56},
+      "train_s2": {"india_rows": 2017799, "mass": 19558, "per_1k": 9.69},
+      "train_s3": {"india_rows": 2115547, "mass": 1449612, "per_1k": 685.22},
+      "test_s1": {"india_rows": 809986, "mass": 10175, "per_1k": 12.56},
+      "test_s2": {"india_rows": 2312565, "mass": 22897, "per_1k": 9.90},
+      "test_s3": {"india_rows": 2405000, "mass": 1675500, "per_1k": 696.67}
+    },
+    "per_1k_example_arithmetic": "train_s3: 1449612 / 2115547 x 1000 = 685.22 ; test_s3: 1675500 / 2405000 x 1000 = 696.67 ; train_s2: 19558 / 2017799 x 1000 = 9.69",
+    "s2_to_s3_jump_multiple": 70,
+    "paired_token_inversion_per_1k": {
+      "maharashtra": {"train_s1": 217.83, "train_s2": 158.72, "train_s3": 11.38, "test_s2": 159.62, "test_s3": 9.37},
+      "mh_selfmap": {"train_s1": 2.38, "train_s2": 0.80, "train_s3": 151.93, "test_s2": 0.79, "test_s3": 154.44},
+      "karnataka": {"train_s1": 79.85, "train_s2": 58.68, "train_s3": 4.55, "test_s2": 59.45, "test_s3": 3.88},
+      "ka_selfmap": {"train_s1": 2.73, "train_s2": 2.40, "train_s3": 56.62, "test_s2": 2.53, "test_s3": 58.18},
+      "tamil": {"train_s1": 72.01, "train_s2": 52.55, "train_s3": 3.74, "test_s2": 53.24, "test_s3": 3.12},
+      "tn_selfmap": {"train_s1": 0.00, "train_s2": 0.00, "train_s3": 49.38, "test_s2": 0.00, "test_s3": 50.67},
+      "uttar": {"train_s1": 85.85, "train_s2": 62.72, "train_s3": 6.18, "test_s2": 63.22, "test_s3": 5.25},
+      "up_selfmap": {"train_s1": 0.75, "train_s2": 0.69, "train_s3": 58.21, "test_s2": 0.69, "test_s3": 59.17},
+      "delhi": {"train_s1": 364.56, "train_s2": 243.35, "train_s3": 211.23, "test_s2": 243.13, "test_s3": 209.94},
+      "dl_selfmap": {"train_s1": 0.00, "train_s2": 0.00, "train_s3": 95.29, "test_s2": 0.00, "test_s3": 96.10}
+    },
+    "clean_signature": "dl and tn are exactly 0 in every s1/s2 file and >104000 in every s3 file - a zero-vs-nonzero signature, not a sampling wobble",
+    "mechanism": "INFERENCE, marked as such. s3 Indian addresses appear to carry the state as the two-letter code in its own comma-component, while s1/s2 carry the spelled-out name. What the data shows is the token-mass inversion; the component placement is inferred and is NOT measurable from this profile.",
+    "consequence": "Because normalize.py:333 requires the whole component to equal the key, the s3 code is resolvable ONLY because line 254 inserted the canonical value as its own key. Without the loop, ~3.1M s3 occurrences would fail to resolve a state.",
+    "rows_at_risk_from_a_tidyup": 4520547,
+    "rows_at_risk_arithmetic": "2115547 (train_s3 India) + 2405000 (test_s3 India) = 4520547",
+    "recommendation": "DO NOT remove, restructure or 'simplify' the self-map loop, and do not treat the bare-code keys as redundant. This is a strong do-not-touch."
+  },
+  "negative_confirmation_gap_hunt": {
+    "states_missing": 0,
+    "uts_missing": 0,
+    "ut_tier_defect": "NONE. IN_STATES is a flat str->str map with no tier metadata, so the union-territory-vs-state ambiguity the work order worried about is not expressible in this table.",
+    "delhi": {
+      "status": "NO GAP - three distinct keys plus self-map",
+      "keys": {"delhi": "dl", "new delhi": "dl", "nct of delhi": "dl", "dl_selfmap": "dl"},
+      "delhi_token_total": 2621031,
+      "new_token_total": 1034062,
+      "nct_token_total": 0,
+      "nct_zero_caveat": "not in the top 4000",
+      "dl_token_total": 432705,
+      "note": "New Delhi and Delhi are separate keys sharing canonical dl, not conflated with one another. Correct design."
+    },
+    "concatenation_and_suffix_variants_all_zero": [
+      "uttarpradesh", "andhrapradesh", "himachalpradesh", "madhyapradesh",
+      "arunachalpradesh", "westbengal", "nctofdelhi", "andamannicobar",
+      "andamannicobarislands", "dadranagarhaveli", "dadranagarhaveliandamandiu",
+      "uttaranchal", "pondicherry", "coorg", "himachal", "arunachal", "andaman",
+      "nicobar", "daman", "diu", "dadra", "nct", "lakshadweep", "ladakh", "puducherry"
+    ],
+    "concatenation_variant_above_floor": {
+      "tamilnadu": 4567,
+      "tamilnadu_note": "The ONLY concatenated spelling in that whole family that actually occurs. The dict adds concatenated forms for exactly two states - tamilnadu (line 236) and uttaranchal (line 238) - and the data justifies precisely that pair. Apparent asymmetry, no cost."
+    },
+    "ordinal_variants_for_india": "NONE FOUND. The known LEET-on-French-ordinals defect is France-only and already settled; no India analogue."
+  },
+  "structural_gap_merged_territory": {
+    "status": "CONFIRMED structural gap, ZERO measured impact - do not act on it for this dataset",
+    "what": "The dictionary carries the PRE-2020 split form: 'dadra and nagar haveli'->dn and 'daman and diu'->dd as two separate keys (normalize.py:240-241). The merged post-reorganisation UT is absent.",
+    "merged_ut_key_present": false,
+    "nagar_haveli_alone_key_present": false,
+    "measured_stake": "NONE. dadra = 0, daman = 0, diu = 0, dnhh = 0 in all six files (not in the top 4000), so the pre-2020 keys dn and dd are themselves unmeasurable in this corpus.",
+    "tested_explicitly": "MERGED_UT_KEY_present=False ; NAGAR_HAVELI_ALONE=False"
+  },
+  "new_evidence_haveli": {
+    "status": "NEW EVIDENCE, but explicitly NOT a dictionary gap - recorded as an evidence gap",
+    "claim_not_made": "I am NOT claiming a missing state key.",
+    "haveli_india_addr_total": 52465,
+    "nagar_india_addr_total": 1578887,
+    "haveli_us_addr_total": 0,
+    "haveli_france_addr_total": 0,
+    "nagar_us_addr_total": 0,
+    "clears_floor_by_factor": 26,
+    "clears_floor_arithmetic": "52465 / 1979 = 26.5",
+    "prior_gap": "D080 F4a probed dadra/daman/diu (all 0) and closed the question; it never probed haveli.",
+    "inference_marked": "haveli is very likely the GUJARAT TOWN Nagar Haveli (near Surat), not the union territory. With nagar at 1,578,887 the town reading is far more likely. The UT form requires 'dadra', which is 0 everywhere.",
+    "unresolvable": "The profile has no bigram or component field, so town-vs-UT cannot be separated. I refuse to guess.",
+    "conditional_addition_not_recommended": "'nagar haveli' -> 'dn' would be the minimal addition, but the evidence does not support it and the downside (firing on a Gujarat town name) is real."
+  },
+  "finding_S2_english_word_selfmap_keys": {
+    "status": "NEW latent defect - CONFIRMED, no behavioural change warranted",
+    "claim": "The self-map loop at normalize.py:254 manufactures the keys 'as' (Assam) and 'an' (Andaman and Nicobar), which are ordinary English function words. D078's Defect-2 audit examined only LITERAL short aliases, so it missed every hazard the loop itself creates.",
+    "why_new": "D078 flagged or=0, ut=0, ts=2187 and called ts 'the live risk'. It did not inspect the 37 loop-generated code keys at all.",
+    "exposure": {
+      "as": 2743,
+      "an": 3647,
+      "as_plus_an": 6390,
+      "as_plus_an_arithmetic": "2743 + 3647 = 6390",
+      "ts_for_comparison": 2187,
+      "multiple_vs_ts": 2.92,
+      "multiple_arithmetic": "6390 / 2187 = 2.920",
+      "la_for_comparison": 4473,
+      "or": 0,
+      "ut": 0
+    },
+    "per_file_as": {"train_s1": 297, "train_s2": 574, "train_s3": 501, "test_s1": 242, "test_s2": 614, "test_s3": 515},
+    "per_file_an": {"train_s1": 386, "train_s2": 778, "train_s3": 581, "test_s1": 348, "test_s2": 886, "test_s3": 668},
+    "severity": "LATENT_LOW",
+    "why_harmless_today": [
+      "The match is WHOLE-COMPONENT (normalize.py:333), so only a component that is literally the bare word 'as' or 'an' would misfire. The token counts are UPPER BOUNDS ON CANDIDATES, not measured misfires - the profile cannot count true misfires at all.",
+      "Country scoping keeps the US meanings of la (Louisiana) and as out of Indian rows: smap = STATE_MAPS.get(country, {}) at normalize.py:318."
+    ],
+    "recommendation": "NO behavioural change. Same 'add a regression test, do not edit the dictionary' pattern D079 recommended for its 7 cross-country collisions. Pin the measured totals as=2743 and an=3647 so a future edit trips a diff, or assert the loop-generated key set contains no English stopword."
+  },
+  "cross_dictionary_collisions": {
+    "in_states_x_addr_canon_common": {
+      "addr_canon_common_key_count": 177,
+      "in_states_effective_key_count": 86,
+      "intersection_n": 2,
+      "intersection_members": ["keralam", "odisha"],
+      "reproduces_d080_f6": true,
+      "verdict": "NOT A DEFECT. normalize.py:333-335 consumes a state component and 'continue's, so the canon.get pass at line 347 never sees it. A non-standalone 'odisha' falls through to ADDR_CANON_COMMON and yields 'orissa' - the same canonical value. Well-designed redundancy."
+    },
+    "in_states_x_us_states": {
+      "shared_keys_meaning_different_states": 7,
+      "members": ["ar", "ga", "la", "mn", "or", "tn", "ut"],
+      "us_occurrences": 976874,
+      "counts_rederived_by_me": false,
+      "verdict": "NO LIVE BUG. Latent only, because STATE_MAPS is keyed strictly by country (normalize.py:250, 318) - a US row can never read an IN_STATES key. D079's counts not re-derived."
+    },
+    "jammu_and_kashmir_dead_key": {
+      "still_present": true,
+      "jammu_token_total": 0,
+      "kashmir_token_total": 0,
+      "verdict": "Re-confirmed from D078 Defect 1 / D080 F7, still zero stake. Not re-derived."
+    }
+  },
+  "districts_where_states_expected": {
+    "position": "AGREE WITH D080 F8, numbers not re-derived",
+    "d080_measured": "82 of 100 probed Indian districts above the 1,979 floor (pune 574,946; hyderabad 477,654; noida 170,497)",
+    "verdict": "A district is not a state. Adding district names to IN_STATES would emit WRONG state codes and actively degrade the feature. This is a profile-harness gap (no co-occurrence data), NOT an IN_STATES gap.",
+    "unanswerable": "Whether a district-bearing address also carries its state cannot be determined from a unigram-only profile."
+  },
+  "gaps_and_limitations": [
+    "No true zero is provable. Every '0' means 'not in the top 4000', bounded at < 1,979 six-file occurrences.",
+    "True false-positive rate is unmeasurable: candidate tokens can be bounded (as 2743, an 3647, la 4473, ts 2187) but actual component-level misfires cannot.",
+    "The s3 code-placement mechanism is INFERRED from token-mass inversion, not measured; the profile has no whole-component field.",
+    "Nagar Haveli town-vs-UT is unresolvable from this profile (see new_evidence_haveli).",
+    "Semicolon prevalence is unmeasurable, inherited from D078 Defect H: build_profile.py:31 splits on [,;] while normalize.py:322 splits on ',' only, and the profile has no semicolon field.",
+    "Indic-script text is invisible to the entire report. build_profile.py:28's TOKEN_RE = [a-z0-9]+ cannot match Devanagari, so Indic-script Indian addresses contribute zero tokens. This biases every count DOWNWARD by an unquantified amount.",
+    "10 of 37 self-map codes are below the floor (cg jh jk ld ml mz nl py tr uk, all 0) and are unmeasurable even though the loop is load-bearing.",
+    "The s3 self-map mass is an UPPER BOUND on s3 state resolutions, for the same whole-component reason as every other count here."
+  ],
+  "not_rederived_by_design": [
+    "D080 F8 district vocabulary numbers", "D079 US_STATES x IN_STATES collision counts (976,874)",
+    "D078/D080 the jammu & kashmir dead key", "REFUTED-1 France postal codes", "REFUTED-2 FR_REGIONS thinness",
+    "France LEET-on-ordinals (3eme -> eeme) - France-only, already settled"
+  ],
+  "final_recommendation": "DO NOT CHANGE IN_STATES. The dictionary is complete for this corpus. (a) The self-map loop is the sole state-resolution mechanism for train_s3 and test_s3 and must not be 'cleaned up'. (b) The 'as' and 'an' loop-generated keys deserve a regression test, not an edit. 'No change needed' is the finding, and it is well-evidenced."
+}

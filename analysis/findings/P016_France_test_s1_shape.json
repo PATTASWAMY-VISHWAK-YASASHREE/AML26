@@ -1,0 +1,210 @@
+{
+  "task": "P016",
+  "title": "[France] test_s1: shape, null rates, length distribution",
+  "agent": "b07",
+  "status": "COMPLETE",
+  "deliverable": "analysis_out/findings/P016_France_test_s1_shape.md",
+  "profile_input": "analysis_out/profile/test_s1.json",
+  "supporting_inputs": [
+    "analysis_out/profile/test_s2.json",
+    "analysis_out/profile/test_s3.json",
+    "analysis_out/profile/train_s1.json",
+    "analysis_out/profile/train_s2.json",
+    "analysis_out/profile/train_s3.json"
+  ],
+  "headline": "test_s1 France is 259,452 rows = 14.98% of the FILE and 15.31% of France. It is a MINORITY slice on both denominators and is structurally unlike the other 84.69% of France: 0.0000% empty addresses vs 2.5423% pooled, mean address length 50.07 vs 41.34 (+21.1%). Do not generalise s1 France figures to France. No defect found in the slice.",
+  "most_important_number": 15.3119,
+  "most_important_number_meaning": "test_s1 share of France test rows: 259,452 / 1,694,445. Any row-level conclusion from this slice covers one row in seven.",
+  "new_defect_found": false,
+  "defect_note": "No defect. prefix_bad = 0/259,452, name_empty = 0/259,452, addr_empty = 0/259,452, len_hist sums to rows exactly. The finding is a MEASUREMENT-SCOPE discipline issue, already fleet policy, not a code defect.",
+
+  "denominators": {
+    "test_s1_rows_whole_file": 1732544,
+    "test_s1_france_rows": 259452,
+    "france_rows_s1_share_of_file": 0.149752,
+    "france_rows_s1_share_of_file_pct": 14.9752,
+    "france_test_rows_total": 1694445,
+    "france_test_rows_s1_share": 0.153119,
+    "france_test_rows_s1_share_pct": 15.3119,
+    "france_test_rows_s2_share_pct": 41.5108,
+    "france_test_rows_s3_share_pct": 43.1773,
+    "france_rows_never_touched_by_s1": 1434993,
+    "france_rows_never_touched_by_s1_pct": 84.6881,
+    "france_share_of_all_test_rows_pct": 14.4798,
+    "all_test_rows": 11702133
+  },
+
+  "s1_france_shape": {
+    "rows": 259452,
+    "name_empty": 0,
+    "name_empty_rate": 0.0,
+    "addr_empty": 0,
+    "addr_empty_rate": 0.0,
+    "name_chars_total": 5039314,
+    "mean_name_len": 19.4229,
+    "addr_chars_total": 12990984,
+    "mean_addr_len": 50.0709,
+    "name_tokens_total": 828812,
+    "mean_name_tokens": 3.1945,
+    "has_digit_name": 2002,
+    "digit_in_name_rate": 0.007716,
+    "has_comma": 259452,
+    "comma_in_address_rate": 1.0,
+    "prefix_bad": 0,
+    "entity_id_prefix_valid_rate": 1.0,
+    "alpha_only_addr": 1089,
+    "alpha_only_addr_rate": 0.004197,
+    "num_digits_total": 510818,
+    "num_digits_per_row": 1.9688,
+    "dig5_total": 1082,
+    "dig5_per_row": 0.00417,
+    "dig6_total": 34,
+    "dig6_per_row": 0.000131
+  },
+
+  "s1_france_name_len_hist": {
+    "bucket_semantics": "key = len(business_name)//10*10 (build_profile.py:104-105). Bucket '0' = length 0-9, NOT 'empty'. name_empty=0 so no row in this bucket is actually empty.",
+    "0-9": {"n": 2719, "pct": 1.048},
+    "10-19": {"n": 142909, "pct": 55.081},
+    "20-29": {"n": 102124, "pct": 39.361},
+    "30-39": {"n": 11627, "pct": 4.481},
+    "40-49": {"n": 72, "pct": 0.028},
+    "50-59": {"n": 1, "pct": 0.0},
+    "sum_n": 259452,
+    "sum_equals_rows": true,
+    "note": "94.44% of names in 10-29 chars; only 0.028% exceed 39 chars. s2 reaches 60-69, s3 reaches 70-79."
+  },
+
+  "france_by_source_comparison": {
+    "s1": {"rows": 259452, "name_empty": 0, "addr_empty": 0, "mean_name_len": 19.4229, "mean_addr_len": 50.0709, "mean_name_tokens": 3.1945, "digit_in_name_rate": 0.007716, "comma_rate": 1.0, "prefix_bad": 0, "alpha_only_addr_rate": 0.004197, "num_digits_per_row": 1.9688, "dig5_per_row": 0.00417, "dig6_per_row": 0.000131},
+    "s2": {"rows": 703378, "name_empty": 0, "addr_empty": 21537, "mean_name_len": 21.103, "mean_addr_len": 39.5477, "mean_name_tokens": 3.4423, "digit_in_name_rate": 0.011115, "comma_rate": 0.969125, "prefix_bad": 0, "alpha_only_addr_rate": 0.037897, "num_digits_per_row": 1.9339, "dig5_per_row": 0.005137, "dig6_per_row": 0.000185},
+    "s3": {"rows": 731615, "name_empty": 0, "addr_empty": 21541, "mean_name_len": 21.1402, "mean_addr_len": 39.9686, "mean_name_tokens": 3.4524, "digit_in_name_rate": 0.011063, "comma_rate": 0.970348, "prefix_bad": 0, "alpha_only_addr_rate": 0.036709, "num_digits_per_row": 1.9345, "dig5_per_row": 0.005343, "dig6_per_row": 0.000157},
+    "s2_plus_s3": {"rows": 1434993, "addr_empty": 43078, "addr_empty_rate": 0.03002, "mean_name_len": 21.122, "mean_addr_len": 39.7623, "mean_name_tokens": 3.4475, "digit_in_name_rate": 0.011089, "comma_rate": 0.969748, "alpha_only_addr_rate": 0.037291},
+    "pooled_all_three": {"rows": 1694445, "name_empty": 0, "addr_empty": 43078, "addr_empty_rate": 0.025423, "name_chars_total": 35349230, "mean_name_len": 20.8618, "addr_chars_total": 70049550, "mean_addr_len": 41.3407, "name_tokens_total": 5775884, "mean_name_tokens": 3.4087, "digit_in_name_rate": 0.010572, "has_comma": 1651034, "comma_rate": 0.97438, "prefix_bad": 0, "alpha_only_addr": 54602, "alpha_only_addr_rate": 0.032224, "num_digits_per_row": 1.939542, "dig5_per_row": 0.005078, "dig6_per_row": 0.000165}
+  },
+
+  "s1_bias_vs_pooled": {
+    "addr_empty_rate_pp": -2.5423,
+    "addr_empty_rate_note": "s1 is exactly 0.0000%, so the relative error is undefined - no weighting recovers pooled 2.5423% from s1 data.",
+    "comma_rate_pp": 2.562,
+    "mean_addr_len_chars": 8.7302,
+    "mean_addr_len_pct": 21.1,
+    "mean_name_len_chars": -1.4389,
+    "mean_name_len_pct": -6.9,
+    "mean_name_tokens": -0.214,
+    "mean_name_tokens_pct": -6.3,
+    "digit_in_name_pp": -0.2856,
+    "digit_in_name_pct": -27.0,
+    "alpha_only_addr_ratio_understated": 8.88
+  },
+
+  "sample_sufficiency": {
+    "ci95_halfwidth_worst_case_pp": 0.1924,
+    "ci95_formula": "1.96*sqrt(0.25/259452)",
+    "statistically_large_enough": true,
+    "generalisable_to_france": false,
+    "verdict": "Precision is NOT the binding constraint; population choice is. Bias is ~100x the sampling noise."
+  },
+
+  "geography_density_rederived": {
+    "method": "region discriminators = hauts+nouvelle+pays; dept discriminators = nord+gironde+calais+atlantique; from addr_tokens['France']. Independently recomputed, not quoted from D128.",
+    "s1": {"rows": 259452, "region_tokens": 259840, "region_density_pct": 100.15, "dept_tokens": 16482, "dept_density_pct": 6.35, "hauts": 101717, "nouvelle": 85311, "pays": 72812, "nord": 200, "gironde": 62, "calais": 15967, "atlantique": 253},
+    "s2": {"rows": 703378, "region_tokens": 225997, "region_density_pct": 32.13, "dept_tokens": 269436, "dept_density_pct": 38.31},
+    "s3": {"rows": 731615, "region_tokens": 254016, "region_density_pct": 34.72, "dept_tokens": 273990, "dept_density_pct": 37.45},
+    "density_definition": "token occurrences / France rows. Exceeds 100% for s1 because a region name contributes 2-3 tokens per row. This is a CONCENTRATION INDICATOR, NEVER A ROW COUNT.",
+    "d128_discrepancy": "My densities differ slightly from D128's (100.7/6.8/32.6/38.7) because my discriminator token sets are fixed 3-region/4-dept; D128's exact membership is unpublished. Qualitative conclusion identical.",
+    "could_not_reproduce_retracted_arithmetic": "101,521 + 85,197 + 72,734 = 259,452 (the retracted figure). My measured s1 values are hauts 101,717, nouvelle 85,311, pays 72,812 = 259,840, close to but NOT equal to the s1 row count. Conclusion survives regardless."
+  },
+
+  "france_name_len_hist_by_source_pct": {
+    "0-9": {"s1": 1.048, "s2": 3.694, "s3": 4.904, "pooled": 3.812},
+    "10-19": {"s1": 55.081, "s2": 42.791, "s3": 41.831, "pooled": 44.258},
+    "20-29": {"s1": 39.361, "s2": 39.357, "s3": 37.937, "pooled": 38.745},
+    "30-39": {"s1": 4.481, "s2": 12.509, "s3": 13.076, "pooled": 11.525},
+    "40-49": {"s1": 0.028, "s2": 1.607, "s3": 2.096, "pooled": 1.576},
+    "50-59": {"s1": 0.0, "s2": 0.042, "s3": 0.148, "pooled": 0.081},
+    "60-69": {"s1": 0.0, "s2": 0.0, "s3": 0.007, "pooled": 0.003},
+    "70-79": {"s1": 0.0, "s2": 0.0, "s3": 0.0, "pooled": 0.0}
+  },
+
+  "entity_id_prefix_check": {
+    "check_definition": "build_profile.py:94 -> if not eid.startswith(f'S{src}-'): prefix_bad += 1",
+    "france_s1_prefix_bad": 0,
+    "france_s1_valid_rate": 1.0,
+    "whole_file_all_countries_prefix_bad": 0,
+    "whole_file_rows": 1732544,
+    "extended_to_all_six_profiles": "prefix_bad = 0 in every country of every file (train s1/s2/s3 and test s1/s2/s3)",
+    "semantic_correction": "The check tests S{src}- where src is the SOURCE number and is applied IDENTICALLY to train and test. So prefix_bad=0 in train_s1 means train entity_ids ALSO start with 'S1-'. THE S PREFIX ENCODES SOURCE, NOT SPLIT. It is not a train/test discriminator.",
+    "downstream_consumer": "stage2.py:106 -> pl.when(pl.col('entity_id').str.starts_with('S2')).then(2).otherwise(3). Applied to the q (S2+S3) side, not s1. A malformed prefix would silently fall into otherwise(3) rather than raise. Measured: no such rows exist.",
+    "gap": "No entity_id values are stored in the profile, so suffix format, uniqueness and cross-file disjointness are NOT checkable. Not estimated."
+  },
+
+  "structural_finding_s1_is_the_answer_key_side": {
+    "claim": "s1 is not a random sample of France - it is a different ROLE. s1 = candidate/answer-key side; s2+s3 = query side.",
+    "evidence": [
+      "run_blocking.py:11 - source1_norm -> {split}_s1.parquet",
+      "run_blocking.py:12 - concat(source2_norm, source3_norm) -> {split}_q.parquet",
+      "features.py:1 - 'Pairwise feature computation for (query = Source2/3 record, candidate = Source1 record).'",
+      "make_submission.py:66 - s1 entity_id aliased to source1_entity_id",
+      "make_submission.py:69 - match = s1.join(acc, on='s1', how='left')"
+    ],
+    "consequence": "s1 France is 100% of the SCORED French units, while being 15.31% of French ROWS. Both statements are true; they are different populations.",
+    "disagrees_with_work_order": "My order asks me to assert that conclusions generalise to 'only 15.31% of French rows'. That is CORRECT for row-level descriptive statistics (proved by the bias table) but WRONG as a coverage/participation claim. Asserting it as coverage would itself be a scoping error of the same kind that produced the retracted figure."
+  },
+
+  "france_is_test_only": {
+    "confirmed": true,
+    "train_country_rows_keys": {"train_s1": ["US", "India"], "train_s2": ["US", "India"], "train_s3": ["US", "India"]},
+    "sum_checks": {
+      "train_s1": "1323633 + 883188 = 2206821 = rows exactly",
+      "train_s2": "3016817 + 2017799 = 5034616 = rows exactly",
+      "train_s3": "3170056 + 2115547 = 5285603 = rows exactly"
+    },
+    "france_train_rows": 0,
+    "consequence": "No French training data exists. No French train/test consistency check is available and s1 cannot be calibrated against French labels. Consistent with P013/P014/P015, all of which found the France train slices empty."
+  },
+
+  "whole_file_property_test_s1": {
+    "has_comma_100pct_all_countries": true,
+    "detail": "US 663,106/663,106; India 809,986/809,986; France 259,452/259,452. test_s1 has ZERO empty addresses and ZERO comma-free addresses in ALL THREE countries - it is a pre-normalised, fully-populated file. test_s2/s3 are not.",
+    "addr_empty_by_country_by_file_pct": {
+      "train_s1": {"US": 0.0, "India": 0.0},
+      "train_s2": {"US": 3.683, "India": 2.867},
+      "train_s3": {"US": 3.501, "India": 3.07},
+      "test_s1": {"US": 0.0, "France": 0.0, "India": 0.0},
+      "test_s2": {"US": 2.945, "France": 3.062, "India": 2.282},
+      "test_s3": {"US": 2.843, "France": 2.944, "India": 2.463}
+    }
+  },
+
+  "gaps": [
+    "No entity_id values stored - prefix confirmed, suffix/uniqueness/disjointness not checkable.",
+    "len_hist is NAME length only (build_profile.py:104, on bn). There is NO address-length histogram in the profile, only the mean. An address-length DISTRIBUTION claim would be a gap.",
+    "No per-row data - all figures are aggregates or token-occurrence sums.",
+    "name_tokens/addr_tokens are TOP 4000 per country (min values 23/58/60 for test s1/s2/s3 France). A missing token is 'not in the top 4000', NEVER 'does not occur'.",
+    "build_profile.py:126-127 FLATTENS comma components - no per-component rate (e.g. share of rows with N components) is derivable.",
+    "The profile does not strip accents; the pipeline does (normalize.py:317). Accented-token counts here are undercounts.",
+    "No downstream/pipeline-visible effect claimed for the length and empty-address statistics. Only the entity_id prefix was traced to a consuming code path (stage2.py:106)."
+  ],
+
+  "recommendations": [
+    {"status": "CONFIRMED", "text": "No defect in this slice. prefix_bad 0/259,452; name_empty 0/259,452; addr_empty 0/259,452; len_hist closes on rows. Nothing to fix."},
+    {"status": "CONFIRMED", "text": "Do not quote any s1-France statistic as a France statistic. Biases run 2.5-21% and the empty-address bias is unbounded because s1's value is exactly zero."},
+    {"status": "CONFIRMED", "text": "France is test-only. No French training data exists, so no French train/test consistency check is available."},
+    {"status": "LIKELY", "text": "Add a population tag to every France figure: every France number carries its denominator (test_s1 France / France test / France scored units). These are genuinely different quantities and the project already shipped one wrong figure from conflating two of them."},
+    {"status": "SPECULATIVE", "text": "If a French length/null profile is ever needed for tuning, it must come from s2+s3 (1,434,993 rows), not s1 - s1 has no long-name tail and no empty addresses. NOT shown that any current hyperparameter was fitted on s1 France; that would need the training logs."}
+  ],
+
+  "provenance": {
+    "s1_france_shape": "analysis_out/profile/test_s1.json -> by_country['France']",
+    "comparison": "analysis_out/profile/test_s2.json, test_s3.json -> by_country['France']",
+    "pooled": "sum over the three by_country['France'] blocks / 1694445",
+    "france_test_only": "country_rows in analysis_out/profile/train_s1/s2/s3.json",
+    "prefix_semantics": "build_profile.py:94; _upstream/src/stage2.py:106; run_blocking.py:11-12; make_submission.py:66,69; features.py:1",
+    "hist_semantics": "build_profile.py:104-105",
+    "digit_field_semantics": "build_profile.py:29-30,114-116 - num_digits is ADDRESS only; dig5/dig6 are lookaround-guarded",
+    "top4000_truncation": "build_profile.py:27,139",
+    "fr_regions": "_upstream/src/normalize.py:243-249 (read-only)",
+    "tools": "PowerShell ConvertFrom-Json only. Python is broken on this box. No raw TSV opened. No network. _upstream/ and the dataset untouched."
+  }
+}

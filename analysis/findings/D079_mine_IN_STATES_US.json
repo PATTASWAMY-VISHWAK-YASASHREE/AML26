@@ -1,0 +1,429 @@
+{
+  "task_id": "D079",
+  "family": "B-dictionary",
+  "title": "mine evidence to extend IN_STATES for US",
+  "headline": "IN_STATES needs no extension for US because IN_STATES is structurally unreachable from US rows: STATE_MAPS is country-keyed (normalize.py:250) and normalize_address reads smap = STATE_MAPS.get(country, {}) (normalize.py:318). Mining did surface a NEW latent defect: US_STATES and IN_STATES share 7 keys meaning different states (ar ga la mn or tn ut), carrying 976,874 US address-token occurrences = 81.47 per 1000 US address rows. Inert today only because lookup is country-scoped and because an accidental len>3 guard in learn_translit.py:55 filters all 7 out.",
+  "primary_answer": "Nothing should be added to IN_STATES for US. Zero possible effect on any US row, by construction rather than by measurement.",
+  "row_totals": {
+    "source": "profile.country_rows summed over train_s1..3 and test_s1..3",
+    "US": 11990643,
+    "India": 10544085,
+    "France": 1694445,
+    "total": 24229173
+  },
+  "invariants_verified": {
+    "note": "exact arithmetic checks run on all 6 profiles as a provenance check",
+    "rows_equals_sum_country_rows": "6/6 files",
+    "by_country_rows_equals_sum_len_hist": "6/6 files x 3 countries"
+  },
+  "F1_in_states_unreachable_from_US": {
+    "status": "CONFIRMED",
+    "basis": "code-only, no profile field needed",
+    "state_maps_line": 250,
+    "smap_lookup_line": 318,
+    "state_assign_line": "333-334",
+    "prep_passes_row_country_line": 13,
+    "implication": "no edit to IN_STATES can change any feature value for any US row",
+    "other_live_consumer_of_IN_STATES": "learn_translit.py:51 states = set(N.IN_STATES.keys())"
+  },
+  "F2_state_code_collisions_US_vs_IN": {
+    "status": "LIKELY-defect (latent, not currently live)",
+    "status_reasoning": "confirmed as a property of the dictionaries; NOT confirmed as a live bug because state lookup is country-scoped (F1)",
+    "derivation": "intersect US_STATES and IN_STATES AFTER the self-map loop at normalize.py:252-254 re-inserts each map's values as keys",
+    "US_STATES_key_count_after_selfmap": 104,
+    "IN_STATES_key_count_after_selfmap": 86,
+    "collision_count": 7,
+    "all_collisions_are_2_chars": true,
+    "collisions": [
+      {
+        "key": "tn",
+        "us_means": "tennessee",
+        "in_means": "tamilnadu",
+        "us_addr_occ": 313504,
+        "in_addr_occ": 226332,
+        "us_rate_per_1k": 26.146
+      },
+      {
+        "key": "mn",
+        "us_means": "minnesota",
+        "in_means": "manipur",
+        "us_addr_occ": 163335,
+        "in_addr_occ": 3750,
+        "us_rate_per_1k": 13.622
+      },
+      {
+        "key": "or",
+        "us_means": "oregon",
+        "in_means": "odisha (hand-written key 'or':'od')",
+        "us_addr_occ": 157903,
+        "in_addr_occ": 0,
+        "us_rate_per_1k": 13.169
+      },
+      {
+        "key": "ar",
+        "us_means": "arkansas",
+        "in_means": "arunachal pradesh",
+        "us_addr_occ": 143938,
+        "in_addr_occ": 6730,
+        "us_rate_per_1k": 12.004
+      },
+      {
+        "key": "ut",
+        "us_means": "utah",
+        "in_means": "uttarakhand (hand-written key 'ut':'uk')",
+        "us_addr_occ": 120670,
+        "in_addr_occ": 0,
+        "us_rate_per_1k": 10.064
+      },
+      {
+        "key": "la",
+        "us_means": "louisiana",
+        "in_means": "ladakh",
+        "us_addr_occ": 61346,
+        "in_addr_occ": 4473,
+        "us_rate_per_1k": 5.116
+      },
+      {
+        "key": "ga",
+        "us_means": "georgia",
+        "in_means": "goa",
+        "us_addr_occ": 16178,
+        "in_addr_occ": 4030,
+        "us_rate_per_1k": 1.349
+      }
+    ],
+    "us_addr_occ_total": 976874,
+    "us_addr_occ_arithmetic": "313504+163335+157903+143938+120670+61346+16178 = 976874",
+    "us_rate_per_1k_total": 81.47,
+    "us_rate_arithmetic": "976874 / 11990643 * 1000 = 81.47",
+    "sharpest_case": {
+      "keys": [
+        "or",
+        "ut"
+      ],
+      "pure_us_occurrences_at_risk": 278573,
+      "arithmetic": "157903 + 120670 = 278573",
+      "why": "India writes 0 occurrences of either, so a merged map corrupts these US rows with no offsetting benefit"
+    }
+  },
+  "F3_learn_translit_country_blind": {
+    "status": "CONFIRMED",
+    "line_building_set": 51,
+    "line_applying_set": 55,
+    "set_has_country_filter": false,
+    "scanned_field": "a1 (Source 1 address) - mixed-country file",
+    "guard": "len(c.strip()) > 3",
+    "guard_neutralises_all_7_collisions": true,
+    "guard_is_coincidental": true,
+    "guard_rationale": "intended to skip 2-letter codes, not to prevent cross-country collision",
+    "IN_STATES_keys_unusable_by_this_path": 41,
+    "IN_STATES_keys_total": 86,
+    "IN_STATES_pct_unusable": 47.7,
+    "unusable_keys": [
+      "an",
+      "ap",
+      "ar",
+      "as",
+      "br",
+      "cg",
+      "ch",
+      "dd",
+      "dl",
+      "dn",
+      "ga",
+      "gj",
+      "goa",
+      "hp",
+      "hr",
+      "jh",
+      "jk",
+      "ka",
+      "kl",
+      "la",
+      "ld",
+      "mh",
+      "ml",
+      "mn",
+      "mp",
+      "mz",
+      "nl",
+      "od",
+      "or",
+      "pb",
+      "py",
+      "rj",
+      "sk",
+      "tg",
+      "tn",
+      "tr",
+      "ts",
+      "uk",
+      "up",
+      "ut",
+      "wb"
+    ],
+    "notable_casualty": "goa (real frequent state) can never be learned; gujarat can",
+    "measured_leak_into_US": 0,
+    "measured_leak_into_France": 0,
+    "IN_STATES_keys_with_len_gt_3": 45,
+    "IN_STATES_keys_len_gt_3_with_any_US_evidence": 0,
+    "IN_STATES_keys_len_gt_3_that_occur_at_all_india_counts": {
+      "delhi": 2621031,
+      "maharashtra": 1104757,
+      "karnataka": 410672,
+      "gujarat": 335446,
+      "telangana": 283530,
+      "haryana": 218443,
+      "rajasthan": 188237,
+      "kerala": 181552,
+      "bihar": 141819,
+      "punjab": 85621,
+      "keralam": 67682,
+      "orissa": 57491,
+      "odisha": 40791,
+      "tamilnadu": 4567,
+      "chandigarh": 4436
+    },
+    "conclusion": "clean no-defect result for the path that actually uses IN_STATES"
+  },
+  "F4_leet_omits_2_and_9": {
+    "status": "NEW, CONFIRMED",
+    "leet_line": 256,
+    "leet_mapped_chars": [
+      "0",
+      "1",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "@",
+      "$"
+    ],
+    "leet_unmapped_digits": [
+      "2",
+      "9"
+    ],
+    "measured_on": "name_tokens['US'], tokens that are mixed alpha-digit (the exact condition at normalize.py:279)",
+    "distinct_mixed_tokens": 133,
+    "total_mixed_occurrences": 90100,
+    "occurrences_with_unmapped_digit": 3657,
+    "pct_with_unmapped_digit": 4.06,
+    "unmapped_digit_tokens": {
+      "24hr": 3657
+    },
+    "note_24hr": "LEET maps 4->a and leaves 2, yielding nonsense token '2ahr' which matches nothing",
+    "clean_occurrences_using_only_mapped_digits": 86443,
+    "top_clean_examples": {
+      "c0m": 2855,
+      "5ervices": 2707,
+      "ass0ciates": 1817,
+      "denta1": 1652,
+      "hea1th": 1576,
+      "fami1y": 1395,
+      "0f": 1345,
+      "6roup": 1179,
+      "l1c": 1119,
+      "c1inic": 1042,
+      "c0rp": 1022,
+      "visi0n": 945,
+      "r0cky": 859,
+      "chir0practic": 853,
+      "m0untain": 850,
+      "harb0r": 803,
+      "n0se": 793,
+      "8lue": 758
+    }
+  },
+  "F5_dead_and_misscoped_entries": {
+    "status": "CONFIRMED",
+    "items": [
+      {
+        "entry": "puerto rico -> pr",
+        "dict": "US_STATES",
+        "us_addr_occ": 0,
+        "note": "unexercised; puerto=0 and rico=0 in all 6 files and all 3 countries"
+      },
+      {
+        "entry": "calle",
+        "dict": "absent from ADDR_CANON_COMMON",
+        "us_addr_occ": 2821,
+        "india_addr_occ": 0,
+        "note": "Spanish street word, safely country-scoped to US"
+      },
+      {
+        "entry": "county",
+        "dict": "absent from ADDR_CANON, not a state",
+        "us_addr_occ": 281125,
+        "note": "largest unhandled US address token found; out of scope, belongs to D086-D089"
+      },
+      {
+        "entry": "district",
+        "dict": "ADDR_CANON_COMMON -> dist",
+        "us_addr_occ": 27527,
+        "note": "already handled; correctly not a state"
+      },
+      {
+        "entry": "borough",
+        "dict": "absent from ADDR_CANON",
+        "us_addr_occ": 17520,
+        "note": "Alaska-specific, low value"
+      },
+      {
+        "entry": "canton",
+        "dict": "absent from ADDR_CANON",
+        "us_addr_occ": 18546,
+        "note": "also French/Chinese, country-ambiguous"
+      }
+    ],
+    "puerto_rico_spanish_tokens_all_zero": [
+      "puerto",
+      "rico",
+      "estado",
+      "carretera",
+      "barrio",
+      "condominio",
+      "municipio",
+      "zona",
+      "urb"
+    ],
+    "corroborates": "D075 reported pr as a zero-evidence code; consistent with no Puerto Rico rows in this corpus"
+  },
+  "F6_abbreviation_pairs": {
+    "status": "no-defect result",
+    "abbreviations_tested": [
+      "del",
+      "penn",
+      "mass",
+      "conn",
+      "wash",
+      "ariz",
+      "colo",
+      "mich",
+      "minn",
+      "wisc",
+      "fla",
+      "ill",
+      "kans",
+      "nebr",
+      "okla",
+      "oreg",
+      "penna",
+      "calif",
+      "cali",
+      "bama",
+      "wyo"
+    ],
+    "abbreviations_with_nonzero_us_addr_occ": {
+      "del": 10711,
+      "penn": 3084
+    },
+    "abbreviations_with_zero_us_addr_occ_count": 20,
+    "full_names_all_substantial": {
+      "delaware": 41742,
+      "pennsylvania": 47713,
+      "massachusetts": 206116,
+      "connecticut": 68304,
+      "washington": 267075,
+      "arizona": 206484,
+      "colorado": 19189,
+      "michigan": 7822,
+      "minnesota": 112763,
+      "wisconsin": 118034,
+      "florida": 5791,
+      "illinois": 273325,
+      "kansas": 97056,
+      "nebraska": 21040,
+      "oklahoma": 82572,
+      "oregon": 115199,
+      "california": 139681,
+      "alabama": 118811,
+      "wyoming": 13043
+    },
+    "corroborates_D075": true,
+    "new_conclusion": "no third abbreviation is worth adding",
+    "cross_country_state_name_aliasing": "none observed"
+  },
+  "F7_jammu_ampersand_key_dead": {
+    "status": "CONFIRMED, no defect",
+    "keys": [
+      "jammu and kashmir",
+      "jammu & kashmir"
+    ],
+    "mechanism": "normalize.py:331 re.sub(r'[^a-z0-9& ]+',' ',c).replace('&',' and ') converts the & form to the and form before the smap lookup",
+    "and_form_present_in_IN_STATES": true,
+    "conclusion": "& key never matches but the 'and' key absorbs it correctly; do not delete the 'and' form"
+  },
+  "gaps": [
+    "Multi-word keys are unmeasurable: build_profile.py:126-127 splits on [,;] then tokenises with [a-z0-9]+, so 'andhra pradesh' is stored only as tokens 'andhra' and 'pradesh'. The 30 zero-evidence multi-word IN_STATES keys are UNMEASURED, not absent.",
+    "Their constituent words do appear in India (pradesh 783159, uttar 443572, bengal 331662, tamil 366913, nagu 366795) which is circumstantial LIKELY support only.",
+    "No component-position field: cannot tell whether a state token sits in the state position or elsewhere in the address. All rates are raw token frequencies and may overstate state function.",
+    "No bigram/co-occurrence field: F6 pairs rest on independent unigram counts, not same-address co-occurrence. All pairs are LIKELY at best.",
+    "No per-row entity linkage: F2 exposure is a token-count exposure, not a demonstrated scoring error.",
+    "Cannot assess whether US 'or' rows and India 'orissa' rows could ever be cross-matched by the model.",
+    "LEET is not applied to addresses at all (normalize.py:342-349). 519,989 mixed alpha-digit address-token occurrences across 145 distinct tokens, dominated by ordinals (2nd 19721, 4th 19461, 3rd 19019, 5th 16825, 1st 16478). The ordinal gap is already covered by D075 (396,959 uncanonicalised) and is NOT re-derived here. Whether any of those 145 would be wrongly leeted if LEET were extended to addresses is unmeasured."
+  ],
+  "recommendations": [
+    {
+      "priority": 1,
+      "action": "DO NOT add US state names to IN_STATES",
+      "basis": "F1: zero possible effect on any US row; would only enlarge the F2 collision surface",
+      "expected_effect": "none, by construction"
+    },
+    {
+      "priority": 1,
+      "action": "Add a regression test pinning the 7 collisions without changing behaviour, e.g. assert set(US_STATES) & set(IN_STATES) == set() after the self-map loop",
+      "basis": "F2 is latent; a well-intentioned 'merge the state maps' refactor would break 7 of the most common US codes",
+      "expected_effect": "pure insurance, no scoring change"
+    },
+    {
+      "priority": 2,
+      "action": "Give learn_translit.py a country filter and comment it with the F2 collision table",
+      "basis": "F3: leak measured at 0 today, but the len>3 protection is accidental",
+      "expected_effect": "no measured change now; prevents a future silent mis-learn"
+    },
+    {
+      "priority": 2,
+      "action": "Decide deliberately whether goa should be reachable by transliteration learning (it currently is not, while gujarat is)",
+      "basis": "F3: 41/86 keys unusable",
+      "expected_effect": "possible small gain in Indic state-name translation coverage"
+    },
+    {
+      "priority": 3,
+      "action": "Add calle to ADDR_CANON_COMMON (NOT to ADDR_CANON_FR)",
+      "basis": "F5: 2,821 US occurrences, 0 in India and France",
+      "expected_effect": "small, safe, country-scoped"
+    },
+    {
+      "priority": "SKIP",
+      "action": "Do NOT extend LEET with 2/9",
+      "basis": "F4: entire benefit is 3,657 occurrences of the single token 24hr; mapping 2->z would corrupt 24 (25681), 2 (277980), 7 (35097), 21 (29108) in a corpus with 519,989 numeric address-token occurrences",
+      "expected_effect": "net-negative"
+    },
+    {
+      "priority": "OUT_OF_SCOPE",
+      "action": "county (281,125 US occurrences) belongs to ADDR_CANON_COMMON, not to any state table",
+      "basis": "F5",
+      "expected_effect": "flagged for D086-D089"
+    },
+    {
+      "priority": "NO_CHANGE",
+      "action": "Leave puerto rico: pr in place",
+      "basis": "F5: zero evidence in all 6 files and all 3 countries",
+      "expected_effect": "none; removing it would only add risk"
+    }
+  ],
+  "refuted_findings_addressed": "Neither REFUTED-1 (France pin guard) nor REFUTED-2 (FR_REGIONS too thin) is supported by my evidence. My task is US/IN_STATES-scoped and I did not re-derive either.",
+  "files_written": [
+    "analysis_out/findings/D079_mine_IN_STATES_US.md",
+    "analysis_out/findings/D079_mine_IN_STATES_US.json"
+  ],
+  "constraints_respected": {
+    "raw_tsv_never_opened": true,
+    "dataset_read_only": true,
+    "upstream_read_only": true,
+    "network_access": "none",
+    "files_written_count": 2
+  }
+}

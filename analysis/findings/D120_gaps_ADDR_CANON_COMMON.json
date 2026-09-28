@@ -1,0 +1,526 @@
+{
+    "task":  "D120",
+    "title":  "remaining gaps in ADDR_CANON_COMMON, France path",
+    "deliverable":  "analysis_out/findings/D120_gaps_ADDR_CANON_COMMON.md",
+    "headline":  "The 7-key exclusion at normalize.py:321 is a provable no-op (all 7 keys are self-maps in ADDR_CANON_COMMON, and canon.get(t,t) makes an absent key and a self-mapping key the same operation). Four of the seven (st, ste, dr, n) are re-added by ADDR_CANON_FR which is merged after the filter. The live gaps are elsewhere: n is deleted for France at 0.8874% of listed address mass, and ADDR_CANON_COMMON silently gives an English sense to six French words totalling 5,192 = 0.0433% of listed mass.",
+    "verdict_no_change_needed_on_exclusion_list":  true,
+    "denominators":  {
+                         "source":  "analysis_out/profile/*.json, fields rows / country_rows.France / addr_tokens.France",
+                         "france_rows_test_s1":  259452,
+                         "france_rows_test_s2":  703378,
+                         "france_rows_test_s3":  731615,
+                         "france_rows_pooled":  1694445,
+                         "france_test_s1_share_of_france":  0.1531,
+                         "france_listed_addr_mass_s1":  2253877,
+                         "france_listed_addr_mass_s2":  4745780,
+                         "france_listed_addr_mass_s3":  4993261,
+                         "france_listed_addr_mass_pooled":  11992918,
+                         "addr_tokens_topn":  4000,
+                         "france_list_at_cap":  true,
+                         "france_4000th_token_count_s1":  23,
+                         "france_4000th_token_count_s2":  58,
+                         "france_4000th_token_count_s3":  60,
+                         "train_france_rows":  0
+                     },
+    "dictionaries_as_built":  {
+                                  "source":  "_upstream/src/normalize.py, dict literals parsed directly out of the file",
+                                  "addr_canon_common_keys":  177,
+                                  "addr_canon_fr_keys":  68,
+                                  "addr_canon_common_self_maps":  63,
+                                  "effective_france_map_keys":  219,
+                                  "exclusion_list":  [
+                                                         "st",
+                                                         "ste",
+                                                         "dr",
+                                                         "n",
+                                                         "s",
+                                                         "e",
+                                                         "w"
+                                                     ],
+                                  "exclusion_line":  321
+                              },
+    "the_seven_excluded_keys":  {
+                                    "question_1_which_entries":  "abbreviations only, 1-3 chars each; no full word is excluded",
+                                    "source_lines":  {
+                                                         "st":  "normalize.py:154  \"street\": \"st\", \"st\": \"st\", \"str\": \"st\", \"strt\": \"st\"",
+                                                         "dr":  "normalize.py:157  \"drive\": \"dr\", \"dr\": \"dr\", \"drv\": \"dr\"",
+                                                         "n_s_e":  "normalize.py:171  \"north\": \"n\", \"n\": \"n\", \"south\": \"s\", \"s\": \"s\", \"so\": \"s\", \"east\": \"e\", \"e\": \"e\"",
+                                                         "w":  "normalize.py:172  \"west\": \"w\", \"w\": \"w\", ...",
+                                                         "ste":  "normalize.py:174  \"suite\": \"ste\", \"ste\": \"ste\", ..."
+                                                     },
+                                    "all_seven_are_self_maps":  true,
+                                    "per_key":  [
+                                                    {
+                                                        "key":  "st",
+                                                        "common_value":  "st",
+                                                        "self_map":  true,
+                                                        "in_addr_canon_fr":  true,
+                                                        "fr_value":  "saint",
+                                                        "fr_line":  207,
+                                                        "effective_value_france":  "saint",
+                                                        "doubly_dead":  true
+                                                    },
+                                                    {
+                                                        "key":  "ste",
+                                                        "common_value":  "ste",
+                                                        "self_map":  true,
+                                                        "in_addr_canon_fr":  true,
+                                                        "fr_value":  "sainte",
+                                                        "fr_line":  207,
+                                                        "effective_value_france":  "sainte",
+                                                        "doubly_dead":  true
+                                                    },
+                                                    {
+                                                        "key":  "dr",
+                                                        "common_value":  "dr",
+                                                        "self_map":  true,
+                                                        "in_addr_canon_fr":  true,
+                                                        "fr_value":  "dr",
+                                                        "fr_line":  208,
+                                                        "effective_value_france":  "dr",
+                                                        "note":  "French sense is docteur, not drive",
+                                                        "doubly_dead":  true
+                                                    },
+                                                    {
+                                                        "key":  "n",
+                                                        "common_value":  "n",
+                                                        "self_map":  true,
+                                                        "in_addr_canon_fr":  true,
+                                                        "fr_value":  "",
+                                                        "fr_line":  213,
+                                                        "effective_value_france":  "",
+                                                        "note":  "token deleted at normalize.py:348",
+                                                        "doubly_dead":  true
+                                                    },
+                                                    {
+                                                        "key":  "s",
+                                                        "common_value":  "s",
+                                                        "self_map":  true,
+                                                        "in_addr_canon_fr":  false,
+                                                        "effective_value_france":  null,
+                                                        "behaviour":  "passthrough via canon.get(t,t)"
+                                                    },
+                                                    {
+                                                        "key":  "e",
+                                                        "common_value":  "e",
+                                                        "self_map":  true,
+                                                        "in_addr_canon_fr":  false,
+                                                        "effective_value_france":  null,
+                                                        "behaviour":  "passthrough via canon.get(t,t)"
+                                                    },
+                                                    {
+                                                        "key":  "w",
+                                                        "common_value":  "w",
+                                                        "self_map":  true,
+                                                        "in_addr_canon_fr":  false,
+                                                        "effective_value_france":  null,
+                                                        "behaviour":  "passthrough via canon.get(t,t)"
+                                                    }
+                                                ],
+                                    "tokens_changed_by_the_exclusion":  0,
+                                    "mass_passing_through_the_seven_keys":  190940,
+                                    "mass_arithmetic":  "25454(st)+591(ste)+256(dr)+106424(n)+12701(s)+45410(e)+104(w) = 190940; NONE of it is altered by their removal, because for a self-map canon[k]==k and canon.get(k,k)==k are the same return value."
+                                },
+    "no_op_proof":  {
+                        "code":  "normalize.py:347  t = canon.get(t, t)",
+                        "argument":  "For a self-mapping key k: if the key is present, canon.get(k) returns canon[k] which equals k. If the key is absent, canon.get(k, k) returns the default, which is k. Both branches return the identical string, so removing a self-map is information-preserving for every possible input.",
+                        "stronger_than_d086":  "D086 built eff vs eff\u0027 and found 3 differences requiring case-by-case reasoning. This proof needs no data and covers all 7 keys at once.",
+                        "conclusion":  "delete the tuple at normalize.py:321 and no output changes for any input string"
+                    },
+    "component_skip_check":  {
+                                 "code":  "normalize.py:333-335  if ck in smap: state = smap[ck]; continue",
+                                 "concern":  "per the D119 correction, a whole comma-component matching an FR_REGIONS key is skipped, so its tokens never reach atoks",
+                                 "fr_regions_keys_checked":  14,
+                                 "excluded_tokens_found_inside_fr_regions":  0,
+                                 "collision_tokens_found_inside_fr_regions":  0,
+                                 "collision_tokens_checked":  [
+                                                                  "est",
+                                                                  "col",
+                                                                  "fort",
+                                                                  "centre",
+                                                                  "village",
+                                                                  "point",
+                                                                  "h"
+                                                              ],
+                                 "conclusion":  "no count in this document is hidden by the state skip; all are pipeline-visible"
+                             },
+    "live_consequence_n_deletion":  {
+                                        "delivered_by":  "ADDR_CANON_FR:213 (\"no\": \"\", \"n\": \"\", \"numero\": \"\", \"null\": \"\", \"na\": \"\")",
+                                        "not_by_the_exclusion_list":  true,
+                                        "n_count_s1":  2648,
+                                        "n_count_s2":  51535,
+                                        "n_count_s3":  52241,
+                                        "n_count_pooled":  106424,
+                                        "pct_of_listed_mass_s1":  0.001175,
+                                        "pct_of_listed_mass_s2":  0.010859,
+                                        "pct_of_listed_mass_s3":  0.010462,
+                                        "pct_of_listed_mass_pooled":  0.008874,
+                                        "arithmetic":  "2648/2253877=0.1175%; 51535/4745780=1.0857%; 52241/4993261=1.0463%; pooled 106424/11992918=0.8874%",
+                                        "s3_over_s1_ratio":  19.7,
+                                        "largest_token_deletion_in_effective_french_map":  true,
+                                        "verdict":  "CORRECT BEHAVIOUR, not a defect. Inference (marked as such): French n is overwhelmingly numero (n-degree, N-degree 5), a house-number marker with no identity. No change proposed.",
+                                        "gap":  "cannot separate numero from north; the profile has no component structure"
+                                    },
+    "cross_language_rewrites_live_for_france":  {
+                                                    "method":  "all 177 ADDR_CANON_COMMON keys resolved through the effective France map, cross-referenced against addr_tokens.France pooled over test_s1+s2+s3",
+                                                    "confirmed_corruptions":  [
+                                                                                  {
+                                                                                      "token":  "fort",
+                                                                                      "effective":  "ft",
+                                                                                      "fr_count":  1923,
+                                                                                      "pct_listed_mass":  0.00016,
+                                                                                      "source_line":  170,
+                                                                                      "known_from":  "D086",
+                                                                                      "verdict":  "CONFIRMED"
+                                                                                  },
+                                                                                  {
+                                                                                      "token":  "centre",
+                                                                                      "effective":  "ctr",
+                                                                                      "fr_count":  967,
+                                                                                      "pct_listed_mass":  8.1E-05,
+                                                                                      "source_line":  178,
+                                                                                      "known_from":  "D120 NEW",
+                                                                                      "verdict":  "CONFIRMED"
+                                                                                  },
+                                                                                  {
+                                                                                      "token":  "point",
+                                                                                      "effective":  "pt",
+                                                                                      "fr_count":  938,
+                                                                                      "pct_listed_mass":  7.8E-05,
+                                                                                      "source_line":  168,
+                                                                                      "known_from":  "D120 NEW",
+                                                                                      "verdict":  "CONFIRMED"
+                                                                                  },
+                                                                                  {
+                                                                                      "token":  "village",
+                                                                                      "effective":  "vill",
+                                                                                      "fr_count":  770,
+                                                                                      "pct_listed_mass":  6.4E-05,
+                                                                                      "source_line":  189,
+                                                                                      "known_from":  "D120 NEW",
+                                                                                      "verdict":  "CONFIRMED"
+                                                                                  },
+                                                                                  {
+                                                                                      "token":  "est",
+                                                                                      "effective":  "estate",
+                                                                                      "fr_count":  469,
+                                                                                      "pct_listed_mass":  3.9E-05,
+                                                                                      "source_line":  186,
+                                                                                      "known_from":  "D086",
+                                                                                      "verdict":  "CONFIRMED"
+                                                                                  },
+                                                                                  {
+                                                                                      "token":  "col",
+                                                                                      "effective":  "colony",
+                                                                                      "fr_count":  125,
+                                                                                      "pct_listed_mass":  1E-05,
+                                                                                      "source_line":  187,
+                                                                                      "known_from":  "D086",
+                                                                                      "verdict":  "CONFIRMED"
+                                                                                  }
+                                                                              ],
+                                                    "total_count":  5192,
+                                                    "total_pct_listed_mass":  0.000433,
+                                                    "arithmetic":  "1923+967+938+770+469+125 = 5192; 5192/11992918 = 0.0433%",
+                                                    "excluded_from_this_total":  {
+                                                                                     "tokens":  [
+                                                                                                    "e",
+                                                                                                    "s",
+                                                                                                    "w"
+                                                                                                ],
+                                                                                     "reason":  "passthrough, not rewrites; and the counts are accent debris per build_profile.py:28, see accent_artefact_section"
+                                                                                 },
+                                                    "empty_mapping_deletion":  {
+                                                                                   "token":  "h",
+                                                                                   "effective":  "",
+                                                                                   "fr_count":  5020,
+                                                                                   "pct_listed_mass":  0.000419,
+                                                                                   "source_line":  196,
+                                                                                   "note":  "covered by the already-settled empty-mappings-are-harmless ruling; excluded from the total above"
+                                                                               }
+                                                },
+    "directional_consistency":  {
+                                    "question":  "are ADDR_CANON_COMMON\u0027s and ADDR_CANON_FR\u0027s directional keys consistent",
+                                    "answer":  "CONSISTENT - ADDR_CANON_FR contains no directional key at all (all 68 keys parsed), so there is nothing to contradict. But no French compass word is in either table, and one of the four is actively corrupted.",
+                                    "common_has_full_eight_way_compass":  true,
+                                    "addr_canon_fr_directional_keys":  [
+
+                                                                       ],
+                                    "french_compass_words":  [
+                                                                 {
+                                                                     "word":  "nord",
+                                                                     "fr_count":  152011,
+                                                                     "pct_listed_mass":  0.012675,
+                                                                     "in_common":  false,
+                                                                     "in_addr_canon_fr":  false,
+                                                                     "effective_behaviour":  "consumed as state at normalize.py:333 (it is an FR_REGIONS key)"
+                                                                 },
+                                                                 {
+                                                                     "word":  "sud",
+                                                                     "fr_count":  1254,
+                                                                     "pct_listed_mass":  0.000105,
+                                                                     "in_common":  false,
+                                                                     "in_addr_canon_fr":  false,
+                                                                     "effective_behaviour":  "passthrough unchanged"
+                                                                 },
+                                                                 {
+                                                                     "word":  "ouest",
+                                                                     "fr_count":  1221,
+                                                                     "pct_listed_mass":  0.000102,
+                                                                     "in_common":  false,
+                                                                     "in_addr_canon_fr":  false,
+                                                                     "effective_behaviour":  "passthrough unchanged"
+                                                                 },
+                                                                 {
+                                                                     "word":  "est",
+                                                                     "fr_count":  469,
+                                                                     "pct_listed_mass":  3.9E-05,
+                                                                     "in_common":  true,
+                                                                     "common_value":  "estate",
+                                                                     "in_addr_canon_fr":  false,
+                                                                     "effective_behaviour":  "CORRUPTED to estate",
+                                                                     "verdict":  "CONFIRMED defect"
+                                                                 }
+                                                             ],
+                                    "defect_summary":  "four French compass words, exactly one corrupted (est -\u003e estate)"
+                                },
+    "correction_to_d086":  {
+                               "d086_claim":  "ne and se are CONFIRMED cross-language collisions; a French row containing ne is silently treated as northeast",
+                               "finding":  "NOT TRUE at the token level. COMMON:172-173 define \"ne\": \"ne\" and \"se\": \"se\" - both are SELF-MAPS, so canon.get(\"ne\",\"ne\") returns ne and the token is byte-identical before and after.",
+                               "ne_fr_count":  6465,
+                               "se_fr_count":  556,
+                               "nw_fr_count":  0,
+                               "sw_fr_count":  0,
+                               "residual_effect":  "ne becomes a recognised token to token_idf (features.py:13-20) instead of an unknown one taking fill_null(12.0) at features.py:31,36, very slightly lowering its IDF. Far weaker than corruption.",
+                               "d086_tier1_total_stated":  27792,
+                               "d086_tier1_corruption_subset_actual":  2517,
+                               "d086_subset_arithmetic":  "469(est)+125(col)+1923(fort) = 2517; 2517/11992918 = 0.0210%",
+                               "d120_additions":  2675,
+                               "d120_additions_arithmetic":  "967(centre)+938(point)+770(village) = 2675; 2675/11992918 = 0.0223%",
+                               "corrected_total":  5192,
+                               "corrected_total_pct":  0.000433
+                           },
+    "full_word_aliases_not_excluded":  {
+                                           "question":  "the exclusion list covers abbreviations only - what about the full words",
+                                           "aliases_left_live_in_france_map":  [
+                                                                                   "street",
+                                                                                   "str",
+                                                                                   "strt",
+                                                                                   "suite",
+                                                                                   "drive",
+                                                                                   "drv",
+                                                                                   "north",
+                                                                                   "south",
+                                                                                   "so",
+                                                                                   "east",
+                                                                                   "west"
+                                                                               ],
+                                           "fr_counts_all_zero":  true,
+                                           "qualifier":  "zero means NOT IN THE TOP 4000 of all three test sources, not does-not-occur",
+                                           "verdict":  "the abbreviation-only exclusion happens to be safe on this dataset, but by luck of the data rather than by design. No defect."
+                                       },
+    "accent_artefact_section":  {
+                                    "root_cause":  "build_profile.py:28 TOKEN_RE = re.compile(r\"[a-z0-9]+\") applied to ba.lower() with NO strip_accents, whereas normalize.py:317 calls strip_accents() BEFORE tokenising",
+                                    "consequence":  "accented French words are shredded into fragments by the profiler that the real pipeline keeps whole; 1-char tokens e/s/w are mostly debris, not compass words",
+                                    "cross_source_signature_s3_over_s1":  {
+                                                                              "r":  71.9,
+                                                                              "n":  19.7,
+                                                                              "d":  2.6,
+                                                                              "b":  2.9,
+                                                                              "s":  2,
+                                                                              "e":  1.3
+                                                                          },
+                                    "conclusion":  "no conclusion in this task changes, because e/s/w pass through unchanged anyway; it only means the exclusion list\u0027s largest apparent beneficiaries do not exist"
+                                },
+    "features_trace":  {
+                           "chain":  "prep.py:13 normalize_address -\u003e prep.py:16 \" \".join(toks) into atoks -\u003e features.py:98 sp(q_atoks)/sp(s_atoks) -\u003e features.py:112 qa_len/a_inter -\u003e features.py:123-124 a_jac/a_cont; and features.py:129 _weighted_overlap(..., addr_idf, \"wa\") -\u003e :145 w_sum",
+                           "exclusion_list_contributes_to_these_features":  false,
+                           "reason":  "provable no-op, see no_op_proof"
+                       },
+    "coverage_and_dead_weight":  {
+                                     "addr_canon_common_keys":  177,
+                                     "keys_with_zero_france_occurrences":  144,
+                                     "qualifier":  "zero means NOT IN THE TOP 4000; the 4000th entry has count 23/58/60",
+                                     "india_only_blocks_dead_for_france":  [
+                                                                               "bengaluru",
+                                                                               "bombay",
+                                                                               "gurugram",
+                                                                               "trivandrum",
+                                                                               "calcutta",
+                                                                               "madras",
+                                                                               "poona",
+                                                                               "odisha",
+                                                                               "keralam",
+                                                                               "ahmadabad",
+                                                                               "vishakhapatnam",
+                                                                               "vizag",
+                                                                               "mysuru",
+                                                                               "mangaluru",
+                                                                               "cochin",
+                                                                               "belagavi",
+                                                                               "kozhikode",
+                                                                               "calicut",
+                                                                               "nagar",
+                                                                               "taluk",
+                                                                               "tq",
+                                                                               "phase",
+                                                                               "sector"
+                                                                           ],
+                                     "all_177_keys_france_mass":  628736,
+                                     "all_177_keys_pct_listed_mass":  0.05243,
+                                     "overridden_and_agreeing_mass":  550775,
+                                     "overridden_and_changed":  [
+                                                                    {
+                                                                        "key":  "n",
+                                                                        "to":  "",
+                                                                        "fr_count":  106424
+                                                                    },
+                                                                    {
+                                                                        "key":  "st",
+                                                                        "to":  "saint",
+                                                                        "fr_count":  25454
+                                                                    },
+                                                                    {
+                                                                        "key":  "ste",
+                                                                        "to":  "sainte",
+                                                                        "fr_count":  591
+                                                                    }
+                                                                ],
+                                     "verdict":  "dead weight for France is BY DESIGN and costs nothing at runtime (canon.get is a dict lookup). Do NOT delete - load-bearing for India. No defect, no recommendation."
+                                 },
+    "addr_generic_observation":  {
+                                     "scope_warning":  "this concerns keys.ADDR_GENERIC (keys.py:14-19, applied at keys.py:39), NOT ADDR_CANON_COMMON. Outside this work order. Recorded for the blocking-keys owner. No defect claimed.",
+                                     "fr_canonical_values_not_in_addr_generic":  [
+                                                                                     {
+                                                                                         "value":  "saint",
+                                                                                         "fr_count":  141364,
+                                                                                         "pct":  0.011787,
+                                                                                         "assessment":  "toponym prefix (Saint-Jacques), genuinely discriminative - filtering it would be WRONG"
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "bis",
+                                                                                         "fr_count":  52072,
+                                                                                         "pct":  0.004342,
+                                                                                         "assessment":  "French bis (secondary building, 12 bis) - noise"
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "rte",
+                                                                                         "fr_count":  11995
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "res",
+                                                                                         "fr_count":  8340
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "quai",
+                                                                                         "fr_count":  8089
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "sainte",
+                                                                                         "fr_count":  7486
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "crs",
+                                                                                         "fr_count":  4520
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "bat",
+                                                                                         "fr_count":  1767
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "gen",
+                                                                                         "fr_count":  1227
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "mal",
+                                                                                         "fr_count":  612
+                                                                                     },
+                                                                                     {
+                                                                                         "value":  "pres",
+                                                                                         "fr_count":  496
+                                                                                     }
+                                                                                 ],
+                                     "in_addr_generic_examples":  [
+                                                                      "rue",
+                                                                      "impasse",
+                                                                      "ave",
+                                                                      "allee",
+                                                                      "chemin",
+                                                                      "pl",
+                                                                      "ter",
+                                                                      "blvd",
+                                                                      "st",
+                                                                      "ste",
+                                                                      "dr"
+                                                                  ],
+                                     "of_the_seven_excluded_keys_in_addr_generic":  [
+                                                                                        "st",
+                                                                                        "ste",
+                                                                                        "dr"
+                                                                                    ]
+                                 },
+    "answers_to_work_order_questions":  {
+                                            "q1_which_entries_and_abbrev_or_full":  "Abbreviations only, 1-3 chars: st(street), ste(suite), dr(drive), n(north), s(south), e(east), w(west) at normalize.py:154,157,171-172,174. No full word is excluded.",
+                                            "q2_what_france_does_instead":  "st-\u003esaint, ste-\u003esainte, dr-\u003edr(docteur), n-\u003e\"\"(deleted) via ADDR_CANON_FR:207,208,213 merged AFTER the filter at line 321. s/e/w have no FR entry and pass through via canon.get(t,t) at line 347.",
+                                            "q3_information_lost_or_gap":  "None. All 7 are self-maps so removal is provably information-preserving. The n-\u003e\"\" deletion is real but comes from ADDR_CANON_FR, not the exclusion, and is semantically correct French.",
+                                            "q4_directional_consistency":  "Consistent - ADDR_CANON_FR has no directional key so nothing can conflict. The real gap: no French compass word is in either table and est is corrupted to estate (469) while nord/sud/ouest pass through.",
+                                            "q5_is_dropping_harmless":  "Yes, provably and completely. Leave normalize.py:321 alone."
+                                        },
+    "recommendations":  [
+                            {
+                                "confidence":  "CONFIRMED",
+                                "action":  "No change to the exclusion list at normalize.py:321. Provably a no-op. Editing it manufactures risk for zero gain, and removing the guard would let a future US-side edit to st/dr silently change French behaviour."
+                            },
+                            {
+                                "confidence":  "CONFIRMED",
+                                "action":  "Add \"est\": \"est\" to ADDR_CANON_FR",
+                                "fr_count":  469,
+                                "pct_listed_mass":  3.9E-05,
+                                "rationale":  "only corrupted member of the French compass; matches how st/ste/n are already resolved"
+                            },
+                            {
+                                "confidence":  "CONFIRMED",
+                                "action":  "Add centre, point, village to ADDR_CANON_FR",
+                                "fr_count":  2675,
+                                "pct_listed_mass":  0.000223,
+                                "rationale":  "same defect class as est, same fix shape"
+                            },
+                            {
+                                "confidence":  "CONFIRMED",
+                                "action":  "fort-\u003eft is the largest single cross-language rewrite and has the strongest cross-country evidence (1923 FR vs 9716 US / 1120 India per D086)",
+                                "fr_count":  1923
+                            },
+                            {
+                                "confidence":  "DO NOT",
+                                "action":  "Do NOT add French ordinals, street types or function words to ADDR_CANON_COMMON. D086 measured the whole candidate set at 0.4566% of listed mass against a 16.9-23.9% geography bucket. French entries belong in ADDR_CANON_FR or they will be applied to US and India. (Function words separately retracted by D119.)"
+                            },
+                            {
+                                "confidence":  "LIKELY",
+                                "action":  "Fix build_profile.py:28 to strip_accents() before TOKEN_RE, matching normalize.py:317",
+                                "rationale":  "confirmed via the 71.9x r cross-source ratio. Until fixed, no short-token (\u003c4 char) claim from these profiles is trustworthy, including the e/s figures in this document."
+                            }
+                        ],
+    "gaps_and_limits":  [
+                            "No component structure: addr_tokens is a flat bag per country, so every rate here is a token rate not a row rate. Cannot say how many ROWS contain est.",
+                            "Top-4000 truncation: all three France lists are at the cap; the 4000th entry has count 23/58/60, so any token with fewer than 23 occurrences in test_s1 is invisible. Absence is always not-in-the-top-4000.",
+                            "Hapaxe pruning: build_profile.py:45-48 drops count-1 tokens periodically, so listed mass under-counts by an unknown amount.",
+                            "Downstream scoring effect unmeasured: atoks is traced into features.py but how much any rewrite moves the model score cannot be quantified. All expected-effect statements are INFERENCE.",
+                            "n sense unresolved: cannot separate numero from north within the 106,424. Labelled, not estimated.",
+                            "Train is France-free (country_rows.France = 0 in all three train profiles), so no French dictionary entry can be validated against a ground truth."
+                        ],
+    "not_rederived_per_brief":  [
+                                    "US_STATES / IN_STATES / FR_REGIONS coverage",
+                                    "the France-postcode refutation",
+                                    "pin_eq / alt_tset dead",
+                                    "France blocking caps healthy",
+                                    "address component order (D126, D127)",
+                                    "ADDR_CANON_COMMON empty-string mappings harmless",
+                                    "LEET ordinal defect - D120 touches no shared normalisation code, so the enlarged 24hr/1st scope from the mailbox correction does not apply here",
+                                    "the D119 French function-word retraction"
+                                ],
+    "confidence_scale_used":  [
+                                  "CONFIRMED",
+                                  "LIKELY",
+                                  "SPECULATIVE"
+                              ]
+}

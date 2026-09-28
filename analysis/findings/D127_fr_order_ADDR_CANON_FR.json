@@ -1,0 +1,115 @@
+{
+  "task_id": "D127",
+  "family": "B-dictionary",
+  "title": "France: component-order robustness for ADDR_CANON_FR",
+  "headline": "Component order is NOT a defect: normalize_address is provably order-independent for state resolution, confirmed by executing the real normalize.py. The work order's main premise is refuted. The real France risk is bis/ter handled asymmetrically in the direction that KEEPS THE NOISE: ter is deleted by ADDR_GENERIC while bis survives into blocking keys and the IDF table (5.86x asymmetry). Separately, fused number+suffix forms (5bis, 12b) are never split, and the house number is dropped from blocking keys.",
+  "verdict": {
+    "component_order_defect": "REFUTED - no defect, order-independent by construction",
+    "new_defect_found": true,
+    "new_defects": ["bis_ter_addr_generic_asymmetry", "fused_number_suffix_token_splitting"]
+  },
+  "component_order": {
+    "claim_tested": "French addresses put the region in inconsistent positions; does any code path assume a fixed order?",
+    "verdict": "NO fixed-order assumption in the state path",
+    "evidence": "normalize.py:322 splits on ',' into comps; :328-335 loops over EVERY component testing 'if ck in smap' with no positional index (no comps[0], no comps[-1])",
+    "executed_pairwise_results": [
+      {"a": "Bordeaux, Nouvelle-Aquitaine", "state_a": "naq", "b": "Nouvelle-Aquitaine, Bordeaux", "state_b": "naq", "same": true},
+      {"a": "Lille, Hauts-de-France", "state_a": "hdf", "b": "Hauts-de-France, Lille", "state_b": "hdf", "same": true},
+      {"a": "Nouvelle-Aquitaine, La Teste-de-Buch", "state_a": "naq", "b": "La Teste-de-Buch, Nouvelle-Aquitaine", "state_b": "naq", "same": true}
+    ],
+    "reordering_breaks_matching": false,
+    "method": "executed the real unmodified _upstream/src/normalize.py with polars stubbed",
+    "corroborating_profile_evidence_region_token_counts": {
+      "field": "addr_tokens[France]",
+      "hauts": {"s1": 101717, "s2": 88519, "s3": 99419},
+      "france": {"s1": 102319, "s2": 89929, "s3": 100902},
+      "nouvelle": {"s1": 85311, "s2": 74392, "s3": 83099},
+      "aquitaine": {"s1": 85268, "s2": 74276, "s3": 82987},
+      "pays": {"s1": 72812, "s2": 63086, "s3": 71498}
+    }
+  },
+  "city_last_order_sensitivity": {
+    "verdict": "GENUINE but pre-existing and not France-caused",
+    "location": "normalize.py:351-352 (append in encounter order) + features.py:90 (x.split('|')[-1] = LAST)",
+    "executed_examples": [
+      {"input": "Bordeaux, La Teste-de-Buch", "city_comps": ["bordeaux", "la teste de buch"], "city_last": "la teste de buch"},
+      {"input": "La Teste-de-Buch, Bordeaux", "city_comps": ["la teste de buch", "bordeaux"], "city_last": "bordeaux"},
+      {"input": "Bordeaux, Rhone, 12 Rue X", "city_comps": ["bordeaux", "rhone"], "city_last": "rhone"},
+      {"input": "Rhone, Bordeaux, 12 Rue X", "city_comps": ["rhone", "bordeaux"], "city_last": "bordeaux"},
+      {"input": "Bordeaux, Nouvelle-Aquitaine", "city_comps": ["bordeaux"], "city_last": "bordeaux", "note": "recognised region is continue'd at :335, never enters city_comps, so single-city case is stable"}
+    ],
+    "exposed_by": "France's multi-word city names (La Teste-de-Buch)",
+    "population_size": "GAP - num_components per row not collected"
+  },
+
+  "bis_ter_asymmetry": {
+    "verdict": "CONFIRMED defect",
+    "status": "CONFIRMED",
+    "addr_canon_fr_line": "normalize.py:211 maps bis->bis, b->bis, ter->ter, t->ter (both handled)",
+    "defect": "keys.py:14-19 ADDR_GENERIC contains 'ter' (inherited from US terrace sense, normalize.py:166) but NOT 'bis', so the two semantically identical French suffixes get opposite treatment",
+    "executed_fate": [
+      {"token": "bis", "canon": "bis", "in_addr_generic": false, "survives_keys_alph": true},
+      {"token": "b", "canon": "bis", "in_addr_generic": false, "survives_keys_alph": true},
+      {"token": "ter", "canon": "ter", "in_addr_generic": true, "survives_keys_alph": false},
+      {"token": "t", "canon": "ter", "in_addr_generic": true, "survives_keys_alph": false}
+    ],
+    "counts": {
+      "field": "addr_tokens[France]",
+      "bis": {"s1": 11010, "s2": 20062, "s3": 21000, "total": 52072},
+      "b": {"s1": 2642, "s2": 7286, "s3": 7757, "total": 17685},
+      "bis_family_total": 69757,
+      "ter": {"s1": 1674, "s2": 3044, "s3": 3178, "total": 7896},
+      "t": {"s1": 612, "s2": 1664, "s3": 1735, "total": 4011},
+      "ter_family_total": 11907
+    },
+    "arithmetic": {
+      "bis_family": "52072 + 17685 = 69757",
+      "ter_family": "7896 + 4011 = 11907",
+      "ratio": "69757 / 11907 = 5.86x",
+      "france_test_rows": 1694445,
+      "bis_family_per_1000_rows": "69757 / 1694445 * 1000 = 41.17",
+      "ter_family_per_1000_rows": "11907 / 1694445 * 1000 = 7.03",
+      "france_listed_addr_token_mass_3_files": "2253877 + 4745780 + 4993261 = 11992918",
+      "bis_family_share_of_mass_pct": "69757 / 11992918 * 100 = 0.5817%",
+      "ter_family_share_of_mass_pct": "11907 / 11992918 * 100 = 0.0993%"
+    },
+    "consequence": "~0.58% of every French address token stream is a suffix with zero location information, yet it gets a full IDF entry and can generate kind-2 address blocking keys (keys.py:63-69); attached to a house number it also creates a spurious number x word pair"
+  },
+  "fused_number_suffix": {
+    "verdict": "CONFIRMED defect - signal loss, not just noise",
+    "status": "CONFIRMED",
+    "root_cause": "normalize.py:342 splits on _non_alnum = [^a-z0-9]+ (:269); digits and letters are both alphanumeric so '5bis' is never split",
+    "canon_lookup_fails": "ADDR_CANON_FR.get('5bis') is None; ADDR_CANON_FR.get('12b') is None",
+    "executed_tokenisation": [
+      {"input": "5 bis Rue Pierre Dignac", "toks": ["5", "bis", "rue", "pierre", "dignac"], "normalize_address_nums": ["5"]},
+      {"input": "5bis Rue Pierre Dignac", "toks": ["5bis", "rue", "pierre", "dignac"], "normalize_address_nums": ["5"]},
+      {"input": "12b Rue Victor Hugo", "toks": ["12b", "rue", "victor", "hugo"], "normalize_address_nums": ["12"]}
+    ],
+    "damage_mechanism": "keys.py:41 derives blocking nums from the TOKEN STRING by ^\\d+$, not from normalize_address's nums field, so the fused form keeps its number for features (features.py:99 qm1/sm1 read anums) but loses it from the blocking keys",
+    "executed_number_loss": [
+      {"input": "5 bis Rue Pierre Dignac", "normalize_address_nums": ["5"], "keys_py_derived_nums": ["5"], "number_lost": false},
+      {"input": "5bis Rue Pierre Dignac", "normalize_address_nums": ["5"], "keys_py_derived_nums": [], "number_lost": true}
+    ],
+    "counts": {
+      "field": "addr_tokens[France]",
+      "distinct_fused_digit_letter_tokens": 46,
+      "all_fused_digit_letter": {"s1": 1610, "s2": 6122, "s3": 5848, "total": 13580},
+      "of_which_Nbis_or_Nb": {"s1": 31, "s2": 2636, "s3": 2165, "total": 4832},
+      "of_which_len_ge_3_becomes_alph": {"s1": 1554, "s2": 5274, "s3": 4998, "total": 11826},
+      "largest_offenders_s1_s2_s3": {"cour2": [657, 1563, 1652], "chem1": [207, 443, 452], "1er": [343, 795, 825]}
+    },
+    "arithmetic": {
+      "Nbis_Nb_share_of_france_rows_pct": "4832 / 1694445 * 100 = 0.285%",
+      "fused_share_of_addr_mass_pct": "13580 / 11992918 * 100 = 0.113%",
+      "fused_vs_split_bis_ratio_pct": {"s1": 3.55, "s2": 14.84, "s3": 12.71, "note": "fused/(fused+standalone bis); heavily s2/s3-weighted"}
+    }
+  },
+  "leet": {
+    "verdict": "NOT a factor for addresses",
+    "leet_defined_at": "normalize.py:256",
+    "leet_used_only_at": "normalize.py:280 inside _name_tokens (NAME path only)",
+    "appears_in_normalize_address_body": false,
+    "executed_demo": {"name_path": "_name_tokens('5bis') = ['sbis']", "address_path": "normalize_address('5bis rue x','France')[0] = ['5bis','rue','x']"},
+    "note": "the name path would actively corrupt 5bis into sbis (digit 5 -> s)"
+  }
+}

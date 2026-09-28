@@ -1,0 +1,212 @@
+{
+  "task_id": "D122",
+  "title": "remaining gaps in ADDR_GENERIC",
+  "author": "b02",
+  "deliverable": "analysis_out/findings/D122_gaps_ADDR_GENERIC.md",
+  "headline": "TWO NEW DEFECTS. (NEW-1) 9 of the 62 ADDR_GENERIC entries are structurally inert: keys.py:42 gates alph on len>=3 and keys.py:41 gates nums on ^DIGITS+$, and 0 of 62 entries is digit-only, so no sub-3-char entry can ever change a blocking key. They strip 39.91% of test-split removal mass. (NEW-2) the D116 IDF-cost argument does NOT transfer here: keys.py:39 filters a LOCAL list and keys.py:45 never returns atoks, so adding entries costs zero IDF feature mass.",
+  "units": "all mass figures are TOKEN OCCURRENCES within the top-4000 listed addr_tokens per country per file, never rows",
+
+  "dictionary_shape": {
+    "source": "_upstream/src/keys.py:14-19",
+    "type": "list",
+    "entry_count": 62,
+    "distinct_count": 62,
+    "duplicates": 0,
+    "uppercase_entries": 0,
+    "digit_only_entries": 0,
+    "empty_values_possible": false,
+    "call_sites": 1,
+    "call_site_ref": "keys.py:39",
+    "consequence_of_being_a_list": "membership test only (pl.element().is_in(ADDR_GENERIC)); there are no key->value pairs, so the work order's 'distinct canonical values' question is not applicable, and an empty value that deletes a token - as ADDR_CANON_COMMON does for 15 keys and ADDR_CANON_FR for 5 - is not expressible. Every entry is a plain suppression key.",
+    "country_scoping": "none - keys.py:39 has no country predicate"
+  },
+
+  "NEW_1_structurally_inert_entries": {
+    "status": "NEW DEFECT",
+    "confidence": "CONFIRMED",
+    "mechanism": "toks (keys.py:39) has exactly two consumers: nums (keys.py:41, filter ^DIGITS+$) and alph (keys.py:42, filter len_chars>=3). make_keys (keys.py:53-73) consumes only tl.nums and tl.alph. A stoplist entry can therefore only matter if its canonical form is digit-only (-> nums) or at least 3 chars (-> alph).",
+    "digit_only_entries_in_list": 0,
+    "nums_route_closed": true,
+    "entries_shorter_than_3": ["st", "rd", "dr", "ln", "ct", "pl", "sq", "fl", "po"],
+    "count": 9,
+    "all_six_files_mass_removed": 13555657,
+    "test_split_mass_removed": 5848087,
+    "test_split_total_removal_mass": 14652812,
+    "test_split_inert_share_pct": 39.91,
+    "test_split_pipeline_visible_mass": 8804725,
+    "per_entry_all_six_files": {
+      "rd": 4469711, "st": 2798350, "dr": 2030601, "fl": 1830216,
+      "ln": 965573, "ct": 640613, "po": 388280, "pl": 360458, "sq": 71855
+    },
+    "claim_type": "INFERENCE from quoted code filters; no pipeline run, no score delta claimed"
+  },
+
+  "NEW_2_idf_argument_does_not_transfer": {
+    "status": "NEW DEFECT (corrects an inherited argument)",
+    "confidence": "CONFIRMED",
+    "d116_argument": "For FR_REGIONS, normalize.py:333-335 'continue' skips toks.extend(ctoks) at :350, deleting tokens BEFORE prep.py:16 writes atoks, so extending the dictionary removes IDF feature mass.",
+    "why_it_fails_here": "ADDR_GENERIC is applied at keys.py:39, which builds a LOCAL list. keys.py:45 returns only [rid, country, nt, pref, nums, alph, pin, fk] - atoks is NOT an output column and is never written back.",
+    "atoks_written_at": "prep.py:16",
+    "atoks_read_at": ["run_blocking.py:11-12", "build_features.py:24-26 token_idf(frames,atoks)", "features.py:129 wa over q_atoks/s_atoks", "features.py:123-124 a_jac/a_cont", "stage2.py:98 s1_addr_dups", "features.py:136 q_addr_empty"],
+    "idf_cost_of_adding_entries": 0,
+    "consequence": "The 19-entry gap is NOT the regression D116's precedent suggests. Adding ADDR_GENERIC entries is a pure blocking-key cleanup with zero feature cost. The reason not to add all 19 is homogeneity, not IDF.",
+    "claim_type": "code-path trace plus quoted select() list; no pipeline run"
+  },
+
+  "denominators_test_split": {
+    "note": "reproduces the D091 D0 table exactly - this is the method validation",
+    "US": {"listed": 20533409, "empty_canon_deleted": 118742, "addr_generic_removed": 5029788, "addr_generic_removed_pct": 24.50, "survives": 15384879},
+    "France": {"listed": 11992918, "empty_canon_deleted": 184862, "addr_generic_removed": 1770731, "addr_generic_removed_pct": 14.76, "survives": 10037325},
+    "India": {"listed": 51134252, "empty_canon_deleted": 4927131, "addr_generic_removed": 7852293, "addr_generic_removed_pct": 15.36, "survives": 38354828}
+  },
+
+  "france_denominator_per_file": {
+    "test_s1": {"listed": 2253877, "gap19_mass": 43389, "pct": 1.9251},
+    "test_s2": {"listed": 4745780, "gap19_mass": 95247, "pct": 2.0070},
+    "test_s3": {"listed": 4993261, "gap19_mass": 99539, "pct": 1.9935},
+    "test_total": {"listed": 11992918, "gap19_mass": 238175, "pct": 1.9860},
+    "rank4000_cutoffs": {"test_s1": 23, "test_s2": 58, "test_s3": 60},
+    "france_rows_train": 0,
+    "train_files_have_france_key": false
+  },
+
+  "nineteen_entry_gap_france": {
+    "all_six_files_total": 336623,
+    "test_split_total": 238175,
+    "test_split_pct_of_french_listed_mass": 1.986,
+    "prior_claim_D127_tokens": 337553,
+    "prior_claim_D127_pct": 2.814,
+    "reconciliation": "Token counts agree within 930 (my 336623 vs D127 337553; the 930 is 'st', which for France is a stoplist INPUT rewritten to 'saint', not one of the 19 outputs). Only the PERCENTAGE disagrees, so the two figures use different denominators. Unresolved: the profile carries no per-token provenance and train has no France rows. I report 1.986% because that is the figure whose arithmetic I can show.",
+    "per_token": {
+      "saint": 166818, "bis": 69757, "rte": 29927, "crs": 13281, "res": 13088,
+      "quai": 13004, "sainte": 8077, "gen": 6078, "mal": 4730, "bat": 3745,
+      "fbg": 3046, "prof": 2485, "pres": 2380, "lieu": 181, "zone": 26,
+      "lieudit": 0, "za": 0, "zi": 0, "zac": 0
+    },
+    "zero_means": "not in the top 4000, NOT 'does not occur'",
+    "safe_to_add_confirmed": {
+      "tokens": ["bis", "rte", "crs", "res", "quai", "gen", "mal", "bat", "fbg", "prof", "pres"],
+      "mass": 159523,
+      "pct_of_gap": 47.3
+    },
+    "would_be_a_regression": {
+      "tokens": ["saint", "sainte"],
+      "mass": 174895,
+      "pct_of_gap": 52.0,
+      "reason": "saint/sainte are genuine French toponym morphemes (Saint-Etienne, Sainte-Marie). Adding them to a DELETE stoplist strips a discriminative token from French blocking keys, making keys coarser and less selective. D091 called this an unmade design decision; 174895 is the number that makes it a decision worth not making blind."
+    },
+    "unmeasurable_or_inert": {
+      "tokens": ["lieu", "zone", "lieudit", "za", "zi", "zac"],
+      "note": "za and zi are 2 chars and therefore structurally inert per NEW_1; adding them is a provable no-op"
+    }
+  },
+
+  "bis_ter_asymmetry": {
+    "status": "CONFIRMED REPLICATION of prior finding, not new",
+    "bis_mass": 69757,
+    "ter_mass": 11907,
+    "ratio": 5.8585,
+    "prior_stated_ratio": 5.86,
+    "split": "test only; train has no France rows"
+  },
+
+  "rte_asymmetry_NEW": {
+    "status": "NEW framing of a token that was listed but not diagnosed",
+    "confidence": "CONFIRMED",
+    "description": "rte is the canon output of route/rt (normalize.py:177) and FR route/rte (normalize.py:204). rte is NOT in ADDR_GENERIC. But rd IS, and rd is the canon output of road (normalize.py:155) - a semantically identical concept. The dictionary suppresses the English spelling and leaks the French one: the same inversion shape as ter/bis, but CROSS-COUNTRY rather than France-only.",
+    "rte_leaks": {"US": 24537, "India": 2446, "France": 29927, "total": 56910},
+    "rd_suppressed": {"US": 2198791, "India": 2270279, "France": 641, "total": 4469711},
+    "why_it_matters": "adding rte alongside the existing rd costs nothing and closes all three countries at once"
+  },
+
+  "plz_hole": {
+    "status": "CONFIRMED replication of D091 D1",
+    "plaza_rewrites_to": "plz",
+    "plz_in_addr_generic": false,
+    "plz_mass": {"US": 8286, "India": 117683, "total": 125969},
+    "note": "plaza is itself in the list and is permanently dead, so the entry is not merely misplaced - it is unreachable"
+  },
+
+  "france_key_drop_overlap": {
+    "status": "CONFIRMED replication of brief item 3",
+    "normalize_py_321_drops": ["st", "ste", "dr", "n", "s", "e", "w"],
+    "st": {"in_addr_generic": true, "US": 2379276, "India": 419074, "France": 0},
+    "ste": {"in_addr_generic": true, "US": 24529, "India": 15128, "France": 0},
+    "dr": {"in_addr_generic": true, "US": 1959575, "India": 60408, "France": 10618, "note": "live for France because ADDR_CANON_FR:208 re-adds docteur->dr"},
+    "directionals": {"in_addr_generic": false, "note": "n/s/e/w are not in ADDR_GENERIC at all, so the D120 no-op finding is orthogonal and was not redone"}
+  },
+
+  "dead_weight": {
+    "zero_mass_all_six_files": {
+      "count": 5,
+      "entries": ["floor", "road", "lane", "street", "plaza"],
+      "detail": {
+        "floor": "canon floor->fl (:174); fl in list but itself inert per NEW_1",
+        "road": "canon road->rd (:155); rd in list but itself inert per NEW_1",
+        "lane": "canon lane->ln (:159); ln in list but itself inert per NEW_1",
+        "street": "canon street->st (:154); st in list but itself inert per NEW_1",
+        "plaza": "canon plaza->plz (:177); plz NOT in list - the only true hole"
+      }
+    },
+    "structurally_inert": {"count": 9, "entries": ["st", "rd", "dr", "ln", "ct", "pl", "sq", "fl", "po"], "see": "NEW_1_structurally_inert_entries"},
+    "combined_no_observable_effect": {"count": 14, "pct_of_62": 22.6},
+    "single_country_live": {
+      "count": 18,
+      "combined_mass": 4793072,
+      "US_only": {"trl": 123479, "pkwy": 59054},
+      "India_only": {"nagar": 1604794, "near": 729328, "sector": 548822, "block": 511622, "opposite": 328751, "complex": 262456, "phase": 223531, "office": 220287, "wing": 110942, "ltd": 94673, "apts": 91329, "off": 70706, "pvt": 15120},
+      "France_only": {"rue": 1096807, "allee": 79868, "impasse": 33330, "chemin": 28332}
+    },
+    "ordinals_live_and_correct": {
+      "entries": ["1st", "2nd", "3rd", "4th", "5th"],
+      "test_split_mass": {"1st": 254592, "2nd": 220547, "3rd": 148346, "4th": 93472, "5th": 61166},
+      "note": "length 3 and not digit-only, so they reach alph; removed before the MAX_ALPHA sort so no interaction"
+    }
+  },
+
+  "cross_country_collision": {
+    "d091_concern_measured": {
+      "tokens": ["rue", "chemin", "allee", "impasse", "quai", "bis", "fbg"],
+      "US": 0, "India": 0,
+      "conclusion": "D091 D3b cross-country contamination has EXACTLY ZERO effect on this dataset. The design smell is real; the measurable effect is nil."
+    },
+    "live_reverse_direction": {
+      "saint": {"US": 201117, "India": 0, "status": "FLAGGED AS GAP, NOT CLAIMED AS DEFECT", "why": "saint is in neither ADDR_GENERIC nor ADDR_CANON_COMMON so it passes through the US canon untouched. But 'Saint Louis' is a plausible LEGITIMATE US toponym, which would make this correct rather than defective. Resolving it requires raw TSV inspection, forbidden by the RAM constraint. Not estimated."},
+      "rte": {"US": 7114, "India": 0},
+      "crs": {"US": 0, "India": 3285}
+    }
+  },
+
+  "recommendations": [
+    {"rank": 1, "action": "add rte and plz", "confidence": "CONFIRMED", "benefit_mass": {"rte": 56910, "plz": 125969}, "feature_cost": 0, "note": "free because NEW_2 shows the IDF argument does not apply; closes cross-country leaks"},
+    {"rank": 2, "action": "add the 11 safe French type morphemes", "confidence": "CONFIRMED", "benefit_mass": 159523, "feature_cost": 0, "tokens": ["bis", "rte", "crs", "res", "quai", "gen", "mal", "bat", "fbg", "prof", "pres"]},
+    {"rank": 3, "action": "saint/sainte - do NOT add blind", "confidence": "SPECULATIVE", "mass_at_risk": 174895, "reason": "toponym-bearing; adding strips a discriminative token from French keys. Needs an explicit design decision."},
+    {"rank": 4, "action": "delete the 9 inert 2-letter entries and the 5 zero-mass entries", "confidence": "CONFIRMED", "effect": "provably zero change to keys; cosmetic honesty only"}
+  ],
+
+  "corrections_to_prior_work": [
+    {"target": "D127", "claim": "19-entry gap = 337,553 tokens = 2.814% of listed French address-token mass", "my_measure": "238,175 / 11,992,918 = 1.986% on the test files", "status": "UNRECONCILED - flagged not resolved", "note": "token counts agree within 930; only the percentage differs, so denominators differ. Direction matters: 2.814% would make the gap 42% larger than I measure."},
+    {"target": "D091", "claim": "D3b rue/chemin/allee/impasse contaminate US/India blocking keys (count marked GAP)", "my_measure": "0 occurrences in US and India across all six files", "status": "MEASURED, effect is exactly zero"},
+    {"target": "D116", "claim": "adding dictionary entries deletes IDF feature mass, so the fix is a bad trade", "my_measure": "ADDR_GENERIC is applied downstream of the atoks write; keys.py:45 never returns atoks", "status": "ARGUMENT DOES NOT TRANSFER to this dictionary; the two act at different pipeline stages"}
+  ],
+
+  "gaps_and_limitations": [
+    "All mass figures are token occurrences in the top-4000 listed set, not rows and not absolute mass; the tail is truncated.",
+    "A token at 0 means 'not in the top 4000' (cutoffs s1 23 / s2 58 / s3 60), NEVER 'does not occur'.",
+    "NEW_1 and NEW_2 are structural claims from quoted code, not measured score deltas. No pipeline was run; no F0.5 change is claimed.",
+    "D127's 2.814% denominator could not be determined; the discrepancy is flagged, not closed.",
+    "US saint (201,117) is flagged as needing raw inspection and is explicitly NOT claimed as a defect.",
+    "The bis/ter and 19-entry figures are replications of prior findings, reported because the brief requires every number to be traceable and because they validate the replication (my test-split totals reproduce the D091 D0 table exactly).",
+    "build_profile.py flattens address components; no claim here relies on component structure.",
+    "No raw *.tsv was opened. No network access. Read-only respected on amazon_ml_2026_research/ and _upstream/."
+  ],
+
+  "provenance": {
+    "code_read": ["_upstream/src/keys.py", "_upstream/src/normalize.py", "_upstream/src/features.py", "_upstream/src/blocking.py", "_upstream/src/prep.py", "_upstream/src/build_features.py", "_upstream/src/run_blocking.py", "build_profile.py"],
+    "data_read": ["analysis_out/profile/test_s1.json", "analysis_out/profile/test_s2.json", "analysis_out/profile/test_s3.json", "analysis_out/profile/train_s1.json", "analysis_out/profile/train_s2.json", "analysis_out/profile/train_s3.json"],
+    "profile_fields_used": ["rows", "country_rows", "by_country", "addr_tokens"],
+    "built_on_not_redone": ["D091", "D094", "D116", "D119", "D120", "D127"],
+    "python_used": false,
+    "computation": "PowerShell only (Python is broken on this box)"
+  }
+}

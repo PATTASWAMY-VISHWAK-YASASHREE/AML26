@@ -1,0 +1,932 @@
+{
+    "frozen_at_utc":  "2026-09-27T11:59:50Z",
+    "root":  "C:\\Users\\pvish\\OneDrive - UCB-O365\\Desktop\\New folder (13)",
+    "batch_size":  10,
+    "counts":  {
+                   "roster":  128,
+                   "delivered":  47,
+                   "outstanding":  81,
+                   "orphan_deliverables":  5
+               },
+    "note":  "Task IDs are IMMUTABLE from this point. Do not renumber or delete task JSONs.",
+    "orphan_deliverables":  [
+                                {
+                                    "id":  "D071",
+                                    "deliverable":  "analysis_out\\findings\\D071_mine_FR_REGIONS_US.md"
+                                },
+                                {
+                                    "id":  "D072",
+                                    "deliverable":  "analysis_out\\findings\\D072_mine_FR_REGIONS_India.md"
+                                },
+                                {
+                                    "id":  "D076",
+                                    "deliverable":  "analysis_out\\findings\\D076_mine_US_STATES_India.md"
+                                },
+                                {
+                                    "id":  "D077",
+                                    "deliverable":  "analysis_out\\findings\\D077_mine_US_STATES_France.md"
+                                },
+                                {
+                                    "id":  "D079",
+                                    "deliverable":  "analysis_out\\findings\\D079_mine_IN_STATES_US.md"
+                                }
+                            ],
+    "tasks":  [
+                  {
+                      "id":  "D070",
+                      "family":  "B-dictionary",
+                      "title":  "audit current FR_REGIONS",
+                      "deliverable":  "analysis_out/findings/D070_audit_FR_REGIONS.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D073",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend FR_REGIONS for France",
+                      "deliverable":  "analysis_out/findings/D073_mine_FR_REGIONS_France.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D074",
+                      "family":  "B-dictionary",
+                      "title":  "audit current US_STATES",
+                      "deliverable":  "analysis_out/findings/D074_audit_US_STATES.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D075",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend US_STATES for US",
+                      "deliverable":  "analysis_out/findings/D075_mine_US_STATES_US.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D078",
+                      "family":  "B-dictionary",
+                      "title":  "audit current IN_STATES",
+                      "deliverable":  "analysis_out/findings/D078_audit_IN_STATES.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D080",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend IN_STATES for India",
+                      "deliverable":  "analysis_out/findings/D080_mine_IN_STATES_India.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D081",
+                      "family":  "B-dictionary",
+                      "title":  "audit current ADDR_CANON_FR",
+                      "deliverable":  "analysis_out/findings/D081_audit_ADDR_CANON_FR.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D082",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend ADDR_CANON_FR for France",
+                      "deliverable":  "analysis_out/findings/D082_mine_ADDR_CANON_FR_France.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D083",
+                      "family":  "B-dictionary",
+                      "title":  "audit current ADDR_CANON_COMMON",
+                      "deliverable":  "analysis_out/findings/D083_audit_ADDR_CANON_COMMON.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D084",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend ADDR_CANON_COMMON for US",
+                      "deliverable":  "analysis_out/findings/D084_mine_ADDR_CANON_COMMON_US.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D085",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend ADDR_CANON_COMMON for India",
+                      "deliverable":  "analysis_out/findings/D085_mine_ADDR_CANON_COMMON_India.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "D086",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend ADDR_CANON_COMMON for France",
+                      "deliverable":  "analysis_out/findings/D086_mine_ADDR_CANON_COMMON_France.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D087",
+                      "family":  "B-dictionary",
+                      "title":  "audit current LEET",
+                      "deliverable":  "analysis_out/findings/D087_audit_LEET.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D088",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend LEET for US",
+                      "deliverable":  "analysis_out/findings/D088_mine_LEET_US.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D089",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend LEET for India",
+                      "deliverable":  "analysis_out/findings/D089_mine_LEET_India.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "D090",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend LEET for France",
+                      "deliverable":  "analysis_out/findings/D090_mine_LEET_France.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D091",
+                      "family":  "B-dictionary",
+                      "title":  "audit current ADDR_GENERIC",
+                      "deliverable":  "analysis_out/findings/D091_audit_ADDR_GENERIC.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D092",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend ADDR_GENERIC for US",
+                      "deliverable":  "analysis_out/findings/D092_mine_ADDR_GENERIC_US.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D093",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend ADDR_GENERIC for India",
+                      "deliverable":  "analysis_out/findings/D093_mine_ADDR_GENERIC_India.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D094",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend ADDR_GENERIC for France",
+                      "deliverable":  "analysis_out/findings/D094_mine_ADDR_GENERIC_France.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D095",
+                      "family":  "B-dictionary",
+                      "title":  "audit current indic_token_dict",
+                      "deliverable":  "analysis_out/findings/D095_audit_indic_token_dict.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D096",
+                      "family":  "B-dictionary",
+                      "title":  "mine evidence to extend indic_token_dict for India",
+                      "deliverable":  "analysis_out/findings/D096_mine_indic_token_dict_India.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "D116",
+                      "family":  "B-dictionary",
+                      "title":  "remaining gaps in FR_REGIONS",
+                      "deliverable":  "analysis_out/findings/D116_gaps_FR_REGIONS.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D117",
+                      "family":  "B-dictionary",
+                      "title":  "remaining gaps in US_STATES",
+                      "deliverable":  "analysis_out/findings/D117_gaps_US_STATES.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D118",
+                      "family":  "B-dictionary",
+                      "title":  "remaining gaps in IN_STATES",
+                      "deliverable":  "analysis_out/findings/D118_gaps_IN_STATES.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D119",
+                      "family":  "B-dictionary",
+                      "title":  "remaining gaps in ADDR_CANON_FR",
+                      "deliverable":  "analysis_out/findings/D119_gaps_ADDR_CANON_FR.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D120",
+                      "family":  "B-dictionary",
+                      "title":  "remaining gaps in ADDR_CANON_COMMON",
+                      "deliverable":  "analysis_out/findings/D120_gaps_ADDR_CANON_COMMON.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D121",
+                      "family":  "B-dictionary",
+                      "title":  "remaining gaps in LEET",
+                      "deliverable":  "analysis_out/findings/D121_gaps_LEET.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D122",
+                      "family":  "B-dictionary",
+                      "title":  "remaining gaps in ADDR_GENERIC",
+                      "deliverable":  "analysis_out/findings/D122_gaps_ADDR_GENERIC.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D123",
+                      "family":  "B-dictionary",
+                      "title":  "remaining gaps in indic_token_dict",
+                      "deliverable":  "analysis_out/findings/D123_gaps_indic_token_dict.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D124",
+                      "family":  "B-dictionary",
+                      "title":  "France name_tokens: city and place-name coverage",
+                      "deliverable":  "analysis_out/findings/D124_fr_places_name_tokens.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D125",
+                      "family":  "B-dictionary",
+                      "title":  "France addr_tokens: city and place-name coverage",
+                      "deliverable":  "analysis_out/findings/D125_fr_places_addr_tokens.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D126",
+                      "family":  "B-dictionary",
+                      "title":  "France: component-order robustness for FR_REGIONS",
+                      "deliverable":  "analysis_out/findings/D126_fr_order_FR_REGIONS.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D127",
+                      "family":  "B-dictionary",
+                      "title":  "France: component-order robustness for ADDR_CANON_FR",
+                      "deliverable":  "analysis_out/findings/D127_fr_order_ADDR_CANON_FR.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "D128",
+                      "family":  "B-dictionary",
+                      "title":  "audit the France state-resolution contradiction: 71.10% vs 97.44%",
+                      "deliverable":  "analysis_out/findings/D128_audit_FR_state_contradiction.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P001",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s1: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P001_US_train_s1_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P002",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s2: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P002_US_train_s2_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P003",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s3: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P003_US_train_s3_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P004",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s1: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P004_US_test_s1_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P005",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s2: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P005_US_test_s2_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P006",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s3: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P006_US_test_s3_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P007",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s1: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P007_India_train_s1_shape.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P008",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s2: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P008_India_train_s2_shape.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P009",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s3: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P009_India_train_s3_shape.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P010",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s1: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P010_India_test_s1_shape.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P011",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s2: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P011_India_test_s2_shape.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P012",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s3: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P012_India_test_s3_shape.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P013",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s1: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P013_France_train_s1_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P014",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s2: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P014_France_train_s2_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P015",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s3: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P015_France_train_s3_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P016",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s1: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P016_France_test_s1_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P017",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s2: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P017_France_test_s2_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P018",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s3: shape, null rates, length distribution",
+                      "deliverable":  "analysis_out/findings/P018_France_test_s3_shape.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P019",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s1: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P019_US_train_s1_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P020",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s2: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P020_US_train_s2_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P021",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s3: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P021_US_train_s3_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P022",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s1: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P022_US_test_s1_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P023",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s2: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P023_US_test_s2_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P024",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s3: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P024_US_test_s3_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P025",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s1: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P025_India_train_s1_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P026",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s2: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P026_India_train_s2_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P027",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s3: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P027_India_train_s3_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P028",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s1: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P028_India_test_s1_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P029",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s2: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P029_India_test_s2_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P030",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s3: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P030_India_test_s3_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P031",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s1: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P031_France_train_s1_numeric.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P032",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s2: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P032_France_train_s2_numeric.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P033",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s3: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P033_France_train_s3_numeric.md",
+                      "status":  "DELIVERED"
+                  },
+                  {
+                      "id":  "P034",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s1: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P034_France_test_s1_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P035",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s2: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P035_France_test_s2_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P036",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s3: digit structure and address-number behaviour",
+                      "deliverable":  "analysis_out/findings/P036_France_test_s3_numeric.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P037",
+                      "family":  "A-profile",
+                      "title":  "France digit forensics (train_s1): what the numbers are",
+                      "deliverable":  "analysis_out/findings/P037_fr_digits_train_s1.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P038",
+                      "family":  "A-profile",
+                      "title":  "France digit forensics (test_s1): what the numbers are",
+                      "deliverable":  "analysis_out/findings/P038_fr_digits_test_s1.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P039",
+                      "family":  "A-profile",
+                      "title":  "France digit forensics (test_s2): what the numbers are",
+                      "deliverable":  "analysis_out/findings/P039_fr_digits_test_s2.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P040",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s1: address component vocabulary",
+                      "deliverable":  "analysis_out/findings/P040_US_train_s1_addr_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P041",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s1: address component vocabulary",
+                      "deliverable":  "analysis_out/findings/P041_US_test_s1_addr_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P042",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s1: address component vocabulary",
+                      "deliverable":  "analysis_out/findings/P042_India_train_s1_addr_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P043",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s1: address component vocabulary",
+                      "deliverable":  "analysis_out/findings/P043_India_test_s1_addr_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P044",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s1: address component vocabulary",
+                      "deliverable":  "analysis_out/findings/P044_France_train_s1_addr_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P045",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s1: address component vocabulary",
+                      "deliverable":  "analysis_out/findings/P045_France_test_s1_addr_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P046",
+                      "family":  "A-profile",
+                      "title":  "[US] business-name vocabulary and structure",
+                      "deliverable":  "analysis_out/findings/P046_US_name_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P047",
+                      "family":  "A-profile",
+                      "title":  "[India] business-name vocabulary and structure",
+                      "deliverable":  "analysis_out/findings/P047_India_name_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P048",
+                      "family":  "A-profile",
+                      "title":  "[France] business-name vocabulary and structure",
+                      "deliverable":  "analysis_out/findings/P048_France_name_vocab.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P049",
+                      "family":  "A-profile",
+                      "title":  "[US] train vs test distribution shift",
+                      "deliverable":  "analysis_out/findings/P049_US_shift.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P050",
+                      "family":  "A-profile",
+                      "title":  "[India] train vs test distribution shift",
+                      "deliverable":  "analysis_out/findings/P050_India_shift.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P051",
+                      "family":  "A-profile",
+                      "title":  "[France] train vs test distribution shift",
+                      "deliverable":  "analysis_out/findings/P051_France_shift.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P052",
+                      "family":  "A-profile",
+                      "title":  "cross-country shift: train_s1",
+                      "deliverable":  "analysis_out/findings/P052_train_s1_crosscountry.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P053",
+                      "family":  "A-profile",
+                      "title":  "cross-country shift: train_s2",
+                      "deliverable":  "analysis_out/findings/P053_train_s2_crosscountry.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P054",
+                      "family":  "A-profile",
+                      "title":  "cross-country shift: train_s3",
+                      "deliverable":  "analysis_out/findings/P054_train_s3_crosscountry.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P055",
+                      "family":  "A-profile",
+                      "title":  "cross-country shift: test_s1",
+                      "deliverable":  "analysis_out/findings/P055_test_s1_crosscountry.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P056",
+                      "family":  "A-profile",
+                      "title":  "cross-country shift: test_s2",
+                      "deliverable":  "analysis_out/findings/P056_test_s2_crosscountry.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P057",
+                      "family":  "A-profile",
+                      "title":  "cross-country shift: test_s3",
+                      "deliverable":  "analysis_out/findings/P057_test_s3_crosscountry.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P058",
+                      "family":  "A-profile",
+                      "title":  "[US] name_tokens tail analysis (train_s1)",
+                      "deliverable":  "analysis_out/findings/P058_US_train_s1_name_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P059",
+                      "family":  "A-profile",
+                      "title":  "[US] name_tokens tail analysis (test_s1)",
+                      "deliverable":  "analysis_out/findings/P059_US_test_s1_name_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P060",
+                      "family":  "A-profile",
+                      "title":  "[US] addr_tokens tail analysis (train_s1)",
+                      "deliverable":  "analysis_out/findings/P060_US_train_s1_addr_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P061",
+                      "family":  "A-profile",
+                      "title":  "[US] addr_tokens tail analysis (test_s1)",
+                      "deliverable":  "analysis_out/findings/P061_US_test_s1_addr_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P062",
+                      "family":  "A-profile",
+                      "title":  "[India] name_tokens tail analysis (train_s1)",
+                      "deliverable":  "analysis_out/findings/P062_India_train_s1_name_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P063",
+                      "family":  "A-profile",
+                      "title":  "[India] name_tokens tail analysis (test_s1)",
+                      "deliverable":  "analysis_out/findings/P063_India_test_s1_name_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P064",
+                      "family":  "A-profile",
+                      "title":  "[India] addr_tokens tail analysis (train_s1)",
+                      "deliverable":  "analysis_out/findings/P064_India_train_s1_addr_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P065",
+                      "family":  "A-profile",
+                      "title":  "[India] addr_tokens tail analysis (test_s1)",
+                      "deliverable":  "analysis_out/findings/P065_India_test_s1_addr_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P066",
+                      "family":  "A-profile",
+                      "title":  "[France] name_tokens tail analysis (train_s1)",
+                      "deliverable":  "analysis_out/findings/P066_France_train_s1_name_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P067",
+                      "family":  "A-profile",
+                      "title":  "[France] name_tokens tail analysis (test_s1)",
+                      "deliverable":  "analysis_out/findings/P067_France_test_s1_name_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P068",
+                      "family":  "A-profile",
+                      "title":  "[France] addr_tokens tail analysis (train_s1)",
+                      "deliverable":  "analysis_out/findings/P068_France_train_s1_addr_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P069",
+                      "family":  "A-profile",
+                      "title":  "[France] addr_tokens tail analysis (test_s1)",
+                      "deliverable":  "analysis_out/findings/P069_France_test_s1_addr_tokens_tail.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P092",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s1: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P092_US_train_s1_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P093",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s2: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P093_US_train_s2_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P094",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s3: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P094_US_train_s3_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P095",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s1: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P095_US_test_s1_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P096",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s2: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P096_US_test_s2_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P097",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s3: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P097_US_test_s3_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P098",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s1: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P098_India_train_s1_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P099",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s2: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P099_India_train_s2_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P100",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s3: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P100_India_train_s3_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P101",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s1: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P101_India_test_s1_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P102",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s2: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P102_India_test_s2_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P103",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s3: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P103_India_test_s3_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P104",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s1: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P104_France_train_s1_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P105",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s2: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P105_France_train_s2_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P106",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s3: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P106_France_train_s3_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P107",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s1: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P107_France_test_s1_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P108",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s2: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P108_France_test_s2_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P109",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s3: name-vs-address informativeness balance",
+                      "deliverable":  "analysis_out/findings/P109_France_test_s3_balance.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P110",
+                      "family":  "A-profile",
+                      "title":  "[US] train_s1: short-name and edge-case audit",
+                      "deliverable":  "analysis_out/findings/P110_US_train_s1_edge.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P111",
+                      "family":  "A-profile",
+                      "title":  "[US] test_s1: short-name and edge-case audit",
+                      "deliverable":  "analysis_out/findings/P111_US_test_s1_edge.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P112",
+                      "family":  "A-profile",
+                      "title":  "[India] train_s1: short-name and edge-case audit",
+                      "deliverable":  "analysis_out/findings/P112_India_train_s1_edge.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P113",
+                      "family":  "A-profile",
+                      "title":  "[India] test_s1: short-name and edge-case audit",
+                      "deliverable":  "analysis_out/findings/P113_India_test_s1_edge.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P114",
+                      "family":  "A-profile",
+                      "title":  "[France] train_s1: short-name and edge-case audit",
+                      "deliverable":  "analysis_out/findings/P114_France_train_s1_edge.md",
+                      "status":  "OUTSTANDING"
+                  },
+                  {
+                      "id":  "P115",
+                      "family":  "A-profile",
+                      "title":  "[France] test_s1: short-name and edge-case audit",
+                      "deliverable":  "analysis_out/findings/P115_France_test_s1_edge.md",
+                      "status":  "OUTSTANDING"
+                  }
+              ]
+}

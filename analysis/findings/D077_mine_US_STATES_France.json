@@ -1,0 +1,164 @@
+{
+  "task_id": "D077",
+  "family": "B-dictionary",
+  "title": "mine evidence to extend US_STATES for France",
+  "headline": "FR_REGIONS coverage is fine, but the '100% of France rows' denominator behind that clearance is test_s1 only: across all three test splits 43,411 of 1,694,445 France rows (2.5620%) cannot carry a state, a hard ceiling of 97.4380%. The real France dictionary gap is in ADDR_CANON_FR, not FR_REGIONS: six France-only address tokens (ge 41,120; pr 5,881; cit 5,580; cite 2,546; haut 2,263; es 2,168) are unhandled, and LEET corrupts 1,111 French ordinal name tokens (3eme->eeme, 1er->ler) while correctly decoding 1,949 genuine leetspeak tokens.",
+  "new_defect_found": true,
+  "most_important_number": 43078,
+  "most_important_number_meaning": "France rows with an empty business_address across test_s1+s2+s3 (2.5423% of 1,694,445 France rows); these can never resolve a state, so the true state-resolution ceiling is 97.4380%, not the 100.00% quoted in REFUTED-2",
+
+  "scope": {
+    "splits_used": ["test_s1", "test_s2", "test_s3"],
+    "why": "France appears only in test; country_rows in train_s1, train_s2, train_s3 contains no 'France' key",
+    "france_rows_by_split": {"test_s1": 259452, "test_s2": 703378, "test_s3": 731615},
+    "france_rows_total": 1694445,
+    "france_addr_token_occurrences_union_top4000": 11992918,
+    "profile_fields_used": ["country_rows", "by_country", "addr_tokens", "name_tokens"],
+    "rate_denominator": "1694445 total France rows"
+  },
+
+  "already_checked_interaction": {
+    "refuted_1_pin_guard": "not re-derived; out of scope for this dictionary task",
+    "refuted_2_fr_regions": {
+      "status": "conclusion CONFIRMED by independent evidence, but denominator is too narrow",
+      "independent_confirmation": "FR_REGIONS canonical values hdf/idf/naq/pdl each occur 0 times in the France address token stream, so the missing self-map loop at normalize.py:252 is inert",
+      "scope_correction": "the quoted 259,452/259,452 equals exactly the test_s1 France row count; it is a test_s1-only measurement",
+      "denominator_caveat": "any 'state resolves for X% of France' claim must state its split"
+    }
+  },
+
+  "F0_state_resolution_ceiling": {
+    "arithmetic_invariant": "rows - addr_empty == has_comma + nonempty_comma_free  (holds exactly for every split x country)",
+    "by_split": [
+      {"split": "test_s1", "rows": 259452, "addr_empty": 0, "has_comma": 259452, "nonempty_comma_free": 0, "can_carry_state_pct": 100.0, "shortfall": 0},
+      {"split": "test_s2", "rows": 703378, "addr_empty": 21537, "has_comma": 681661, "nonempty_comma_free": 180, "can_carry_state_pct": 96.9125, "shortfall": 21717},
+      {"split": "test_s3", "rows": 731615, "addr_empty": 21541, "has_comma": 709921, "nonempty_comma_free": 153, "can_carry_state_pct": 97.0348, "shortfall": 21694}
+    ],
+    "france_addr_empty_total": 43078,
+    "france_addr_empty_pct": 2.5423,
+    "france_nonempty_comma_free_total": 333,
+    "france_hard_no_state": 43411,
+    "france_hard_no_state_pct": 2.562,
+    "france_state_resolution_ceiling_pct": 97.438,
+    "code_evidence": "normalize_address('', 'France') -> state='' ; normalize_address('Nord','France') -> state='hdf' (so a comma-free row can only resolve if the whole address is a bare region name)",
+    "control_other_countries_pct": {"US_test_s1": 100.0, "US_test_s2": 97.0552, "US_test_s3": 97.157, "India_test_s1": 100.0, "India_test_s2": 97.7183, "India_test_s3": 97.5368},
+    "verdict": "the empty-address rate is a source-2/3 data property matching US and India, NOT a France defect; it bounds the achievable rate only"
+  },
+
+  "F1_region_candidates_not_in_FR_REGIONS": {
+    "note": "FR_REGIONS has 14 keys covering 4 canonical values (hdf, naq, pdl, idf)",
+    "caveat": "normalize_address matches a region only when an ENTIRE comma-component equals a key; a token count is not a row count and not a state-signal count. build_profile.py flattens tokens per component so component identity is lost. Hence LIKELY not CONFIRMED.",
+    "candidates": [
+      {"token": "marne", "test_s1": 423, "test_s2": 994, "test_s3": 1061, "total": 2478, "per_1k_fr_rows": 1.46, "status": "LIKELY"},
+      {"token": "lorraine", "test_s1": 334, "test_s2": 825, "test_s3": 789, "total": 1948, "per_1k_fr_rows": 1.15, "status": "LIKELY"},
+      {"token": "alsace", "test_s1": 311, "test_s2": 744, "test_s3": 758, "total": 1813, "per_1k_fr_rows": 1.07, "status": "LIKELY"},
+      {"token": "bretagne", "test_s1": 222, "test_s2": 505, "test_s3": 535, "total": 1262, "per_1k_fr_rows": 0.74, "status": "LIKELY"},
+      {"token": "gard", "test_s1": 135, "test_s2": 305, "test_s3": 320, "total": 760, "per_1k_fr_rows": 0.45, "status": "LIKELY"},
+      {"token": "normandie", "test_s1": 139, "test_s2": 288, "test_s3": 329, "total": 756, "per_1k_fr_rows": 0.45, "status": "LIKELY"},
+      {"token": "auvergne", "test_s1": 89, "test_s2": 213, "test_s3": 218, "total": 520, "per_1k_fr_rows": 0.31, "status": "LIKELY"},
+      {"token": "martinique", "test_s1": 75, "test_s2": 166, "test_s3": 173, "total": 414, "per_1k_fr_rows": 0.24, "status": "LIKELY"},
+      {"token": "picardie", "test_s1": 38, "test_s2": 79, "test_s3": 98, "total": 215, "per_1k_fr_rows": 0.13, "status": "LIKELY"},
+      {"token": "vienne", "test_s1": 35, "test_s2": 82, "test_s3": 77, "total": 194, "per_1k_fr_rows": 0.11, "status": "LIKELY"},
+      {"token": "guyane", "test_s1": 27, "test_s2": 0, "test_s3": 0, "total": 27, "per_1k_fr_rows": 0.02, "status": "SPECULATIVE"}
+    ],
+    "candidates_total_occurrences": 10387,
+    "candidates_total_per_1k_fr_rows": 6.13,
+    "fr_regions_variant_gaps_verified_against_code": [
+      {"input": "Hauts-de-France", "state": "hdf", "resolved": true},
+      {"input": "Haut de France", "state": "", "resolved": false, "note": "singular variant is not a key"},
+      {"input": "Nord-Pas-de-Calais", "state": "", "resolved": false, "note": "hyphenated two-dept form is not a key"},
+      {"input": "Nord Pas-de-Calais", "state": "", "resolved": false},
+      {"input": "Pas-de-Calais", "state": "hdf", "resolved": true},
+      {"input": "Loire-Atlantique", "state": "pdl", "resolved": true},
+      {"input": "Ile-de-France", "state": "idf", "resolved": true},
+      {"input": "Aquitaine", "state": "", "resolved": false},
+      {"input": "Lorraine", "state": "", "resolved": false},
+      {"input": "Bretagne", "state": "", "resolved": false}
+    ],
+    "haut_singular_count": 2263,
+    "hauts_plural_count": 289655
+  },
+
+  "F2_abbreviation_candidates": {
+    "in_canon_definition": "token present in ADDR_CANON_FR or ADDR_CANON_COMMON",
+    "candidates": [
+      {"token": "ge", "france": 41120, "us": 0, "india": 0, "in_canon": false, "status": "LIKELY", "per_1k_fr_rows": 24.27, "rationale": "prefixes general (4826 -> canon 'gen') and gen (1227 -> 'gen'); also prefixes georges (10957), george (1361), germain (950)", "per_split": {"test_s1": 8279, "test_s2": 16037, "test_s3": 16804}},
+      {"token": "pr", "france": 5881, "us": 0, "india": 0, "in_canon": false, "status": "SPECULATIVE", "per_1k_fr_rows": 3.47, "rationale": "prefixes professeur (2485 -> 'prof'), president (1884 -> 'pres'), also prairie/princesse/prosper", "per_split": {"test_s1": 1271, "test_s2": 2255, "test_s3": 2355}},
+      {"token": "cit", "france": 5580, "us": 0, "india": 1589, "in_canon": false, "status": "LIKELY", "per_1k_fr_rows": 3.29, "rationale": "French Cite; cite (2546) is France-only", "per_split": {"test_s1": 1224, "test_s2": 2117, "test_s3": 2239}},
+      {"token": "cite", "france": 2546, "us": 0, "india": 0, "in_canon": false, "status": "CONFIRMED", "per_1k_fr_rows": 1.5, "rationale": "French Cite street type absent from ADDR_CANON_FR while impasse/place/square/chemin/cours/faubourg are present", "per_split": {"test_s1": 141, "test_s2": 1205, "test_s3": 1200}},
+      {"token": "haut", "france": 2263, "us": 0, "india": 0, "in_canon": false, "status": "LIKELY", "per_1k_fr_rows": 1.34, "rationale": "singular Haut; 'haut de france' does not resolve", "per_split": {"test_s1": 369, "test_s2": 928, "test_s3": 966}},
+      {"token": "es", "france": 2168, "us": 0, "india": 0, "in_canon": false, "status": "SPECULATIVE", "per_1k_fr_rows": 1.28, "rationale": "prefixes est (469 -> canon 'estate'), esplanade (878), espagne (755), esp (611)", "per_split": {"test_s1": 445, "test_s2": 865, "test_s3": 858}},
+      {"token": "alle", "france": 502, "us": 0, "india": 0, "in_canon": false, "status": "CONFIRMED", "per_1k_fr_rows": 0.3, "rationale": "misspelling/truncation of allee (17779 -> canon 'allee')", "per_split": {"test_s1": 0, "test_s2": 248, "test_s3": 254}},
+      {"token": "avneue", "france": 482, "us": 0, "india": 0, "in_canon": false, "status": "CONFIRMED", "per_1k_fr_rows": 0.28, "rationale": "misspelling of avenue (126497 -> canon 'ave')", "per_split": {"test_s1": 0, "test_s2": 228, "test_s3": 254}},
+      {"token": "allees", "france": 187, "us": 0, "india": 0, "in_canon": false, "status": "CONFIRMED", "per_1k_fr_rows": 0.11, "rationale": "plural misspelling of allee", "per_split": {"test_s1": 0, "test_s2": 103, "test_s3": 84}},
+      {"token": "citadelle", "france": 24, "us": 0, "india": 0, "in_canon": false, "status": "SPECULATIVE", "per_1k_fr_rows": 0.01, "rationale": "too rare to act on"}
+    ],
+    "source_drift_signal": "alle, allees, avneue are all 0 in test_s1 and non-zero only in test_s2/test_s3; the misspellings are introduced by sources 2 and 3"
+  },
+
+  "F3_leetspeak": {
+    "leet_map": {"0": "o", "1": "l", "3": "e", "4": "a", "5": "s", "6": "g", "7": "t", "8": "b", "@": "a", "$": "s"},
+    "applied_in_name_tokens": true,
+    "applied_in_address_tokens": false,
+    "address_evidence": "'LEET' in inspect.getsource(normalize_address) is False",
+    "genuine_leetspeak_decoding_correctly": {
+      "tokens": {"5arl": 637, "5as": 417, "5asu": 85, "5a": 129, "c1ub": 190, "amica1e": 136, "mais0n": 118, "uni0n": 87, "c0mite": 75, "ass0ciation": 75},
+      "total": 1949,
+      "per_1k_fr_rows": 1.15,
+      "examples_verified_via_code": ["5arl->sarl", "5as->sas", "c1ub->club", "amica1e->amicale", "mais0n->maison", "c0mite->comite", "ass0ciation->association"],
+      "status": "CONFIRMED working"
+    },
+    "french_ordinals_corrupted": {
+      "tokens": {"3eme": 748, "1er": 131, "3e": 121, "1ere": 102, "7eme": 9},
+      "total": 1111,
+      "per_1k_fr_rows": 0.66,
+      "per_split": {"test_s1": 186, "test_s2": 447, "test_s3": 478},
+      "corruption_verified_via_code": {"3eme": "eeme", "1er": "ler", "1ere": "lere", "3e": "ee", "7eme": "teme", "2eme": "2eme (safe, '2' not in LEET)"},
+      "status": "CONFIRMED defect"
+    },
+    "address_ordinals_unhandled": {"1er": 1963, "2eme": 697, "3eme": 350, "total": 3010, "note": "survive as literals in addresses because LEET is not applied there, and none is in any canon dict"},
+    "unexplained_token": {"token": "4l", "total": 1943, "per_split": {"test_s1": 311, "test_s2": 835, "test_s3": 797}, "decodes_to": "al", "status": "SPECULATIVE", "action": "none recommended"}
+  },
+
+  "F4_fused_building_suffixes": {
+    "defect": "fused <n>b / <n>bis tokens are neither split nor canon-mapped, so '12 bis' and '12bis' produce different token streams",
+    "code_evidence": {
+      "normalize_address('12 bis avenue de la Paix','France')": ["12", "bis", "ave", "de", "la", "paix"],
+      "normalize_address('12bis avenue de la Paix','France')": ["12bis", "ave", "de", "la", "paix"],
+      "identical": false
+    },
+    "standalone_bis_handled": 52072,
+    "fused_n_b": 3427,
+    "fused_n_bis": 1405,
+    "fused_total": 4832,
+    "per_1k_fr_rows": 2.85,
+    "other_fused_compounds_unhandled": {"cour2": 3872, "chem1": 1102, "espl1": 311, "chau1": 177, "total": 5462}
+  },
+
+  "gaps": [
+    {"id": 1, "severity": "high", "gap": "Accented French place names are invisible to the profile: build_profile.py uses TOKEN_RE=[a-z0-9]+ and never strips accents, so 'Vende'+'e' tokenises as 'vend'+'e'", "evidence": "vendee=0 but vend=230; rhone, pyrenees, finistere, herault, lozere, cotes all exactly 0", "consequence": "zero counts are a measurement artefact, not evidence of absence; no accented department can be ranked or ruled out; this is why no F1 row is CONFIRMED", "not_a_pipeline_bug": "strip_accents runs before matching in normalize.py; verified 'Vende'->'vendee'->state='pdl'"},
+    {"id": 2, "severity": "high", "gap": "Component identity is lost: addr_tokens is flattened per [,;] component, so a region component cannot be told apart from a street-name token", "consequence": "F1 candidates capped at LIKELY; unfixable without a re-scan"},
+    {"id": 3, "severity": "medium", "gap": "Top-4000 truncation floor per country per file: rank-4000 count is 23/58/60 (address) and 9/25/26 (name) for test_s1/2/3", "consequence": "absence of a low-count candidate is not evidence of absence; 2eme=0 in name_tokens is inside the floor and inconclusive"},
+    {"id": 4, "severity": "medium", "gap": "city_comps and address component-order behaviour are not measured at all by the profile", "consequence": "the region-before-city vs city-before-region inconsistency flagged in the work order was not tested"},
+    {"id": 5, "severity": "medium", "gap": "No per-row data; every rate is token-occurrence-based and row-level rates for the F1 candidates are unknown"},
+    {"id": 6, "severity": "low", "gap": "The earlier '~1,100 rows of legacy names' figure could not be verified: no profile field records it, and F1's 10,387 token occurrences cannot be converted to rows"}
+  ],
+
+  "recommendations": [
+    {"priority": 1, "action": "Add cite/cit -> cite to ADDR_CANON_FR", "evidence": "cite=2546 (France-only, US=0 India=0) + cit=5580", "status": "CONFIRMED", "expected_effect": "unifies Cite/cit spellings; a standard French street type sitting alongside already-mapped impasse/place/square/chemin/cours/faubourg"},
+    {"priority": 2, "action": "Add avneue->ave, alle->allee, allees->allee to ADDR_CANON_FR", "evidence": "482 + 502 + 187 occurrences, all 0 in test_s1, all France-only", "status": "CONFIRMED", "expected_effect": "zero-risk, canonical targets already exist"},
+    {"priority": 3, "action": "Add a French-ordinal guard before LEET.translate: skip ^[0-9]+(er|ere|eme|e)$", "evidence": "removes 1,111 corrupted occurrences while preserving 1,949 genuine leetspeak decodes", "status": "CONFIRMED", "expected_effect": "highest value per line; also add 1er/2eme/3eme to ADDR_CANON_FR for the address path (3,010 occurrences)"},
+    {"priority": 4, "action": "Split fused building suffixes in normalize_address before canon lookup: ^[0-9]+b(is)?$ -> [num, bis]; add ^cour[0-9]+$ style handling", "evidence": "4,832 fused-suffix occurrences plus 5,462 cour2/chem1/espl1/chau1", "status": "CONFIRMED", "expected_effect": "fixes the verified '12bis' != '12 bis' mismatch that can break blocking on addresses"},
+    {"priority": 5, "action": "Add ge->gen to ADDR_CANON_FR, but verify first", "evidence": "ge=41,120, France-only, and general/gen already map to gen", "status": "LIKELY", "expected_effect": "largest single unhandled token; verify it is the 'General' abbreviation and not a truncated forename (georges 10,957) before editing"},
+    {"priority": 6, "action": "Do NOT widen FR_REGIONS yet", "evidence": "F1's 10,387 occurrences are unconfirmed (gaps 1-2) and REFUTED-2 shows coverage is not the binding constraint", "status": "CONFIRMED", "expected_effect": "revisit only on a re-scan preserving accents and component identity; if done, add the verified-missing 'haut de france' and 'nord pas de calais' variants"},
+    {"priority": 7, "action": "No change needed for the pin guard, the FR_REGIONS self-map loop, or the empty-address rate", "evidence": "already covered, inert (hdf/idf/naq/pdl occur 0 times), or a data property matching US/India rates", "status": "CONFIRMED", "expected_effect": "none"}
+  ],
+
+  "no_defect_confirmed": [
+    "FR_REGIONS self-map loop omission (normalize.py:252): hdf, idf, naq, pdl each occur 0 times in the France address token stream, so the defect is inert",
+    "LEET on genuine French leetspeak: 1,949 occurrences decode correctly (5arl->sarl etc.)",
+    "standalone 'bis': 52,072 occurrences, already mapped in ADDR_CANON_FR",
+    "region tokens actually present: hauts de france 289655 (hauts), nouvelle aquitaine 242802/242531, pays de la loire 207396, nord 152011, gironde 150787, pas de calais 29032/128762, loire atlantique 334419/128348 - all already mapped",
+    "accents in the pipeline: strip_accents runs before matching, so accented region spellings resolve correctly in normalize.py"
+  ]
+}

@@ -1,0 +1,237 @@
+{
+  "task_id": "D126",
+  "family": "B-dictionary",
+  "title": "France: component-order robustness for FR_REGIONS, and the bis/ter house-number suffixes",
+  "deliverable": "analysis_out/findings/D126_fr_order_FR_REGIONS.md",
+  "inputs": ["test_s1.json", "test_s2.json", "test_s3.json"],
+  "code_read_only": ["_upstream/src/normalize.py", "_upstream/src/keys.py", "_upstream/src/features.py", "_upstream/src/prep.py", "build_profile.py"],
+  "headline": "Reordering French address components provably cannot break state resolution: normalize_address applies the FR_REGIONS test to every component with no positional logic, so state is permutation-invariant. The only order-dependent consumer is city_last (features.py:90), and it fires only when the region component is NOT an FR_REGIONS key, so the order risk and the dictionary gap are one defect. Separately, the premise that s2/s3 use unmapped departments is largely FALSE: the four departments that carry s2/s3 geography are all already mapped, and the whole unmapped lexicon is worth at most 2.46% of the residual. And bis is a confirmed dictionary defect (69757 tokens) but small; saint is the same defect 2.4x larger.",
+  "most_important_number": {
+    "value": 1206992,
+    "denominator": 1694445,
+    "pct": 71.2323,
+    "meaning": "France test rows whose address contains all tokens of at least one FR_REGIONS key, union-bounded over the 14 keys, across test_s1+s2+s3. Ceiling on state resolution; floor on the unresolvable share is 487453 rows (28.7677%)."
+  },
+  "denominators": {
+    "france_rows": {"s1": 259452, "s2": 703378, "s3": 731615, "total": 1694445},
+    "source_field": "by_country.France.rows",
+    "addr_empty": {"s1": 0, "s2": 21537, "s3": 21541, "total": 43078},
+    "has_comma": {"s1": 259452, "s2": 681661, "s3": 709921, "total": 1651034},
+    "rows_minus_has_comma": {"s1": 0, "s2": 21717, "s3": 21694, "total": 43411},
+    "nonempty_addr_without_comma": {"s1": 0, "s2": 180, "s3": 153, "total": 333},
+    "alpha_only_addr": {"s1": 1089, "s2": 26656, "s3": 26857, "total": 54602},
+    "num_digits": {"s1": 510818, "s2": 1360296, "s3": 1415333, "total": 3286447},
+    "dig5": {"s1": 1082, "s2": 3613, "s3": 3909, "total": 8604},
+    "dig6": {"s1": 34, "s2": 130, "s3": 115, "total": 279},
+    "addr_chars": {"s1": 12990984, "s2": 27816963, "s3": 29241603, "total": 70049550},
+    "name_chars": {"s1": 5039314, "s2": 14843398, "s3": 15466518, "total": 35349230},
+    "name_tokens": {"s1": 828812, "s2": 2421234, "s3": 2525838, "total": 5775884},
+    "has_digit_name": {"s1": 2002, "s2": 7818, "s3": 8094, "total": 17914},
+    "listed_addr_token_mass": {"s1": 2253877, "s2": 4745780, "s3": 4993261, "total": 11992918},
+    "top4000_cutoff_count": {"s1": 23, "s2": 58, "s3": 60}
+  },
+  "derived_rates": {
+    "addr_chars_per_row": {"s1": 50.0709, "s2": 39.5477, "s3": 39.9686},
+    "num_digits_per_row": {"s1": 1.9688, "s2": 1.9339, "s3": 1.9345},
+    "name_tokens_per_row": {"s1": 3.1945, "s2": 3.4423, "s3": 3.4524},
+    "listed_mass_per_row_lower_bound": {"s1": 8.687, "s2": 6.747, "s3": 6.825},
+    "alpha_only_addr_pct": {"s1": 0.4197, "s2": 3.7897, "s3": 3.6709},
+    "dig5_per_row": {"s1": 0.00417, "s2": 0.005137, "s3": 0.005343},
+    "dig6_per_row": {"s1": 0.000131, "s2": 0.000185, "s3": 0.000157}
+  },
+  "exact_invariants_verified": [
+    {"invariant": "len_hist sums exactly to by_country.France.rows", "s1": true, "s2": true, "s3": true, "values": [259452, 703378, 731615]},
+    {"invariant": "country_rows sums exactly to file rows", "s1": true, "s2": true, "s3": true, "values": [1732544, 4887273, 5082316]},
+    {"invariant": "(rows - has_comma) - addr_empty == 0", "s1": 0, "s2": 180, "s3": 153, "total": 333, "note": "333 France rows have a non-empty address with no comma at all; s.split(',') treats each as a single component"},
+    {"invariant": "num_digits/rows equal to 4sf across s2 and s3", "s1_per_row": 1.9688, "s2_per_row": 1.9339, "s3_per_row": 1.9345, "inference": "LIKELY: s2 and s3 are drawn from one generator; s1 is not"},
+    {"invariant": "de token mass sums to the already_checked figure", "value": 1050023, "detail": "257777 + 381880 + 410366"},
+    {"invariant": "hauts + ile ~= france (france occurs only in the 2 region names)", "s1": {"lhs": 102020, "rhs": 102319, "delta": 299}, "s2": {"lhs": 89336, "rhs": 89929, "delta": 593}, "s3": {"lhs": 100213, "rhs": 100902, "delta": 689}},
+    {"invariant": "pays + atlantique ~= loire (loire occurs only in those 2 names)", "s1": {"lhs": 73065, "rhs": 72836, "delta": -229}, "s2": {"lhs": 126783, "rhs": 126216, "delta": -567}, "s3": {"lhs": 135896, "rhs": 135367, "delta": -529}},
+    {"invariant": "calais - pas = excess calais not from 'Pas de Calais'", "s1": 15788, "s2": 40948, "s3": 42994, "note": "mostly Saint-Calais, a town in Sarthe / Pays de la Loire; min(pas,calais) is the correct bound, a naive calais count would overstate coverage by 3.9x"}
+  ],
+  "component_order": {
+    "verdict": "state/toks/nums/pin are PROVABLY permutation-invariant; no reordering fix is needed, and none can be justified",
+    "evidence_type": "code-derived (deterministic from _upstream/src), not data-derived",
+    "state_test": "normalize.py:333-335  if ck in smap: state = smap[ck]; continue  -- applied to every component; the loop index is never referenced",
+    "hyphen_handling": "normalize.py:331 replaces [^a-z0-9& ] with a space, so 'nouvelle-aquitaine' -> 'nouvelle aquitaine' which IS an FR_REGIONS key; hyphenation is not a failure mode",
+    "work_order_examples_traced": [
+      {"input": "Bordeaux, Nouvelle-Aquitaine", "state": "naq", "toks": "bordeaux", "nums": "", "acity": "bordeaux"},
+      {"input": "Nouvelle-Aquitaine, Bordeaux", "state": "naq", "toks": "bordeaux", "nums": "", "acity": "bordeaux", "note": "byte-identical to the previous row: permutation-invariant"},
+      {"input": "Nouvelle-Aquitaine, La Teste-de-Buch", "state": "naq", "toks": "la teste de buch", "nums": "", "acity": "la teste de buch"},
+      {"input": "Nouvelle-Aquitaine, 3 Rue de Campeyraut", "state": "naq", "toks": "3 rue de campeyraut", "nums": "3", "acity": ""}
+    ],
+    "order_dependent_code_path": {
+      "location": "features.py:90  F['city_last'] = _cp([x.split('|')[-1] ...], [...], fuzz.ratio)",
+      "in_source_comment": "last city component (usually the city)",
+      "order_free_sibling": "features.py:88 city_tset uses token_set_ratio",
+      "gate": "normalize.py:335 continue -- a MATCHED region component never enters city_comps (normalize.py:351-352), so it can never become city_last",
+      "failure_mode": "an UNMAPPED region component stays in city_comps in its original position; if it trails the city ('Bordeaux, Bretagne') city_last returns the region, if it leads ('Bretagne, Bordeaux') it returns the city",
+      "conclusion": "the order risk and the FR_REGIONS dictionary gap are ONE defect; no separate reordering fix exists"
+    },
+    "other_paths_provably_order_free": [
+      "keys.py:43 alph sorted by length",
+      "keys.py:46 fk sorted",
+      "keys.py:61 nn filter t < t2",
+      "keys.py:67 aa2 filter alph < alphb",
+      "features.py:95 .list.unique() before every set operation"
+    ],
+    "city_last_is_only_order_sensitive_feature": true
+  },
+  "fr_regions_coverage_criterion_C": {
+    "criterion": "U = SUM over the 14 FR_REGIONS keys of min(count of each constituent token) in addr_tokens[France]; U/rows is an UPPER bound on state resolution",
+    "reason_for_union_bound": "profile discards component structure, so per-key co-occurrence within one component cannot be tested; min() per token then SUM across keys",
+    "per_key_min_token_count": {
+      "hauts de france": {"s1": 101717, "s2": 88519, "s3": 99419},
+      "nord": {"s1": 200, "s2": 75362, "s3": 76449},
+      "pas de calais": {"s1": 179, "s2": 14325, "s3": 14528},
+      "somme": {"s1": 333, "s2": 807, "s3": 833},
+      "aisne": {"s1": 0, "s2": 0, "s3": 0},
+      "oise": {"s1": 74, "s2": 148, "s3": 139},
+      "nouvelle aquitaine": {"s1": 85268, "s2": 74276, "s3": 82987},
+      "gironde": {"s1": 62, "s2": 75104, "s3": 75621},
+      "landes": {"s1": 116, "s2": 292, "s3": 313},
+      "pays de la loire": {"s1": 72812, "s2": 63086, "s3": 71498},
+      "loire atlantique": {"s1": 253, "s2": 63697, "s3": 64398},
+      "vendee": {"s1": 0, "s2": 0, "s3": 0},
+      "ile de france": {"s1": 303, "s2": 817, "s3": 794},
+      "paris": {"s1": 388, "s2": 952, "s3": 923}
+    },
+    "U": {"s1": 261705, "s2": 457385, "s3": 487902, "total": 1206992},
+    "rows": {"s1": 259452, "s2": 703378, "s3": 731615, "total": 1694445},
+    "U_over_rows_pct": {"s1": 100.8684, "s2": 65.0269, "s3": 66.6884, "total": 71.2323},
+    "residual_rows": {"s1": -2253, "s2": 245993, "s3": 243713, "total": 487453},
+    "residual_pct": {"s1": -0.8684, "s2": 34.9731, "s3": 33.3116, "total": 28.7677},
+    "s1_bound_is_non_binding": true,
+    "s1_double_counting_cause": "pays de la loire / loire atlantique share 'loire'; hauts de france / ile de france share 'france'",
+    "contradiction_status": {
+      "d073_pct": 71.10,
+      "d077_pct": 97.4380,
+      "d126_pct": 71.2323,
+      "my_verdict": "criterion C independently reproduces the ~71.2% family within 0.14pp; a 97.44% CEILING is arithmetically incompatible with an upper bound of 71.23% on the same data, so the contradiction is criterion-driven not data-driven",
+      "status": "narrowed, not closed -- I did not read D077's criterion"
+    }
+  },
+  "already_checked_root_cause_challenge": {
+    "claim_challenged": "test_s2/test_s3 encode geography with DEPARTMENT names, and most of those departments are absent from FR_REGIONS (examples given: gironde, nord, atlantique)",
+    "verdict": "LARGELY FALSE",
+    "why": "gironde, nord, loire atlantique and pas de calais are ALL already FR_REGIONS keys (normalize.py:244, 244, 247, 245); the three cited examples are precisely the mapped ones",
+    "departments_that_actually_carry_s2_s3_geography": ["gironde", "nord", "loire atlantique", "pas de calais"],
+    "their_token_mass": {"s2": 228488, "s3": 231992},
+    "gazetteer_probe": {
+      "n_departments_probed": 85,
+      "found_in_top4000_in_any_source": 0,
+      "per_source_upper_bound_per_token": {"s1": 22, "s2": 57, "s3": 59},
+      "aggregate_upper_bound_if_all_85_hit_cutoff": {"s1": 1955, "s2": 4930, "s3": 5100, "total": 11985},
+      "as_pct_of_france_rows": {"s1": 0.7535, "s2": 0.7009, "s3": 0.6971},
+      "as_pct_of_residual_487453": 2.459,
+      "multiword_fragments_found": {"val": 445, "maritime": 80, "source": "s2 only, possible Val-d'Oise / Seine-Maritime", "even_counted_in_full_pct_of_s2_rows": 0.075}
+    },
+    "legacy_region_token_mass": {"s1": 2829, "s2": 6451, "s3": 6986, "total": 16266, "as_pct_of_s2_listed_mass": 0.96, "caveat": "'grand' 1710 and 'est' 189 in s2 are not region names; treat as upper bound"},
+    "inference": "the >=487453-row residual is best explained by those rows having NO region/department component at all (structural), not by unmapped vocabulary (lexical). Ranks 1-260 of addr_tokens[France] for s2 contain only street names, house numbers, city names and person names.",
+    "decision_impact": "a department-expansion project sized on the 28.77% residual would recover at most ~2.5% of it"
+  },
+  "bis_ter": {
+    "verdict": "both are tokenised as ALPHABETIC WORDS in atoks, not as numbers and not as noise; LEET is irrelevant; bis is the only one not neutralised for blocking",
+    "leet_relevance": "ZERO -- LEET is defined at normalize.py:256 and has exactly one call site, normalize.py:280 inside _name_tokens, which prep.py:12 applies to business_name only; prep.py:13 calls normalize_address for the address",
+    "addr_canon_fr_mapping": "normalize.py:211  \"bis\": \"bis\", \"b\": \"bis\", \"ter\": \"ter\", \"t\": \"ter\"  (both are identity maps; standalone b is PROMOTED to bis, standalone t to ter)",
+    "tokenisation": "normalize.py:342 _non_alnum = [^a-z0-9]+ : '5 bis' -> ['5','bis'] ; '5bis' -> ['5bis'] one fused token. NUM_RE (:311,:336) still lifts 5 into nums so anums is right but atoks is not",
+    "keys_asymmetry": "keys.py:14 ADDR_GENERIC contains 'ter' but NOT 'bis'; keys.py:39 deletes ADDR_GENERIC tokens before blocking, so ter is dropped and bis survives into alph (len 3 >= 3, keys.py:42) and into kind-2 blocking keys",
+    "mass_bis_destination": {"bis": {"s1": 11010, "s2": 20062, "s3": 21000, "total": 52072}, "b": {"s1": 2642, "s2": 7286, "s3": 7757, "total": 17685}, "combined": {"s1": 13652, "s2": 27348, "s3": 28757, "total": 69757}},
+    "mass_ter_destination": {"ter": {"s1": 1674, "s2": 3044, "s3": 3178, "total": 7896}, "t": {"s1": 612, "s2": 1664, "s3": 1735, "total": 4011}, "combined": {"s1": 2286, "s2": 4708, "s3": 4913, "total": 11907}},
+    "pct_of_listed_token_mass": {"bis": {"s1": 0.6057, "s2": 0.5763, "s3": 0.5759, "all": 0.5816}, "ter": {"s1": 0.1014, "s2": 0.0992, "s3": 0.0984, "all": 0.0993}},
+    "bis_to_ter_ratio": 5.86,
+    "bis_destined_per_france_row_pct": {"s1": 5.261, "s2": 3.889, "s3": 3.930, "all": 4.117},
+    "fused_house_number_forms": {
+      "regex": "^[0-9]+(b|bis|ter|terr|quater|quatre)$",
+      "distinct_tokens": {"s1": 1, "s2": 35, "s3": 28},
+      "mass": {"s1": 31, "s2": 2636, "s3": 2165, "total": 4832}
+    },
+    "fused_ordinal_forms": {"tokens": ["1er", "2eme", "3eme", "2e"], "mass": {"s1": 583, "s2": 1277, "s3": 1312, "total": 3172}},
+    "effect_chain": [
+      "'5 bis rue pierre dignac' -> atoks '5 bis rue pierre dignac'; bis is non-numeric and length 3 so it enters alph and generates kind-2 keys (keys.py:65-68), and enters qa/sa (features.py:97-98) and the addr IDF overlap wa (features.py:129)",
+      "'5bis rue pierre dignac' -> atoks contains '5bis', which is not ^\\d+$, so keys.py:41 puts it in alph and NOT in nums; the house number is lost from the number-x-word blocking key entirely; the two spellings of one address produce disjoint blocking vocabularies",
+      "BOTH bis and ter dilute the FEATURE side identically because q_atoks/s_atoks (prep.py:16) are never filtered by ADDR_GENERIC; the bis/ter asymmetry is BLOCKING-ONLY"
+    ],
+    "honest_sizing": "0.58% of listed French address-token mass. Small. Worth one line of code because the fix is one line with zero downside, not because it is large."
+  },
+  "addr_canon_fr_vs_addr_generic": {
+    "verdict": "NEW DEFECT: 19 of 30 non-empty ADDR_CANON_FR outputs are absent from keys.ADDR_GENERIC",
+    "covered_10": ["ave", "blvd", "dr", "pl", "sq", "ter", "rue", "chemin", "allee", "impasse"],
+    "uncovered_mass_by_canonical": {
+      "saint": {"raw_inputs": ["saint", "st"], "s1": 27562, "s2": 68685, "s3": 71527, "total": 167774},
+      "bis": {"raw_inputs": ["bis", "b"], "s1": 13652, "s2": 27348, "s3": 28757, "total": 69757},
+      "rte": {"raw_inputs": ["route", "rte"], "s1": 4826, "s2": 12332, "s3": 12769, "total": 29927},
+      "crs": {"raw_inputs": ["cours", "crs"], "s1": 2182, "s2": 5432, "s3": 5667, "total": 13281},
+      "res": {"raw_inputs": ["residence", "res"], "s1": 2540, "s2": 5143, "s3": 5405, "total": 13088},
+      "quai": {"raw_inputs": ["quai", "q", "qu"], "s1": 2157, "s2": 5347, "s3": 5500, "total": 13004},
+      "sainte": {"raw_inputs": ["sainte", "ste"], "s1": 1350, "s2": 3310, "s3": 3417, "total": 8077},
+      "gen": {"raw_inputs": ["general", "gen", "gal"], "s1": 567, "s2": 2735, "s3": 2776, "total": 6078},
+      "mal": {"raw_inputs": ["marechal", "mal"], "s1": 349, "s2": 2184, "s3": 2197, "total": 4730},
+      "bat": {"raw_inputs": ["batiment", "bat"], "s1": 742, "s2": 1449, "s3": 1554, "total": 3745},
+      "fbg": {"raw_inputs": ["faubourg", "fbg"], "s1": 516, "s2": 1253, "s3": 1277, "total": 3046},
+      "prof": {"raw_inputs": ["professeur", "prof"], "s1": 413, "s2": 1047, "s3": 1025, "total": 2485},
+      "pres": {"raw_inputs": ["president", "pres"], "s1": 191, "s2": 1066, "s3": 1123, "total": 2380},
+      "lieu": {"raw_inputs": ["lieu"], "s1": 32, "s2": 68, "s3": 81, "total": 181},
+      "lieudit": {"raw_inputs": ["lieudit"], "s1": "absent", "s2": "absent", "s3": "absent"},
+      "zone": {"raw_inputs": ["zone"], "s1": 26, "s2": "absent", "s3": "absent"},
+      "za": {"raw_inputs": ["za"], "s1": "absent", "s2": "absent", "s3": "absent"},
+      "zi": {"raw_inputs": ["zi"], "s1": "absent", "s2": "absent", "s3": "absent"},
+      "zac": {"raw_inputs": ["zac"], "s1": "absent", "s2": "absent", "s3": "absent"}
+    },
+    "subtotal_not_neutralised": 337553,
+    "subtotal_pct_of_listed_token_mass": 2.814,
+    "dead_addr_generic_entries_for_france": {
+      "entries": ["st", "ste"],
+      "why": "ADDR_CANON_FR at normalize.py:207 maps 'st'->'saint' and 'ste'->'sainte', so by the time keys.py:39 runs those tokens no longer exist in atoks. They work for the US (st->st) and are silently inert for France.",
+      "status": "CONFIRMED from code"
+    },
+    "saint_vs_bis_ratio": 2.4,
+    "saint_vs_ter_ratio": 14.1,
+    "saint_total_with_ste": 174895,
+    "saint_pct_of_listed_mass": {"s1": 1.2404, "s2": 1.517, "s3": 1.5009},
+    "positive_control": {
+      "entry": "rue",
+      "raw_r_mass": {"s1": 2543, "s2": 182872, "s3": 182809},
+      "ave_canon_mass": {"s1": 33198, "s2": 84300, "s3": 87974},
+      "pct_of_s2_french_street_type_mentions_using_r_abbrev": 40.4,
+      "note": "'r'->'rue' is what makes '5 r de la paix' and '5 rue de la paix' identical; the map earns its keep in s2/s3"
+    },
+    "scope_caveat": "changing keys.ADDR_GENERIC affects BLOCKING only; q_atoks/s_atoks used by features.py are unfiltered, so the feature-side dilution (wa, a_jac, a_cont) is unchanged by any of these recommendations"
+  },
+  "gaps": [
+    "Component order is NOT observable: build_profile.py:126-127 splits on ADDR_SPLIT ([,;]) and immediately flattens into one Counter, destroying component boundaries, count and position. No row-level order distribution can be derived; the component_order section is a code result plus token-mass bounds only.",
+    "The city_last mis-fire RATE is unquantifiable. Only the exposed population is bounded (245993 s2 / 243713 s3), not the fraction on which the region actually trails the city.",
+    "The 'two components both match FR_REGIONS, last wins' path (normalize.py:334, no break) is unquantifiable for the same reason.",
+    "Comma vs semicolon divergence is a live unsized bias: build_profile.py:31 ADDR_SPLIT = [,;] but normalize.py:322 splits on ',' only. BIAS DIRECTION: if semicolons occur, the profile over-splits relative to the pipeline, so the U ceilings in criterion C are OVER-estimates of pipeline state resolution and the residual is UNDER-stated. True unresolvable share is >= 28.7677%, not exactly 28.7677%.",
+    "listed addr-token mass is a LOWER bound on true token mass: build_profile.py prunes count<=1 every 8 chunks and truncates to most_common(4000). Every '% of listed mass' figure is therefore an UPPER bound on the true share.",
+    "Absence from addr_tokens[France] is not zero. Per the 4000th listed counts (23/58/60) an unlisted token has count < 23 / < 58 / < 60 and could have been pruned at count 1. The gazetteer bound uses the cut-off count, the loosest defensible reading.",
+    "No ground truth was consulted. Whether reordering actually PRESERVES MATCHING in the scored sense is not answerable without running the pipeline, which was not done.",
+    "The 71.23% / 97.44% contradiction is narrowed, not closed: I did not read D077's criterion, so I cannot state why it differs."
+  ],
+  "recommendations": [
+    {"id": "P1", "priority": 1, "confidence": "CONFIRMED", "action": "Add 'saint' and 'sainte' to keys.ADDR_GENERIC; add or delete the dead 'st'/'ste' entries", "measured_benefit": "174895 tokens = 1.24%/1.52%/1.50% of listed French address-token mass, 2.4x the bis mass", "scope": "blocking only"},
+    {"id": "P2", "priority": 2, "confidence": "CONFIRMED", "action": "Add 'bis' to keys.ADDR_GENERIC", "measured_benefit": "69757 tokens = 0.58% of listed French address-token mass; also stops standalone 'b' being promoted to a 3-char content token", "scope": "blocking only"},
+    {"id": "P3", "priority": 3, "confidence": "CONFIRMED", "action": "Add the remaining uncovered ADDR_CANON_FR outputs: rte, crs, quai, res, gen, mal, bat, fbg, prof, pres, lieu, lieudit, zone, za, zi, zac", "measured_benefit": "P1+P2+P3 together = 337553 tokens = 2.814% of listed French address-token mass", "scope": "blocking only"},
+    {"id": "P4", "priority": 1, "confidence": "CONFIRMED", "action": "Do NOT open a department-expansion project for FR_REGIONS sized on the 28.77% residual. Re-target at why ~35% of s2/s3 France rows appear to carry no geography component at all.", "measured_benefit": "avoids mis-sizing: the entire unmapped French department lexicon is worth <= 11985 tokens <= 2.46% of the residual"},
+    {"id": "P5", "priority": 2, "confidence": "CONFIRMED", "action": "Reorder nothing in normalize_address. If city_last later proves to be a source of error, ADD city_first as a second feature (features.py:90) rather than changing the 'last' rule.", "measured_benefit": "avoids a rewrite of provably permutation-invariant code"},
+    {"id": "P6", "priority": 2, "confidence": "CONFIRMED", "action": "Record criterion C alongside the 71.10%/97.44% figures. Quote 71.23% as the ceiling and 28.77% as the floor on France's unresolvable share; never a point estimate, never a single-source rate.", "measured_benefit": "closes the risk of a 97.44% ceiling being used to size a fix"}
+  ],
+  "new_defects_found": [
+    "bis absent from keys.ADDR_GENERIC while ter is present (69757 tokens, 5.86:1 asymmetry) -- the direct answer to the work order's second question",
+    "19 of 30 ADDR_CANON_FR outputs are absent from keys.ADDR_GENERIC (337553 tokens = 2.814% of listed French address-token mass), of which 'saint' alone is 167774",
+    "keys.ADDR_GENERIC entries 'st' and 'ste' are dead for France because ADDR_CANON_FR:207 rewrites them to 'saint'/'sainte' first",
+    "Fused house-number forms ('5bis', '20b': 4832 tokens) lose the number from the blocking nums list entirely, because keys.py:41 filters atoks not anums",
+    "333 France rows have a non-empty address with no comma at all (180 s2 + 153 s3), which s.split(',') treats as a single component",
+    "The 's2/s3 use unmapped departments' root cause in already_checked is largely false: the four departments that carry s2/s3 geography are all already mapped, and the unmapped lexicon is bounded at <= 2.46% of the residual",
+    "build_profile.py splits on [,;] while normalize.py splits on ',' only -- an unsized, direction-known bias in every profile-derived component claim"
+  ],
+  "constraints_respected": {
+    "raw_tsv_opened": false,
+    "network_used": false,
+    "dataset_modified": false,
+    "upstream_modified": false,
+    "files_written": ["analysis_out/findings/D126_fr_order_FR_REGIONS.md", "analysis_out/findings/D126.json"],
+    "python_available_on_box": false,
+    "parsing_method": "PowerShell 5.1 ConvertFrom-Json over analysis_out/profile/*.json (877-885 KB each)"
+  }
+}

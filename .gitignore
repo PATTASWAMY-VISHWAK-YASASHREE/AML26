@@ -1,0 +1,44 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+package-lock.json
+
+# Data / datasets (licence-restricted, not redistributable)
+*.tsv
+*.csv
+data/
+dataset/
+student_resource/
+amazon_ml_2026_research/student_resource/
+
+# Pipeline artifacts (regenerable, large)
+*.parquet
+*.duckdb
+*.db
+*.zip
+er_work/
+work_test/
+extracted_data/
+output/
+*.npz
+submission.zip
+
+# DuckDB spill
+*_tmp/
+duckdb_tmp/
+*.tmp
+
+# Scratch
+*.log
+*.err
+.scratch_block/

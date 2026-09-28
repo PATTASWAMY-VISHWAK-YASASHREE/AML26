@@ -1,0 +1,219 @@
+{
+  "task_id": "P032",
+  "title": "[France] train_s2: digit structure and address-number behaviour",
+  "agent": "c01",
+  "family": "A-profile",
+  "status": "COMPLETE",
+  "profile_inputs": [
+    "analysis_out/profile/train_s2.json",
+    "analysis_out/profile/train_s1.json",
+    "analysis_out/profile/train_s3.json",
+    "analysis_out/profile/test_s1.json",
+    "analysis_out/profile/test_s2.json",
+    "analysis_out/profile/test_s3.json"
+  ],
+  "deliverable_md": "analysis_out/findings/P032_France_train_s2_digits.md",
+  "filename_note": "tasks/P032.json names the deliverable P032_France_train_s2_numeric.md; the work order names P032_France_train_s2_digits.md as EXACT. Work order followed; mismatch flagged in the .md.",
+  "headline": "The France slice of train_s2 is EMPTY. Every France rate in this work order is 0/0 UNDEFINED, not 0. pin is dead code in all three countries (structurally for US/France, at 0.02% coverage for India).",
+
+  "section_1_france_slice_empty": {
+    "source": "train_s2.json",
+    "rows": 5034616,
+    "country_rows": { "US": 3016817, "India": 2017799 },
+    "country_rows_keys_present": ["US", "India"],
+    "france_key_present": false,
+    "france_rows": 0,
+    "france_share_pct": 0.0,
+    "arithmetic": "3016817 + 2017799 = 5034616 == rows, so the country breakdown is complete and France is absent, not hidden in a bucket",
+    "france_rate_status": "UNDEFINED (0/0) for every France rate in this work order",
+    "same_for_all_train_files": {
+      "train_s1_rows": 2206821,
+      "train_s3_rows": 5285603,
+      "note": "both also contain only US and India"
+    },
+    "france_exists_only_in": { "test_s1": 259452, "test_s2": 703378, "test_s3": 731615 },
+    "mechanism": "build_profile.py:62 country_rows is a Counter; line 142 emits dict(country_rows). A country with zero rows produces no key at all, not a zero entry.",
+    "verdict": "CONFIRMED"
+  },
+
+  "section_2_pin_verdict": {
+    "verdict": "DEAD CODE everywhere except ~0.02% of India. Close the thread; leave the guard alone.",
+    "guard": "normalize.py:336-340 -- pin = n only when len(n)==6 AND country=='India'; nums.append(n2) is OUTSIDE the guard (line 340)",
+    "reason_a_us_and_france": "pin == empty for 100% of US and France rows by construction; France dig6 exists in test (130 occ in test_s2) but is structurally ineligible",
+    "reason_b_india_coverage": {
+      "india_train_s2_rows": 2017799,
+      "dig6_occurrences": 459,
+      "dig6_per_row": 0.000227,
+      "dig6_pct_of_india_rows": 0.0227,
+      "dig6_pct_of_all_train_s2_rows": 0.0091,
+      "upper_bound_rows_with_nonempty_pin": 459,
+      "caveat": "dig5/dig6 count OCCURRENCES not ROWS, so 459 is an upper bound on rows carrying a pin"
+    },
+    "reason_c_redundant": {
+      "pin_consumers": ["prep.py:17 -> keys.py:44,58 (one kind-0 NA key)", "features.py:100,114 -> pin_eq (already established 0.0% of rows)"],
+      "already_reachable_via": "normalize.py:340 nums (unconditional) -> prep.py:16 anums -> features.py:98-99,113-114 qm/sm/m_inter/num1_eq; and a standalone 6-digit token survives t.isdigit() at normalize.py:345 into atoks -> keys.py:41 -> kind-2 (AA) blocking keys",
+      "conclusion": "pin is a strictly redundant duplicate of anums"
+    },
+    "status": "CONFIRMED"
+  },
+
+  "section_3_us_5digit_are_house_numbers": {
+    "claim_tested": "US 5-digit values are house numbers, not ZIPs",
+    "verdict": "CONFIRMED",
+    "method": "counting argument (position is destroyed by build_profile.py:126-127, so the earlier positional STATE-5-digit claim is not reproducible and is not repeated)",
+    "us_train_s2_dig5_occurrences": 323824,
+    "us_train_s2_addr_tokens_cutoff": 407,
+    "us_train_s2_5digit_pure_tokens_in_top4000": 0,
+    "us_train_s2_6digit_pure_tokens_in_top4000": 0,
+    "max_occ_per_5digit_value": 406,
+    "arithmetic": "max per-value <= 406, so distinct values >= ceil(323824/406) = 798",
+    "min_distinct_5digit_values": 798,
+    "reasoning": "A US ZIP field present in essentially every US address with a concentrated real distribution would saturate the top-4000 list. It contains none. A long tail of >=798 values is the signature of house numbers."
+  },
+
+  "section_3_digit_ladder_train_s2": {
+    "note": "addr_tokens pure-digit tokens, token OCCURRENCES not rows; top-4000 bag only so all values are LOWER BOUNDS; zeros mean no value reached the cutoff, not that no value exists",
+    "US": {
+      "len1": { "distinct": 9, "occ": 183570 },
+      "len2": { "distinct": 100, "occ": 359171 },
+      "len3": { "distinct": 680, "occ": 860320 },
+      "len4": { "distinct": 424, "occ": 256829 },
+      "len5": { "distinct": 0, "occ": 0 },
+      "len6": { "distinct": 0, "occ": 0 }
+    },
+    "India": {
+      "len1": { "distinct": 10, "occ": 979507 },
+      "len2": { "distinct": 100, "occ": 1184521 },
+      "len3": { "distinct": 764, "occ": 982956 },
+      "len4": { "distinct": 29, "occ": 18741 },
+      "len5": { "distinct": 0, "occ": 0 },
+      "len6": { "distinct": 0, "occ": 0 }
+    },
+    "shape": "hard cliff at 5 digits in both countries -- the shape of a house/street-number field, not a postcode. India 4-digit band collapses to 29 distinct values while US keeps 424."
+  },
+
+  "section_4_train_s2_digit_structure": {
+    "note": "rate = field / rows, per build_profile.py (slice totals, not averages). num_digits counts the ADDRESS only. has_digit_name counts rows whose business_name contains a digit.",
+    "US": {
+      "rows": 3016817,
+      "dig5": 323824, "dig5_per_row": 0.10734, "dig5_pct": 10.734,
+      "dig6": 42026, "dig6_per_row": 0.013931, "dig6_pct": 1.3931,
+      "num_digits": 11317142, "num_digits_per_row": 3.751352,
+      "alpha_only_addr": 184605, "alpha_only_pct": 6.1192,
+      "has_digit_name": 193041, "has_digit_name_pct": 6.3988,
+      "has_comma": 2905696, "has_comma_pct": 96.3166,
+      "addr_empty": 111121, "addr_empty_pct": 3.6834,
+      "addr_chars": 95123286, "addr_chars_per_row": 31.531
+    },
+    "India": {
+      "rows": 2017799,
+      "dig5": 22959, "dig5_per_row": 0.011378, "dig5_pct": 1.1378,
+      "dig6": 459, "dig6_per_row": 0.000227, "dig6_pct": 0.0227,
+      "num_digits": 8234897, "num_digits_per_row": 4.081128,
+      "alpha_only_addr": 117369, "alpha_only_pct": 5.8167,
+      "has_digit_name": 62595, "has_digit_name_pct": 3.1021,
+      "has_comma": 1959953, "has_comma_pct": 97.1332,
+      "addr_empty": 57846, "addr_empty_pct": 2.8668,
+      "addr_chars": 137606434, "addr_chars_per_row": 68.1963
+    },
+    "France": "UNDEFINED -- 0 rows. No rate is published."
+  },
+
+  "section_5_france_supplement_TEST_ONLY": {
+    "warning": "This is test_s2, NOT train_s2. Must never be cited as a train_s2 France figure.",
+    "france_test_s2": {
+      "rows": 703378,
+      "dig5": 3613, "dig5_per_row": 0.005137,
+      "dig6": 130, "dig6_per_row": 0.000185,
+      "num_digits": 1360296, "num_digits_per_row": 1.9339,
+      "alpha_only_addr": 26656, "alpha_only_pct": 3.7897
+    },
+    "density_contrast": "France num_digits/row 1.93 vs US 3.75 and India 4.08 -- roughly half the US density",
+    "postcode_remainder_finding": {
+      "verdict": "INFERENCE -- qualifies but does not overturn the settled no-country-has-a-postal-field statement",
+      "distinct_5digit_pure_tokens": 10,
+      "values": ["59000","59100","59200","59800","44300","44000","44100","44600","33000","62100"],
+      "identical_in_all_three_test_files": true,
+      "reading": "department code x 1000 (59=Nord/Lille, 44=Loire-Atlantique/Nantes, 33=Gironde/Bordeaux, 62=Pas-de-Calais/Calais) -- postcode-shaped, landing on the dominant cities",
+      "max_occ_per_value": 220,
+      "occ_total_test_s2": 1018,
+      "pct_of_france_test_s2_rows": 0.5137,
+      "arithmetic": "3613/703378 = 0.005137",
+      "why_qualifies_but_does_not_overturn": "only 10 values at <=220 occurrences each = 0.51 percent of France test_s2 rows, and they are inline in the address string, not a dedicated column -- which is what no-postal-FIELD asserts. Far too thin to be a matching key."
+    }
+  },
+
+  "section_6_fused_number_suffix": {
+    "mechanism": "_non_alnum = [^a-z0-9]+ (normalize.py:269) splits on non-alphanumeric, so a letter suffix is NOT a separator: 5bis, 12b, 1a survive as SINGLE tokens (confirms D127)",
+    "blocking_loss": "keys.py:41 nums = toks.filter(digits-only) drops them, so no kind-2 (AA) blocking key is produced",
+    "features_not_lost": "normalize.py:336 runs NUM_RE on the RAW component BEFORE tokenisation, so 5bis -> 5 -> nums -> anums -> qm/sm/num1_eq. t.isdigit() at line 345 is False for 5bis so the token survives unchanged in atoks; only keys.py:41 rejects it.",
+    "refinement_of_D127": "The defect is a BLOCKING-only loss, not a total loss. A fused house number retains its model features but loses its address-number blocking key.",
+    "train_s2_measurement": {
+      "US": {
+        "fused_tokens": 110, "fused_occ": 113327,
+        "ordinal_tokens": 110, "ordinal_occ": 113327,
+        "housenum_suffix_tokens": 0, "housenum_suffix_occ": 0,
+        "fused_occ_pct_of_rows": 3.7565,
+        "assessment": "every fused form is a street ordinal (4th, 16th, 2st, 3th) -- a street name, not a house number. Losing the blocking key costs nothing; the street word is still an alph token."
+      },
+      "India": {
+        "fused_tokens": 88, "fused_occ": 374034,
+        "ordinal_tokens": 30, "ordinal_occ": 303940,
+        "housenum_suffix_tokens": 57, "housenum_suffix_occ": 69612,
+        "other_tokens": 1, "other_occ": 482, "other_example": "100ft",
+        "token_count_check": "30 + 57 + 1 = 88 == measured 88",
+        "occ_check": "303940 + 69612 + 482 = 374034 == measured 374034",
+        "housenum_suffix_occ_pct_of_india_rows": 3.4499,
+        "top_suffixes": {"1a":7743,"2a":4967,"1b":3880,"3a":3465,"2b":3061,"4a":2528,"5a":2295,"3b":2068},
+        "assessment": "57 tokens / 69612 occurrences = 3.4499 percent of India rows are genuine house-number suffixes. A real, quantifiable blocking-key loss for Indian addresses."
+      }
+    },
+    "addr_generic_note": "1st,2nd,3rd,4th,5th are additionally in ADDR_GENERIC (keys.py:18) and are dropped even earlier at keys.py:39. Ordinals 6th+ are not in ADDR_GENERIC and are dropped by the digits-only filter instead. Either way: no AA key.",
+    "france_test_s2_only": {
+      "fused_tokens": 39, "fused_occ": 3913,
+      "top": {"1er":795,"2eme":279,"3eme":139,"1b":119,"2bis":104,"6b":99,"2b":99,"5b":97,"1bis":92,"13bis":89,"12b":82},
+      "note": "the fused form DOES occur in French addresses and France WOULD be affected by the same blocking loss, but France has zero train rows so this cannot be sized against any train denominator"
+    }
+  },
+
+  "section_7_new_finding_india_dig5_asymmetry": {
+    "verdict": "NEW DEFECT / NEW MEASUREMENT -- unflagged in the brief and in P031",
+    "description": "India has a source-1 vs source-2/3 dig5 discontinuity of about 3.8x, the same signature as the flagged US dig6 gap but larger in relative terms and at 5 digits",
+    "india_dig5_by_file": {
+      "train_s1": { "rows": 883188, "dig5": 2668, "per_row": 0.003021 },
+      "train_s2": { "rows": 2017799, "dig5": 22959, "per_row": 0.011378, "ratio_vs_s1": 3.7663 },
+      "train_s3": { "rows": 2115547, "dig5": 22317, "per_row": 0.010549, "ratio_vs_s1": 3.4919 },
+      "test_s1": { "rows": 809986, "dig5": 2305, "per_row": 0.002846 },
+      "test_s2": { "rows": 2312565, "dig5": 25554, "per_row": 0.01105, "ratio_vs_s1": 3.8826 },
+      "test_s3": { "rows": 2405000, "dig5": 24462, "per_row": 0.010171, "ratio_vs_s1": 3.5738 }
+    },
+    "ratio_arithmetic": "train 0.011378/0.003021 = 3.7663; test 0.01105/0.002846 = 3.8826",
+    "reproduced_in_train_and_test": true,
+    "what_the_numbers_are": "GAP -- not estimated. Cannot tell from the profile whether these are survey/plot numbers, PIN fragments, or house numbers.",
+    "min_distinct_5digit_values_india_train_s2": 59,
+    "min_distinct_arithmetic": "addr_tokens cutoff 394, so max per-value <= 393; ceil(22959/393) = 59",
+    "inference": "a long tail of >=59 values is house-number-like, NOT a bounded PIN vocabulary (Indian PINs are 6-digit, and 6-digit tokens also fail to reach the cutoff). More likely survey/plot or house numbers than postcodes.",
+    "impact_direction": "INFERENCE -- source-1 is the blocking index (run_blocking.py:31), s2/s3 are queries. A 5-digit number in a query row produces a kind-2 key the index may not contain: a query-side RECALL asymmetry.",
+    "not_a_recommendation": "I have NOT measured whether the name-only key families (kinds 1,3,4) already cover these rows. This is a description, not a recommended change."
+  },
+
+  "section_8_gaps": {
+    "position_of_house_number": "GAP -- NOT MEASURABLE. build_profile.py:126-127 splits on comma/semicolon then TOKEN_RE.findall + Counter.update, destroying position. addr_tokens is an unordered multiset. No positional field exists in the profile at all.",
+    "consistency_of_position": "GAP -- NOT MEASURABLE, same reason",
+    "reliability_as_matching_key": "only partially answerable -- cross-pair reliability needs pair-level data the profile does not contain. INFERENCE (code-reading, not measurement): the value is high-entropy (>=798 distinct US values) and a kind-2 key is num XOR (alph-hash // 8) at keys.py:65, so it fires only when both the number and a >=3-char street word agree, making it a selective key rather than a noisy one.",
+    "france_train_digit_structure": "permanent GAP -- no train rows exist",
+    "token_counts_are_lower_bounds": "addr_tokens/name_tokens are top-4000 per country AND periodically pruned (build_profile.py:45-48 drops count <= 1 every 8 chunks)",
+    "dig5_dig6_semantics": "lookaround-guarded (build_profile.py:29-30); a digit inside a longer run does not count; they count OCCURRENCES, not ROWS"
+  },
+
+  "constraints_respected": {
+    "upstream_readonly": true,
+    "dataset_readonly": true,
+    "raw_tsv_opened": false,
+    "network_used": false,
+    "files_written": [
+      "analysis_out/findings/P032_France_train_s2_digits.md",
+      "analysis_out/findings/P032_France_train_s2_digits.json"
+    ]
+  }
+}
