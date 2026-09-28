@@ -1,0 +1,805 @@
+# =============================================================================
+#  AMAZON ML CHALLENGE 2026  -  BUSINESS ENTITY RESOLUTION
+#  Single-file Google Colab notebook (DuckDB, out-of-core)
+#
+#  Reads the already-extracted dataset from your Google Drive folder.
+#  Writes output/ and submission.zip to local disk, then downloads it.
+#
+#  HOW TO USE
+#    1. Runtime > Change runtime type  (CPU is fine; a GPU is not required)
+#    2. Paste this whole cell and press Run
+#    3. Authorise the Drive mount popup when it appears
+#    4. Wait. The full run is roughly 1-3 hours on the ~1 GB dataset
+#    5. submission.zip downloads automatically when it finishes
+#
+#  TUNING KNOBS  (section 4, CFG.update)
+#    max_token_df / max_candidates : blocking selectivity vs speed
+#    memory_limit                  : lower it if the kernel gets OOM-killed
+# =============================================================================
+
+
+# # -----------------------------------------------------------------------------
+# SECTION 1 - dependencies
+# -----------------------------------------------------------------------------
+!pip install -q duckdb scikit-learn numpy
+
+# # -----------------------------------------------------------------------------
+# SECTION 2 - mount Google Drive and point at the dataset folder
+# -----------------------------------------------------------------------------
+import os
+import sys
+from pathlib import Path
+
+WORK_DIR = "/content"                    # fast local scratch + output
+DRIVE_MOUNT = "/content/drive"
+Path(WORK_DIR).mkdir(parents=True, exist_ok=True)
+
+# Folder from your Drive link:
+# https://drive.google.com/drive/folders/1ZXJ6FXwsYcchoKQNjdQb_yNgNAJik6LA
+FOLDER_ID = "1ZXJ6FXwsYcchoKQNjdQb_yNgNAJik6LA"
+FOLDER_NAME = "student_resource"
+
+from google.colab import drive
+drive.mount(DRIVE_MOUNT, force_remount=True)
+
+# The folder already contains the extracted dataset, so no unzip step is needed.
+DATASET_DIR = Path(DRIVE_MOUNT) / "MyDrive" / FOLDER_NAME
+
+# Be forgiving about where the TSVs actually sit inside that folder.
+def resolve_dataset_dir(base: Path) -> Path:
+    if (base / "dataset" / "train" / "train_source1.tsv").exists():
+        return base
+    for p in base.rglob("train_source1.tsv"):
+        return p.parent.parent.parent   # .../dataset/train/x.tsv -> dataset
+    raise FileNotFoundError(
+        f"No train_source1.tsv found under {base}. Check FOLDER_NAME matches the "
+        "folder name shown in your Drive link."
+    )
+
+DATASET_DIR = resolve_dataset_dir(DATASET_DIR)
+print("drive folder :", DATASET_DIR)
+print("folder link  : https://drive.google.com/drive/folders/" + FOLDER_ID)
+
+PIPELINE = r'''
+"""
+Amazon ML Challenge 2026 - Business Entity Resolution pipeline (DuckDB, out-of-core).
+
+Runs unchanged in Google Colab on a ~1 GB dataset zip. Everything except the
+final (small) linear model fit happens inside DuckDB, so peak RAM is bounded by
+`memory_limit` rather than by the 23M-row dataset.
+
+Stages
+  1. locate + extract zip (skips macOS __MACOSX / ._* AppleDouble junk)
+  2. normalize TSV -> ZSTD parquet shards (ids, country, keys, token lists)
+  3. rare-token document-frequency posting tables
+  4. candidate generation (selective multi-channel blocking, capped per S1)
+  5. pair features computed entirely in SQL (no Python round trip)
+  6. fit linear scorer, tune threshold against entity-level macro F_0.5
+  7. apply the scorer inside SQL, write contract-compliant outputs
+  8. validate against the official submission rules, emit submission.zip
+"""
+from __future__ import annotations
+
+import csv
+import json
+import os
+import sys
+import time
+import zipfile
+from pathlib import Path
+
+import duckdb
+import numpy as np
+
+CFG = {
+    "threads": max(1, min(8, os.cpu_count() or 2)),
+    "memory_limit": "6GB",
+    "max_token_df": 5000,        # token must be this rare in the target corpus
+    "min_token_len": 4,
+    "max_candidates": 30,        # per Source-1 entity after priority ranking
+    "train_sample_pct": 2,       # percent of train candidate rows used for fitting
+    "candidate_sample_rows": 800000,
+}
+
+# Legal-entity noise dropped from the "core" name key. Rendered as a quoted SQL
+# value list so it can be spliced into a NOT IN (...) predicate.
+LEGAL = ", ".join(f"'{s}'" for s in (
+    "llc", "inc", "incorporated", "ltd", "limited", "pvt", "private",
+    "company", "co", "corp", "corporation", "the", "of", "and",
+))
+
+
+def log(msg: str) -> None:
+    print(f"[*] {msg}", flush=True)
+
+
+def lit(value) -> str:
+    """Quote a value as a DuckDB SQL string literal (defends against injection)."""
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def find_dataset_files(root: Path) -> dict:
+    """Return the real TSV files, ignoring macOS AppleDouble sidecars."""
+    wanted = {
+        "train_s1": "train_source1.tsv", "train_s2": "train_source2.tsv",
+        "train_s3": "train_source3.tsv", "train_gt": "train_ground_truth.tsv",
+        "test_s1": "test_source1.tsv", "test_s2": "test_source2.tsv",
+        "test_s3": "test_source3.tsv",
+    }
+    found: dict[str, Path] = {}
+    for path in root.rglob("*.tsv"):
+        if path.name.startswith("._") or "__MACOSX" in path.parts:
+            continue  # macOS resource fork, not data
+        for key, target in wanted.items():
+            if path.name == target and key not in found:
+                found[key] = path
+    missing = sorted(k for k in wanted if k not in found)
+    if missing:
+        raise FileNotFoundError(
+            f"Missing {missing} under {root}. The archive must contain "
+            "dataset/train/*.tsv and dataset/test/*.tsv."
+        )
+    return found
+
+
+def mount_drive() -> Path:
+    """Mount Google Drive in Colab and return the mount point."""
+    from google.colab import drive
+
+    drive.mount("/content/drive", force_remount=True)
+    return Path("/content/drive")
+
+
+def find_source_zip(search_dir: Path) -> Path:
+    """Locate the dataset zip in a directory (top level or one level of nesting)."""
+    candidates = [p for p in search_dir.rglob("*.zip")
+                  if "submission" not in p.name.lower()]
+    if not candidates:
+        raise FileNotFoundError(f"No .zip dataset archive found under {search_dir}")
+    return max(candidates, key=lambda p: p.stat().st_size)
+
+
+def extract_zip(zip_path: Path, extract_dir: Path) -> None:
+    """Unpack the dataset archive to fast local scratch storage."""
+    extract_dir.mkdir(parents=True, exist_ok=True)
+    log(f"extracting {zip_path.name} ({zip_path.stat().st_size / 2**20:.0f} MB) -> {extract_dir}")
+    with zipfile.ZipFile(zip_path) as zf:
+        zf.extractall(extract_dir)
+
+
+def connect(db_path: Path, tmp_dir: Path) -> duckdb.DuckDBPyConnection:
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    con = duckdb.connect(str(db_path))
+    con.execute(f"SET threads={CFG['threads']}")
+    con.execute(f"SET memory_limit={lit(CFG['memory_limit'])}")
+    con.execute(f"SET temp_directory={lit(tmp_dir)}")
+    con.execute("SET preserve_insertion_order=false")
+    con.execute("SET enable_progress_bar=false")
+    return con
+
+
+def _norm_expr(column: str) -> str:
+    """Deterministic lowercase-alphanumeric key; empty string becomes NULL."""
+    return (
+        "nullif(nullif(lower(trim(regexp_replace(regexp_replace("
+        f"coalesce({column}, ''), '[^a-zA-Z0-9]+', ' ', 'g'), '\\s+', ' ', 'g'))), ''), 'nan')"
+    )
+
+
+def _core_tokens(column: str) -> str:
+    """Token list with legal-suffix / stopword noise removed."""
+    return (
+        "list_filter(string_split(coalesce(" + column + ", ''), ' '), "
+        f"x -> length(x) >= 2 AND lower(x) NOT IN ({LEGAL}))"
+    )
+
+
+def stage_normalize(con, paths: dict, norm_dir: Path) -> None:
+    """TSV -> parquet carrying ids, country, blocking keys and token lists."""
+    norm_dir.mkdir(parents=True, exist_ok=True)
+    cols = ("{'entity_id':'VARCHAR','business_name':'VARCHAR',"
+            "'business_address':'VARCHAR','country':'VARCHAR'}")
+    for split in ("train", "test"):
+        for source in (1, 2, 3):
+            out = norm_dir / f"{split}_s{source}.parquet"
+            if out.exists():
+                continue
+            t0 = time.perf_counter()
+            con.execute(
+                f"""
+                COPY (
+                  SELECT
+                    entity_id,
+                    {_norm_expr('business_name')}  AS n_name,
+                    {_norm_expr('business_address')} AS n_addr,
+                    nullif(nullif(trim(coalesce(country, '')), ''), 'nan') AS country,
+                    nullif(array_to_string(list_sort(string_split(n_name, ' ')), ' '), '') AS n_sorted,
+                    nullif(array_to_string(list_sort({_core_tokens('n_name')}), ' '), '') AS n_core_sorted,
+                    nullif(array_to_string(list_sort(string_split(n_addr, ' ')), ' '), '') AS a_sorted,
+                    {_core_tokens('n_name')} AS name_tokens,
+                    list_filter(string_split(coalesce(n_addr, ''), ' '),
+                                x -> length(x) >= {CFG['min_token_len']}) AS addr_tokens,
+                    list_filter(regexp_extract_all(coalesce(n_name, ''), '[0-9]{{2,}}'),
+                                x -> length(x) >= 2) AS name_nums,
+                    list_filter(regexp_extract_all(coalesce(n_addr, ''), '[0-9]{{2,}}'),
+                                x -> length(x) >= 2) AS addr_nums
+                  FROM read_csv({lit(paths[f'{split}_s{source}'])}, delim='\\t',
+                                header=true, columns={cols}, ignore_errors=false)
+                ) TO {lit(out)} (FORMAT PARQUET, COMPRESSION ZSTD, ROW_GROUP_SIZE 100000)
+                """
+            )
+            rows = con.execute(f"SELECT count(*) FROM read_parquet({lit(out)})").fetchone()[0]
+            log(f"normalized {out.name}: {rows:,} rows in {time.perf_counter() - t0:.1f}s")
+
+
+def stage_tokens(con, norm_dir: Path) -> None:
+    """Posting list of *rare* target tokens, joined on (kind, token, country)."""
+    for split in ("train", "test"):
+        out = norm_dir / f"{split}_tgt_tok.parquet"
+        if out.exists():
+            continue
+        t0 = time.perf_counter()
+        s2 = lit(norm_dir / f"{split}_s2.parquet")
+        s3 = lit(norm_dir / f"{split}_s3.parquet")
+        con.execute(
+            f"""
+            CREATE OR REPLACE TEMP VIEW tgt AS
+            SELECT entity_id, country, unnest(name_tokens) AS token, 'name' AS kind FROM read_parquet({s2})
+            UNION ALL
+            SELECT entity_id, country, unnest(name_tokens), 'name' FROM read_parquet({s3})
+            UNION ALL
+            SELECT entity_id, country, unnest(addr_tokens), 'addr' FROM read_parquet({s2})
+            UNION ALL
+            SELECT entity_id, country, unnest(addr_tokens), 'addr' FROM read_parquet({s3})
+            """
+        )
+        df_out = norm_dir / f"{split}_tok_df.parquet"
+        con.execute(
+            f"""
+            COPY (
+              SELECT kind, token, count(DISTINCT entity_id) AS df
+              FROM tgt
+              WHERE token IS NOT NULL AND length(token) >= {CFG['min_token_len']}
+              GROUP BY 1, 2
+            ) TO {lit(df_out)} (FORMAT PARQUET, COMPRESSION ZSTD)
+            """
+        )
+        con.execute(
+            f"""
+            COPY (
+              SELECT t.kind, t.token, t.entity_id, t.country
+              FROM tgt t
+              JOIN read_parquet({lit(df_out)}) d ON d.kind = t.kind AND d.token = t.token
+              WHERE t.token IS NOT NULL AND length(t.token) >= {CFG['min_token_len']}
+                AND d.df <= {CFG['max_token_df']}
+            ) TO {lit(out)} (FORMAT PARQUET, COMPRESSION ZSTD)
+            """
+        )
+        n = con.execute(f"SELECT count(*) FROM read_parquet({lit(out)})").fetchone()[0]
+        df_n = con.execute(f"SELECT count(*) FROM read_parquet({lit(df_out)})").fetchone()[0]
+        log(f"rare-token postings {split}: {n:,} rows over {df_n:,} distinct keys "
+            f"in {time.perf_counter() - t0:.1f}s")
+
+
+def stage_ground_truth(con, paths: dict, gt_path: Path) -> None:
+    """Explode matched_entity_ids into one row per positive (source1, target) link."""
+    if gt_path.exists():
+        return
+    con.execute(
+        f"""
+        COPY (
+          SELECT trim(source1_entity_id) AS sid, trim(t) AS tid
+          FROM read_csv({lit(paths['train_gt'])}, delim='\\t', header=true,
+                        columns={{'source1_entity_id':'VARCHAR','matched_entity_ids':'VARCHAR'}}),
+               UNNEST(string_split(coalesce(matched_entity_ids, ''), ',')) AS u(t)
+          WHERE trim(t) <> '' AND trim(t) IS NOT NULL
+        ) TO {lit(gt_path)} (FORMAT PARQUET, COMPRESSION ZSTD)
+        """
+    )
+    n = con.execute(f"SELECT count(*) FROM read_parquet({lit(gt_path)})").fetchone()[0]
+    log(f"ground-truth positive links: {n:,}")
+
+
+# (priority, join predicate, non-empty guard column). Lower priority wins the
+# ranking when a pair is produced by several channels.
+CHANNELS = [
+    (1, "s.n_name = t.n_name", "s.n_name"),
+    (2, "s.n_sorted = t.n_sorted", "s.n_sorted"),
+    (3, "s.n_core_sorted = t.n_core_sorted", "s.n_core_sorted"),
+    (4, "s.n_addr = t.n_addr", "s.n_addr"),
+    (5, "s.a_sorted = t.a_sorted", "s.a_sorted"),
+]
+
+
+def stage_candidates(con, norm_dir: Path, split: str, out_path: Path) -> None:
+    """Selective multi-channel blocking -> deduplicated, priority ranked, capped."""
+    if out_path.exists():
+        return
+    t0 = time.perf_counter()
+    con.execute(f"CREATE OR REPLACE TEMP VIEW s AS SELECT * FROM read_parquet("
+                f"{lit(norm_dir / f'{split}_s1.parquet')})")
+    con.execute(
+        f"""
+        CREATE OR REPLACE TEMP VIEW t AS
+        SELECT * FROM read_parquet({lit(norm_dir / f'{split}_s2.parquet')})
+        UNION ALL BY NAME
+        SELECT * FROM read_parquet({lit(norm_dir / f'{split}_s3.parquet')})
+        """
+    )
+    parts = [
+        f"""SELECT {prio} AS prio, s.entity_id AS sid, t.entity_id AS tid
+            FROM s JOIN t ON s.country = t.country AND {pred}
+            WHERE {guard} IS NOT NULL"""
+        for prio, pred, guard in CHANNELS
+    ]
+    for prio, kind, tok_col in ((6, "name", "name_tokens"), (7, "addr", "addr_tokens")):
+        parts.append(
+            f"""SELECT {prio} AS prio, p.sid, q.entity_id AS tid
+            FROM (
+              SELECT entity_id AS sid, country, unnest({tok_col}) AS token
+              FROM s WHERE {tok_col} IS NOT NULL AND list_count({tok_col}) > 0
+            ) p
+            JOIN read_parquet({lit(norm_dir / f'{split}_tgt_tok.parquet')}) q
+              ON q.kind = {lit(kind)} AND q.token = p.token AND q.country = p.country
+            WHERE length(p.token) >= {CFG['min_token_len']}"""
+        )
+    con.execute(
+        f"""
+        COPY (
+          WITH raw AS ({(" UNION ALL " + chr(10)).join(parts)}),
+          dedup AS (SELECT sid, tid, min(prio) AS prio FROM raw GROUP BY 1, 2),
+          ranked AS (
+            SELECT sid, tid, prio,
+                   row_number() OVER (PARTITION BY sid ORDER BY prio, tid) AS rn
+            FROM dedup
+          )
+          SELECT sid, tid, prio FROM ranked WHERE rn <= {CFG['max_candidates']}
+        ) TO {lit(out_path)} (FORMAT PARQUET, COMPRESSION ZSTD)
+        """
+    )
+    row = con.execute(
+        f"""
+        SELECT count(*), count(DISTINCT sid),
+               coalesce(approx_quantile(n, 0.5), 0), coalesce(approx_quantile(n, 0.9), 0)
+        FROM (SELECT sid, count(*) AS n FROM read_parquet({lit(out_path)}) GROUP BY sid)
+        """
+    ).fetchone()
+    log(f"{split} candidates: {row[0]:,} pairs over {row[1]:,} S1 "
+        f"(p50={float(row[2]):.0f}, p90={float(row[3]):.0f}) in {time.perf_counter() - t0:.1f}s")
+
+
+FEATURES = [
+    "name_jw", "addr_jw", "name_dl", "addr_dl",
+    "name_exact", "addr_exact", "name_sorted_exact", "name_core_exact",
+    "name_p2", "name_p4", "name_p6", "addr_p5", "addr_p8",
+    "name_tok_overlap", "name_tok_jaccard", "addr_tok_overlap",
+    "name_len_ratio", "addr_len_ratio", "country_eq",
+    "name_digits_eq", "addr_digits_eq",
+]
+# Columns pulled from the S1 / target shards by the feature join.
+KEY_COLS = ("n_name, n_addr, n_sorted, n_core_sorted, a_sorted, name_tokens, addr_tokens, "
+            "country, name_nums, addr_nums")
+
+
+def stage_features(con, norm_dir: Path, split: str, cand_path: Path, out_path: Path) -> None:
+    """Compute every pair feature in SQL - no Python round trip over candidate rows."""
+    if out_path.exists():
+        return
+    t0 = time.perf_counter()
+    con.execute(
+        f"""
+        COPY (
+          WITH c AS (SELECT * FROM read_parquet({lit(cand_path)})),
+          s AS (SELECT entity_id, {KEY_COLS} FROM read_parquet({lit(norm_dir / f'{split}_s1.parquet')})),
+          t AS (
+            SELECT entity_id, {KEY_COLS} FROM read_parquet({lit(norm_dir / f'{split}_s2.parquet')})
+            UNION ALL BY NAME
+            SELECT entity_id, {KEY_COLS} FROM read_parquet({lit(norm_dir / f'{split}_s3.parquet')})
+          )
+          SELECT
+            c.sid,
+            c.tid,
+            c.prio,
+            CASE WHEN s.n_name IS NOT NULL AND t.n_name IS NOT NULL
+                 THEN jaro_winkler_similarity(s.n_name, t.n_name) ELSE 0.0 END AS name_jw,
+            CASE WHEN s.n_addr IS NOT NULL AND t.n_addr IS NOT NULL
+                 THEN jaro_winkler_similarity(s.n_addr, t.n_addr) ELSE 0.0 END AS addr_jw,
+            CASE WHEN s.n_name IS NOT NULL AND t.n_name IS NOT NULL
+                 THEN 1.0 - least(1.0, damerau_levenshtein(s.n_name, t.n_name)::DOUBLE
+                                        / greatest(length(s.n_name), length(t.n_name)))
+                 ELSE 0.0 END AS name_dl,
+            CASE WHEN s.n_addr IS NOT NULL AND t.n_addr IS NOT NULL
+                 THEN 1.0 - least(1.0, damerau_levenshtein(s.n_addr, t.n_addr)::DOUBLE
+                                        / greatest(length(s.n_addr), length(t.n_addr)))
+                 ELSE 0.0 END AS addr_dl,
+            (s.n_name IS NOT NULL AND s.n_name = t.n_name)::INT AS name_exact,
+            (s.n_addr IS NOT NULL AND s.n_addr = t.n_addr)::INT AS addr_exact,
+            (s.n_sorted IS NOT NULL AND s.n_sorted = t.n_sorted)::INT AS name_sorted_exact,
+            (s.n_core_sorted IS NOT NULL AND s.n_core_sorted = t.n_core_sorted)::INT AS name_core_exact,
+            (s.n_name IS NOT NULL AND t.n_name IS NOT NULL
+             AND left(s.n_name,2) = left(t.n_name,2))::INT AS name_p2,
+            (s.n_name IS NOT NULL AND t.n_name IS NOT NULL
+             AND left(s.n_name,4) = left(t.n_name,4))::INT AS name_p4,
+            (s.n_name IS NOT NULL AND t.n_name IS NOT NULL
+             AND left(s.n_name,6) = left(t.n_name,6))::INT AS name_p6,
+            (s.n_addr IS NOT NULL AND t.n_addr IS NOT NULL
+             AND left(s.n_addr,5) = left(t.n_addr,5))::INT AS addr_p5,
+            (s.n_addr IS NOT NULL AND t.n_addr IS NOT NULL
+             AND left(s.n_addr,8) = left(t.n_addr,8))::INT AS addr_p8,
+            CASE WHEN s.name_tokens IS NULL OR t.name_tokens IS NULL THEN 0
+                 ELSE length(list_intersect(s.name_tokens, t.name_tokens)) END AS name_tok_overlap,
+            CASE WHEN s.name_tokens IS NULL OR t.name_tokens IS NULL
+                      OR (list_count(s.name_tokens) + list_count(t.name_tokens)) = 0 THEN 0.0
+                 ELSE length(list_intersect(s.name_tokens, t.name_tokens))::DOUBLE
+                      / list_count(list_distinct(list_concat(s.name_tokens, t.name_tokens)))
+            END AS name_tok_jaccard,
+            CASE WHEN s.addr_tokens IS NULL OR t.addr_tokens IS NULL THEN 0
+                 ELSE length(list_intersect(s.addr_tokens, t.addr_tokens)) END AS addr_tok_overlap,
+            CASE WHEN s.n_name IS NULL OR t.n_name IS NULL THEN 0.0
+                 ELSE least(length(s.n_name), length(t.n_name))::DOUBLE
+                      / greatest(length(s.n_name), length(t.n_name)) END AS name_len_ratio,
+            CASE WHEN s.n_addr IS NULL OR t.n_addr IS NULL THEN 0.0
+                 ELSE least(length(s.n_addr), length(t.n_addr))::DOUBLE
+                      / greatest(length(s.n_addr), length(t.n_addr)) END AS addr_len_ratio,
+            (s.country IS NOT NULL AND s.country = t.country)::INT AS country_eq,
+            -- shared numeric runs (house numbers, PIN codes): agreement is evidence
+            CASE WHEN s.name_nums IS NULL OR t.name_nums IS NULL
+                      OR (list_count(s.name_nums) + list_count(t.name_nums)) = 0 THEN 0
+                 ELSE (length(list_intersect(s.name_nums, t.name_nums)) > 0)::INT END AS name_digits_eq,
+            CASE WHEN s.addr_nums IS NULL OR t.addr_nums IS NULL
+                      OR (list_count(s.addr_nums) + list_count(t.addr_nums)) = 0 THEN 0
+                 ELSE (length(list_intersect(s.addr_nums, t.addr_nums)) > 0)::INT END AS addr_digits_eq
+          FROM c
+          JOIN s ON s.entity_id = c.sid
+          JOIN t ON t.entity_id = c.tid
+        ) TO {lit(out_path)} (FORMAT PARQUET, COMPRESSION ZSTD)
+        """
+    )
+    n = con.execute(f"SELECT count(*) FROM read_parquet({lit(out_path)})").fetchone()[0]
+    log(f"{split} features: {n:,} rows in {time.perf_counter() - t0:.1f}s")
+
+
+def entity_f05(gold: set, pred: set) -> float:
+    """F_0.5 for one entity: 5*TP / (5*TP + 4*FP + FN) - precision weighted 4:1."""
+    if not gold and not pred:
+        return 1.0
+    if not gold or not pred:
+        return 0.0
+    tp, fp, fn = len(gold & pred), len(pred - gold), len(gold - pred)
+    den = 5 * tp + 4 * fp + fn
+    return 5.0 * tp / den if den else 0.0
+
+
+def macro_f05(triples, all_entities=None) -> float:
+    """Macro entity-level F_0.5 over (sid, tid, is_gold, is_kept) tuples.
+
+    A tuple is one candidate row: `is_gold` marks a true positive link and
+    `is_kept` marks a pair the scorer kept at the current threshold. The gold
+    set of an entity is every true link (kept or not, so a missed link costs
+    recall); the prediction set is every kept pair, whether or not it is gold.
+
+    `all_entities` must enumerate every evaluated Source-1 entity, including
+    true singletons: a singleton with an empty prediction scores 1.0 and one with
+    a false merge scores 0.0, so dropping them would inflate the average.
+    """
+    gold, pred = {}, {}
+    for sid, tid, is_gold, is_kept in triples:
+        if is_gold:
+            gold.setdefault(sid, set()).add(tid)
+        if is_kept:
+            pred.setdefault(sid, set()).add(tid)
+    entities = set(all_entities) if all_entities is not None else set(gold)
+    if not entities:
+        return 0.0
+    return float(np.mean([entity_f05(gold.get(s, set()), pred.get(s, set())) for s in entities]))
+
+
+def stage_train(con, feat_path: Path, gt_path: Path, s1_path: Path) -> tuple:
+    """Fit a linear scorer on a labelled sample, then tune the F_0.5 threshold."""
+    t0 = time.perf_counter()
+    cols = ", ".join(FEATURES)
+    rows = con.execute(
+        f"""
+        SELECT f.sid, f.tid, {cols}, (g.tid IS NOT NULL)::INT AS label
+        FROM read_parquet({lit(feat_path)}) f
+        LEFT JOIN read_parquet({lit(gt_path)}) g ON g.sid = f.sid AND g.tid = f.tid
+        WHERE hash(f.sid) % 100 < {CFG['train_sample_pct']}
+        LIMIT {CFG['candidate_sample_rows']}
+        """
+    ).fetchall()
+    if not rows:
+        raise RuntimeError("no candidate rows for training - check the blocking output")
+    X = np.array([[float(v) for v in r[2:-1]] for r in rows], dtype=np.float64)
+    y = np.array([int(r[-1]) for r in rows], dtype=np.int32)
+    log(f"training rows {len(y):,} (positives {int(y.sum()):,}) in {time.perf_counter() - t0:.1f}s")
+    if int(y.min()) == int(y.max()):
+        raise RuntimeError("training sample is single-class; blocking produced no contrast")
+    # Sampled S1 entities that have no gold link at all: true singletons. They
+    # still count in the macro average, so collect them for threshold tuning.
+    singletons = [
+        r[0] for r in con.execute(
+            f"""
+            SELECT entity_id FROM read_parquet({lit(s1_path)})
+            WHERE hash(entity_id) % 100 < {CFG['train_sample_pct']}
+              AND entity_id NOT IN (SELECT sid FROM read_parquet({lit(gt_path)}))
+            """
+        ).fetchall()
+    ]
+    if singletons:
+        log(f"true singletons in the tuning sample: {len(singletons):,}")
+
+    from sklearn.linear_model import LogisticRegression
+
+    mu, sigma = X.mean(0), X.std(0)
+    sigma[sigma == 0] = 1.0
+    clf = LogisticRegression(max_iter=3000, class_weight="balanced")
+    clf.fit((X - mu) / sigma, y)
+    # Fold standardisation into raw-feature weights so the scorer becomes a plain
+    # dot product that DuckDB can evaluate without a Python round trip.
+    coef = (clf.coef_[0] / sigma).tolist()
+    intercept = float(clf.intercept_[0] - np.dot(clf.coef_[0] / sigma, mu))
+
+    scores = X @ np.array(coef) + intercept
+    sids = [r[0] for r in rows]
+    tids = [r[1] for r in rows]
+    labels = y.tolist()
+    # Every sampled entity counts, including true singletons that produced no
+    # candidate row at all - the official macro average includes them.
+    entities = set(sids) | set(singletons)
+
+    best_t, best_f = float(np.median(scores)), -1.0
+    for q in np.linspace(0.50, 0.9995, 60):
+        t = float(np.quantile(scores, q))
+        sel = scores >= t
+        triples = [(s, ti, bool(lab), bool(keep))
+                   for s, ti, lab, keep in zip(sids, tids, labels, sel)]
+        if (f := macro_f05(triples, entities)) > best_f:
+            best_f, best_t = f, t
+    log(f"threshold {best_t:.4f} -> sampled macro F_0.5 {best_f:.4f} "
+        f"({time.perf_counter() - t0:.1f}s)")
+    return coef, intercept, best_t
+
+
+def score_expression(coef: list, intercept: float) -> str:
+    """SQL for the linear scorer; logistic() is monotone so the raw logit suffices."""
+    terms = " + ".join(f"({w:.10f}) * coalesce({c}, 0)" for w, c in zip(coef, FEATURES))
+    return f"({intercept:.10f} + {terms})"
+
+
+def stage_write_outputs(con, s1_path: Path, feat_path: Path, scorer: str,
+                       threshold: float, out_dir: Path) -> None:
+    """Write both TSVs straight from SQL, one row per S1 entity, no quoting.
+
+    Line endings are forced to LF: the official validator strips only ``\\n``, so
+    a trailing CR would end up inside the last ID of every row.
+    """
+    t0 = time.perf_counter()
+    for fname, header, keep_sql in (
+        ("matching_results.tsv", "source1_entity_id\tmatched_entity_ids",
+         f"""SELECT sid, tid FROM read_parquet({lit(feat_path)})
+            WHERE ({scorer}) >= {threshold!r}"""),
+        ("candidate_pairs.tsv", "source1_entity_id\tcandidate_entity_ids",
+         f"SELECT sid, tid FROM read_parquet({lit(feat_path)})"),
+    ):
+        out = out_dir / fname
+        con.execute(
+            f"""
+            COPY (
+              WITH all_s1 AS (SELECT entity_id FROM read_parquet({lit(s1_path)})),
+              agg AS (
+                SELECT sid, string_agg(DISTINCT tid, ',' ORDER BY tid) AS ids
+                FROM ({keep_sql}) GROUP BY sid
+              )
+              SELECT s.entity_id, coalesce(agg.ids, '')
+              FROM all_s1 s LEFT JOIN agg ON agg.sid = s.entity_id
+              ORDER BY s.entity_id
+            ) TO {lit(out)} (FORMAT CSV, DELIMITER '\t', QUOTE '', NULL '', HEADER false)
+            """
+        )
+        # COPY overwrites the file, so (re-)attach the exact header line.
+        body = out.read_bytes().replace(b"\r\n", b"\n")
+        out.write_bytes(header.encode("utf-8") + b"\n" + body)
+    log(f"outputs written in {time.perf_counter() - t0:.1f}s")
+
+
+def validate_outputs(matching: Path, candidates: Path, s1_ids: set, target_ids: set) -> list:
+    """Enforce every rule the official submission validator checks."""
+    errors = []
+
+    def load(path, header):
+        with path.open("r", encoding="utf-8", newline="") as fh:
+            reader = csv.reader(fh, delimiter="\t", quoting=csv.QUOTE_NONE)
+            got = next(reader, None)
+            if got != header:
+                errors.append(f"{path.name}: header {got!r} != {header!r}")
+            return [(r[0], r[1] if len(r) > 1 else "") for r in reader if r]
+
+    m_rows = load(matching, ["source1_entity_id", "matched_entity_ids"])
+    c_rows = load(candidates, ["source1_entity_id", "candidate_entity_ids"])
+    for label, rows in (("matching_results", m_rows), ("candidate_pairs", c_rows)):
+        ids = [r[0] for r in rows]
+        if len(ids) != len(set(ids)):
+            errors.append(f"{label}: duplicate source1_entity_id rows")
+        if missing := sorted(s1_ids - set(ids)):
+            errors.append(f"{label}: {len(missing)} S1 entities missing (e.g. {missing[:3]})")
+        if unknown := sorted(set(ids) - s1_ids):
+            errors.append(f"{label}: {len(unknown)} unknown S1 ids (e.g. {unknown[:3]})")
+        for sid, cell in rows:
+            vals = [v.strip() for v in cell.split(",") if v.strip()] if cell.strip() else []
+            if len(vals) != len(set(vals)):
+                errors.append(f"{label}[{sid}]: duplicate ids in list")
+            for v in vals:
+                if not v.startswith(("S2-", "S3-")):
+                    errors.append(f"{label}[{sid}]: {v} lacks S2-/S3- prefix")
+                elif v not in target_ids:
+                    errors.append(f"{label}[{sid}]: {v} absent from test targets")
+    c_map = {sid: set(x.strip() for x in cell.split(",") if x.strip()) for sid, cell in c_rows}
+    for sid, cell in m_rows:
+        vals = set(x.strip() for x in cell.split(",") if x.strip()) if cell.strip() else set()
+        if extra := sorted(vals - c_map.get(sid, set())):
+            errors.append(f"matching_results[{sid}]: {extra[:3]} absent from candidate_pairs")
+            break
+    return errors
+
+
+def blocking_recall(con, feat_path: Path, gt_path: Path) -> dict:
+    """Recall ceiling of the candidate generator, per target source."""
+    out = {}
+    for src in ("S2", "S3"):
+        row = con.execute(
+            f"""
+            SELECT count(*) AS gold,
+                   (SELECT count(*)
+                      FROM read_parquet({lit(gt_path)}) g
+                      JOIN read_parquet({lit(feat_path)}) f ON f.sid = g.sid AND f.tid = g.tid
+                     WHERE g.tid LIKE ?) AS recovered
+            FROM read_parquet({lit(gt_path)}) WHERE tid LIKE ?
+            """,
+            [f"{src}-%", f"{src}-%"],
+        ).fetchone()
+        out[src] = {"gold_links": int(row[0]), "recovered": int(row[1]),
+                    "recall": round(row[1] / row[0], 4) if row[0] else None}
+    return out
+
+
+def package_submission(out_dir: Path, work: Path) -> Path:
+    """Bundle the two TSVs (plus the run summary) into submission.zip."""
+    zpath = work / "submission.zip"
+    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as zf:
+        for fname in ("matching_results.tsv", "candidate_pairs.tsv", "run_summary.json"):
+            src = out_dir / fname
+            if src.exists():
+                zf.write(src, arcname=f"output/{fname}")
+    log(f"packaged {zpath.name} ({zpath.stat().st_size / 2**20:.1f} MB)")
+    return zpath
+
+
+def run(work_dir: str = "/content", source_dir: str | None = None,
+        dataset_dir: str | None = None) -> dict:
+    """Run the full pipeline.
+
+    work_dir    : fast local scratch for parquet, temp files and output
+    dataset_dir : a directory that ALREADY contains the TSVs (e.g. an extracted
+                  dataset folder on a mounted Drive). Read directly, no unzip.
+    source_dir  : a directory containing the dataset .zip, used only when
+                  dataset_dir is not given. The zip is unpacked into work_dir.
+
+    All intermediate artifacts stay on local disk; only the raw TSVs are read
+    from Drive, and each is read exactly once (TSV -> parquet).
+    """
+    work = Path(work_dir)
+    wdir = work / "er_work"
+    norm = wdir / "norm"
+    out_dir = work / "output"
+    for d in (norm, out_dir, wdir / "tmp"):
+        d.mkdir(parents=True, exist_ok=True)
+
+    if dataset_dir:
+        root = Path(dataset_dir)
+        paths = find_dataset_files(root)
+        log(f"using pre-extracted dataset at {root}")
+    else:
+        source = Path(source_dir) if source_dir else work
+        extract = work / "extracted_data"
+        already = (any(p.name == "train_source1.tsv" for p in extract.rglob("*.tsv"))
+                   if extract.exists() else False)
+        if not already:
+            extract_zip(find_source_zip(source), extract)
+        root = extract
+        paths = find_dataset_files(root)
+    log("dataset: " + ", ".join(f"{k}={v.relative_to(root)}" for k, v in sorted(paths.items())))
+
+    con = connect(wdir / "er.duckdb", wdir / "tmp")
+    try:
+        stage_normalize(con, paths, norm)
+        stage_tokens(con, norm)
+        gt_path = norm / "train_gt_links.parquet"
+        stage_ground_truth(con, paths, gt_path)
+
+        feat = {}
+        for split in ("train", "test"):
+            cand = norm / f"{split}_cand.parquet"
+            stage_candidates(con, norm, split, cand)
+            feat[split] = norm / f"{split}_feat.parquet"
+            stage_features(con, norm, split, cand, feat[split])
+
+        recall = blocking_recall(con, feat["train"], gt_path)
+        log("blocking recall: " + json.dumps(recall))
+
+        coef, intercept, threshold = stage_train(con, feat["train"], gt_path,
+                                                 norm / "train_s1.parquet")
+        stage_write_outputs(con, norm / "test_s1.parquet", feat["test"],
+                            score_expression(coef, intercept), threshold, out_dir)
+
+        s1_ids = {r[0] for r in con.execute(
+            f"SELECT entity_id FROM read_parquet({lit(norm / 'test_s1.parquet')})").fetchall()}
+        target_ids = set()
+        for src in (2, 3):
+            target_ids.update(r[0] for r in con.execute(
+                f"SELECT entity_id FROM read_parquet({lit(norm / f'test_s{src}.parquet')})").fetchall())
+        if errors := validate_outputs(out_dir / "matching_results.tsv",
+                                      out_dir / "candidate_pairs.tsv", s1_ids, target_ids):
+            log("VALIDATION FAILED:")
+            for e in errors[:20]:
+                log("  - " + e)
+            raise SystemExit(1)
+        log("validation PASSED (headers, S1 coverage, prefixes, dedup, subset invariant)")
+
+        summary = {"config": CFG, "blocking_recall": recall, "threshold": threshold,
+                   "coefficients": dict(zip(FEATURES, coef)),
+                   "test_s1_entities": len(s1_ids), "test_target_entities": len(target_ids)}
+        (out_dir / "run_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        package_submission(out_dir, work)
+        return summary
+    finally:
+        con.close()
+
+
+if __name__ == "__main__":
+    run(sys.argv[1] if len(sys.argv) > 1 else "/content")
+'''
+
+Path(WORK_DIR, "er_pipeline.py").write_text(PIPELINE, encoding="utf-8")
+sys.path.insert(0, WORK_DIR)
+import er_pipeline as ER
+
+# # -----------------------------------------------------------------------------
+# SECTION 4 - configuration
+# -----------------------------------------------------------------------------
+# Lower memory_limit if the kernel is OOM-killed.
+# Lower max_token_df / max_candidates if you need speed over recall.
+ER.CFG.update(
+    threads=max(1, min(8, os.cpu_count() or 2)),
+    memory_limit="6GB",
+    max_token_df=5000,     # a token must appear in at most this many target rows
+    min_token_len=4,       # tokens shorter than this are never used for blocking
+    max_candidates=30,     # max candidates kept per Source-1 entity
+    train_sample_pct=2,    # percent of Source-1 entities sampled to fit the scorer
+    candidate_sample_rows=800000,
+)
+for f in ("train_s1", "train_s2", "train_s3", "train_gt",
+          "test_s1", "test_s2", "test_s3"):
+    pass  # resolved inside the pipeline
+print("config:", ER.CFG)
+
+# # -----------------------------------------------------------------------------
+# SECTION 5 - run
+# -----------------------------------------------------------------------------
+summary = ER.run(work_dir=WORK_DIR, dataset_dir=str(DATASET_DIR))
+
+print()
+print("=" * 68)
+print("blocking recall ceiling :", summary["blocking_recall"])
+print("decision threshold      :", round(summary["threshold"], 4))
+print("test S1 entities        :", summary["test_s1_entities"])
+print("test target entities    :", summary["test_target_entities"])
+print("=" * 68)
+
+# # -----------------------------------------------------------------------------
+# SECTION 6 - download the submission
+# -----------------------------------------------------------------------------
+from google.colab import files
+
+zip_path = Path(WORK_DIR) / "submission.zip"
+print("submission:", zip_path, f"({zip_path.stat().st_size / 2**20:.1f} MB)")
+files.download(str(zip_path))

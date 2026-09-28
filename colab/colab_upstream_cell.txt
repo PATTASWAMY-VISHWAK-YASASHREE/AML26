@@ -1,0 +1,261 @@
+# =============================================================================
+#  AMAZON ML CHALLENGE 2026  -  resumable Colab runner for
+#  https://github.com/Ruthwik000/amazonsummerML
+#
+#  Why this wrapper exists: the upstream run_all.sh is 12 sequential steps that
+#  each overwrite their own outputs, and a full run is ~3-4 h on 2 cores. Free
+#  Colab pre-empts long sessions, so an interrupted run would restart from zero.
+#  This records each step in a manifest ONLY after it exits 0, so re-running the
+#  same cell skips whatever already finished and retries only what was in
+#  flight. A step that never succeeded is never skipped.
+#
+#  It does NOT modify the upstream repo - it only sequences its steps.
+#
+#  BEFORE THE 3-4 HOUR RUN: execute the dependency smoke test in the cell below
+#  it. The upstream pins numpy==2.4.4 / polars==1.44.2 and was tested on Python
+#  3.11; if Colab hands you 3.12 a pinned version may have no wheel, and you
+#  want to find that out in 30 seconds rather than after an hour.
+# =============================================================================
+
+# ---- 0. dependency smoke test (cheap, run this first) -----------------------
+!pip install -q -r requirements.txt 2>&1 | tail -5 || pip install -q polars pyarrow numpy lightgbm rapidfuzz
+import sys
+import lightgbm, numpy, polars, pyarrow, rapidfuzz
+print("python  :", sys.version.split()[0])
+for m in (polars, numpy, pyarrow, lightgbm, rapidfuzz):
+    print(f"  {m.__name__:10s} {getattr(m, '__version__', '?')}")
+
+# ---- 1. clone / update the pipeline ----------------------------------------
+import os
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+from google.colab import drive
+
+REPO = "https://github.com/Ruthwik000/amazonsummerML.git"
+REPO_DIR = "/content/amazonsummerML"
+
+# Durable: a pre-empted session must not lose completed steps.
+WORK = "/content/drive/MyDrive/amz_work"
+OUT = "/content/drive/MyDrive/amz_out"
+DATASET = "/content/drive/MyDrive/student_resource/dataset"
+
+drive.mount("/content/drive", force_remount=True)
+for d in (WORK, OUT):
+    Path(d).mkdir(parents=True, exist_ok=True)
+
+if Path(REPO_DIR).exists():
+    subprocess.run(["git", "-C", REPO_DIR, "pull", "--ff-only"], check=False)
+else:
+    subprocess.run(["git", "clone", "--depth", "1", REPO, REPO_DIR], check=True)
+print("upstream HEAD:", subprocess.run(
+    ["git", "-C", REPO_DIR, "rev-parse", "--short", "HEAD"],
+    capture_output=True, text=True).stdout.strip())
+
+# ---- 2. resumable step runner ---------------------------------------------
+# A step is marked done ONLY after it exits 0, so a run killed mid-flight
+# re-runs at most that one step. The manifest is written atomically.
+import json
+
+
+class StepRunner:
+    def __init__(self, manifest, dry_run=False):
+        self.manifest = Path(manifest)
+        self.dry_run = dry_run
+        self.done = {}
+        if self.manifest.exists():
+            try:
+                self.done = json.loads(
+                    self.manifest.read_text(encoding="utf-8")).get("steps", {})
+            except (OSError, ValueError):
+                self.done = {}          # corrupt manifest -> redo, never trust it
+        self.manifest.parent.mkdir(parents=True, exist_ok=True)
+
+    def _save(self):
+        tmp = self.manifest.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps({"steps": self.done}, indent=2), encoding="utf-8")
+        tmp.replace(self.manifest)     # atomic
+
+    def is_done(self, name, cmd, cwd):
+        rec = self.done.get(name)
+        return bool(rec and rec.get("ok")
+                    and rec.get("cmd") == cmd and rec.get("cwd") == cwd)
+
+    def run(self, name, cmd, cwd=None, env=None, allow_fail=False, shell=False):
+        full = ["bash", "-lc", " ".join(cmd)] if shell else list(cmd)
+        if self.dry_run:
+            print(f"  [dry-run] {name}: {full}")
+            return 0
+        print(f"\n>>> {name}\n    {' '.join(full)}", flush=True)
+        t0 = time.time()
+        environ = {**os.environ, **(env or {})}
+        p = subprocess.run(full, cwd=cwd, env=environ)
+        dt = time.time() - t0
+        print(f"<<< {name}: exit {p.returncode} in {dt:.0f}s", flush=True)
+        self.done[name] = {"cmd": cmd, "cwd": cwd, "ok": p.returncode == 0,
+                           "seconds": round(dt, 1),
+                           "finished": time.strftime("%Y-%m-%d %H:%M:%S")}
+        self._save()
+        if p.returncode != 0 and not allow_fail:
+            raise SystemExit(
+                f"step {name!r} failed (exit {p.returncode}); it stays unmarked so "
+                f"a rerun retries it. Just run this cell again to resume.")
+        return p.returncode
+
+    def summary(self, steps):
+        print("\n" + "=" * 68)
+        print(f"{'step':<14} {'status':<9} {'secs':>7}")
+        print("-" * 68)
+        for s in steps:
+            rec = self.done.get(s["name"], {})
+            st = "done" if self.is_done(s["name"], s["cmd"], SRC) else (
+                "FAILED" if rec else "pending")
+            print(f"{s['name']:<14} {st:<9} {rec.get('seconds', 0):>7.0f}")
+        print("=" * 68)
+
+
+SRC = f"{REPO_DIR}/src"
+PY = sys.executable
+DATA = f"{WORK}/data"
+GT = {"GT": f"{DATA}/train_ground_truth.parquet"}
+Path(DATA).mkdir(parents=True, exist_ok=True)
+
+# Verbatim transcription of _upstream/run_all.sh, same order, same args, same
+# env. GT= is set on the three build_features.py calls that need it.
+STEPS = [
+    {"name": "convert",        "cmd": [PY, "convert.py", DATASET, DATA], "env": None},
+    {"name": "learn_translit", "cmd": [PY, "learn_translit.py", DATA,
+                                       "resources/indic_token_dict.json"], "env": None},
+    {"name": "prep",           "cmd": [PY, "prep.py", DATA, WORK], "env": None},
+    {"name": "block_train",    "cmd": [PY, "run_blocking.py", "train", WORK], "env": None},
+    {"name": "block_test",     "cmd": [PY, "run_blocking.py", "test", WORK], "env": None},
+    {"name": "feat_train",     "cmd": [PY, "build_features.py", "train", WORK], "env": GT},
+    {"name": "select_T",       "cmd": [PY, "select_T.py", WORK], "env": None},
+    {"name": "feat_trainT",    "cmd": [PY, "build_features.py", "trainT", WORK], "env": GT},
+    {"name": "feat_trainRest", "cmd": [PY, "build_features.py", "trainRest", WORK], "env": GT},
+    {"name": "feat_test",      "cmd": [PY, "build_features.py", "test", WORK], "env": None},
+    {"name": "crossfit",       "cmd": [PY, "crossfit.py", WORK, "all"], "env": None},
+    {"name": "submission",     "cmd": [PY, "make_submission.py", WORK, OUT], "env": None},
+]
+
+# DRY = True prints the plan and the resume state without running anything.
+# Useful first: it verifies the 12 steps and what is already cached before
+# committing hours of Colab time.
+DRY = False
+
+RUNNER = StepRunner(f"{WORK}/progress.json", dry_run=DRY)
+todo = [s for s in STEPS if not RUNNER.is_done(s["name"], s["cmd"], SRC)]
+print(f"\n{len(STEPS) - len(todo)}/{len(STEPS)} steps already done; running {len(todo)}")
+print("remaining:", [s["name"] for s in todo] or "nothing - already complete")
+
+for s in todo:
+    RUNNER.run(s["name"], s["cmd"], cwd=SRC, env=s["env"], shell=False)
+RUNNER.summary(STEPS)
+
+# ---- 3. validate ----------------------------------------------------------
+# Run the official validator with a small memory_limit via --check-ids off, but
+# prefer the out-of-core DuckDB check: the official one builds Python sets of
+# every S1 and every S2/S3 id, which is what needs >6 GB on a 6.9M-row
+# candidate file. All checks run as SQL and only a few examples return to Python.
+import duckdb
+
+OUTM = f"{OUT}/matching_results.tsv"
+OUTC = f"{OUT}/candidate_pairs.tsv"
+
+
+def validate_ooc(matching, candidates, test_dir, limit=3):
+    errs = []
+
+    def one(sql):
+        return int(con.execute(sql).fetchone()[0] or 0)
+
+    def ex(sql):
+        return ", ".join(str(r[0]) for r in con.execute(sql).fetchall())
+
+    con = duckdb.connect()
+    con.execute("SET threads=2")
+    con.execute("SET memory_limit='2GB'")
+    con.execute("SET preserve_insertion_order=false")
+    td = str(test_dir).replace("'", "''")
+    con.execute(f"CREATE OR REPLACE TEMP VIEW v_s1 AS SELECT entity_id FROM "
+                f"read_csv('{td}/test_source1.tsv', delim='\t', header=true)")
+    con.execute(f"CREATE OR REPLACE TEMP VIEW v_tgt AS "
+                f"SELECT entity_id FROM read_csv('{td}/test_source2.tsv', delim='\t', header=true) "
+                f"UNION ALL SELECT entity_id FROM read_csv('{td}/test_source3.tsv', delim='\t', header=true)")
+    views = {}
+    for label, second in (("matching", "matched_entity_ids"),
+                          ("candidates", "candidate_entity_ids")):
+        p = matching if label == "matching" else candidates
+        v = f"v_{label}"
+        con.execute(f"CREATE OR REPLACE TEMP VIEW {v} AS SELECT source1_entity_id AS sid, "
+                    f"coalesce(\"{second}\",'') AS cell FROM read_csv('"
+                    f"{str(p).replace(chr(39), chr(39)*2)}', delim='\t', header=true, quote='')")
+        con.execute(f"CREATE OR REPLACE TEMP VIEW {v}_ids AS SELECT sid, trim(u) tid FROM {v}, "
+                    f"unnest(string_split(cell, ',')) s(u) WHERE trim(u) <> ''")
+        con.execute(f"CREATE OR REPLACE TEMP VIEW {v}_uniq AS SELECT DISTINCT sid,tid FROM {v}_ids")
+        views[label] = v
+        miss = one(f"SELECT count(*) FROM v_s1 s WHERE NOT EXISTS "
+                   f"(SELECT 1 FROM {v} x WHERE x.sid=s.entity_id)")
+        if miss:
+            errs.append(f"{label}: {miss} S1 entities missing")
+        d = ex(f"SELECT sid FROM {v} GROUP BY sid HAVING count(*)>1 LIMIT {limit}")
+        if d:
+            errs.append(f"{label}: duplicate source1 rows ({d})")
+        d = ex(f"SELECT sid FROM {v}_ids GROUP BY sid,tid HAVING count(*)>1 LIMIT {limit}")
+        if d:
+            errs.append(f"{label}: duplicate ids within a list ({d})")
+        d = ex(f"SELECT tid FROM {v}_uniq WHERE tid NOT LIKE 'S2-%' AND tid NOT LIKE 'S3-%' LIMIT {limit}")
+        if d:
+            errs.append(f"{label}: non-S2/S3 id ({d})")
+        n = one(f"SELECT count(*) FROM {v}_uniq x WHERE NOT EXISTS "
+                f"(SELECT 1 FROM v_tgt t WHERE t.entity_id=x.tid)")
+        if n:
+            errs.append(f"{label}: {n} ids not in the test target files")
+    d = ex(f"SELECT sid FROM (SELECT sid,tid FROM {views['matching']}_uniq "
+           f"EXCEPT SELECT sid,tid FROM {views['candidates']}_uniq) LIMIT {limit}")
+    if d:
+        errs.append(f"matches not in candidate_pairs ({d})")
+    con.close()
+    return errs
+
+
+if Path(OUTM).exists() and Path(OUTC).exists():
+    problems = validate_ooc(OUTM, OUTC, f"{DATASET}/test")
+    if problems:
+        print("\nVALIDATION FAILED:")
+        for e in problems:
+            print("  - " + e)
+    else:
+        print("\nvalidation PASSED (coverage, dedup, prefixes, target ids, subset)")
+    # header check - cheap and catches a CSV/comma-delimited file
+    for f, want in ((OUTM, "source1_entity_id\tmatched_entity_ids"),
+                    (OUTC, "source1_entity_id\tcandidate_entity_ids")):
+        got = Path(f).read_text(encoding="utf-8").split("\n", 1)[0]
+        print(f"  header {Path(f).name}: {'OK' if got == want else 'WRONG -> ' + got}")
+    # Candidate-set size is now a RANKING factor, so report it honestly:
+    # EVERY S1 entity counts, including true singletons (empty cell = 0
+    # candidates). Filtering empty cells would drop singletons and inflate the
+    # mean, i.e. overstate how tight the candidate set is.
+    import statistics
+    with open(OUTC, encoding="utf-8") as fh:
+        rows = [ln.split("\t", 1)[1] for ln in fh.read().splitlines()[1:]
+                if ln.count("\t")]
+    cands = [len([x for x in cell.split(",") if x.strip()]) for cell in rows]
+    print(f"  candidate set: {len(cands):,} S1 entities, "
+          f"mean {statistics.fmean(cands):.2f} candidates/S1 "
+          f"(upstream reference: 3.97)")
+else:
+    print("outputs not present yet - run the steps above first")
+
+# ---- 4. download ----------------------------------------------------------
+from google.colab import files
+
+for f in (OUTM, OUTC):
+    if Path(f).exists():
+        print(f"downloading {f} "
+              f"({Path(f).stat().st_size / 2**20:.1f} MB)")
+        files.download(f)
+

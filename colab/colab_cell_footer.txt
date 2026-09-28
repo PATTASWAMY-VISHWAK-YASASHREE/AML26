@@ -1,0 +1,71 @@
+'''
+
+Path(WORK_DIR, "er_pipeline.py").write_text(PIPELINE, encoding="utf-8")
+sys.path.insert(0, WORK_DIR)
+import er_pipeline as ER
+
+# -----------------------------------------------------------------------------
+# SECTION 4 - configuration
+# -----------------------------------------------------------------------------
+# TWO directories with OPPOSITE requirements - do not merge them:
+#   WORK_DIR  -> Drive. Durable, so a pre-empted session resumes instead of
+#               redoing the ~10 min normalisation.
+#   SPILL_DIR -> /content. Throwaway, huge (tens of GB) and speed-critical.
+#               Putting spill on Drive fills the Drive quota and then fails
+#               with "failed to offload data block ... max_temp_directory_size".
+#
+# If you still see OutOfMemoryError, change these in this order:
+#   1. max_token_df   1500 -> 600    (biggest lever: shortens every posting list)
+#   2. max_candidates 10   -> 8
+#   3. memory_limit   6GB   -> 4GB
+#
+# The candidate stage now prints, per channel, how many pairs it produced and
+# what fraction survived the cap. ch6/ch7 are the LAST priority, so if they
+# report a tiny "survives" percentage then lowering max_token_df costs you
+# almost nothing - that is the measurement to read before tuning further.
+ER.CFG.update(
+    threads=max(1, min(8, os.cpu_count() or 2)),
+    memory_limit="6GB",
+    temp_directory_size="90GB",   # spill budget; without it DuckDB won't spill
+    max_token_df=1500,     # a token may appear in at most this many target rows
+    min_token_len=4,       # tokens shorter than this never block
+    max_candidates=10,     # RANKING LEVER - smaller candidate set is scored higher
+    train_sample_pct=2,    # percent of Source-1 entities sampled to fit the scorer
+    candidate_sample_rows=800000,
+)
+
+# The brief ranks a SMALLER candidate set per S1 HIGHER, beyond the leaderboard
+# score, so max_candidates is a ranking lever, not just a recall knob. Measured
+# on 22,691 real train S1 entities against the full corpus, all 7 channels
+# (probe_cap_recall.py):
+#
+#   cap   cands/S1   gold recall    vs cap=20
+#     5      4.89       0.4108      -74% candidates, -19.2% recall
+#     8      7.74       0.4502      -59% candidates, -11.4% recall
+#    10      9.63       0.4652      -49% candidates,  -8.4% recall
+#    15     14.31       0.4909      -25% candidates,  -3.4% recall
+#    20     18.96       0.5081       baseline
+#
+# cap=10 halves the candidate set for ~8% of the blocking recall ceiling.
+print("config:", ER.CFG)
+
+# -----------------------------------------------------------------------------
+# SECTION 5 - run
+# -----------------------------------------------------------------------------
+t0 = time.time()
+summary = ER.run(work_dir=WORK_DIR, dataset_dir=str(DATASET_DIR),
+                 spill_dir=SPILL_DIR)
+print(f"\ntotal {time.time() - t0:.0f}s")
+
+print()
+print("=" * 70)
+print("blocking recall ceiling :", summary["blocking_recall"])
+print("decision threshold      :", round(summary["threshold"], 4))
+print("test S1 entities        :", summary["test_s1_entities"])
+print("test target entities    :", summary["test_target_entities"])
+print("=" * 70)
+
+from google.colab import files
+zip_path = Path(WORK_DIR) / "submission.zip"
+print("submission:", zip_path, f"({zip_path.stat().st_size / 2**20:.1f} MB)")
+files.download(str(zip_path))
