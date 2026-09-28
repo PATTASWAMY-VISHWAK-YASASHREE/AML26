@@ -1,13 +1,42 @@
 # France findings — measured, not inferred
 
-**Status: 3 of my earlier headline claims were WRONG and are retracted here** —
-F1, F2, and the US-only remedy in N0. This document records only findings that
-were tested against the real data, with the measurement that supports each one.
-Every script named here is re-runnable.
+**Status: 4 of my earlier headline claims were WRONG and are retracted here** —
+F1, F2, the US-only remedy in N0, and the function-word claim in A13. This document records
+only findings that were tested against the real data, with the measurement that supports each
+one. Every script named here is re-runnable.
 
 Test data: `dataset/test/test_source1.tsv`, France slice = **259,452 rows**.
 France appears **only in test** (train has US + India only) — confirmed from
 `country_rows` in `analysis_out/profile/*.json`.
+
+## How to read this document
+
+The body is **append-only** — nothing above has been rewritten, because the sequence of
+wrong turns is itself the evidence. That means later findings sit *after* earlier ones out
+of logical order (A7, A11, A12 and A13 were appended out of sequence). Use this index:
+
+**Retracted — do not act on these**
+| § | Claim | Reality |
+|---|---|---|
+| F1 | France loses postal codes | **FALSE.** France `dig5/row` = 0.004 vs US 0.110 — house numbers, not postcodes |
+| F2 | `FR_REGIONS` too thin | **FALSE.** All regions in the data resolve; the real gap is the *query* side (N3) |
+| N0-R | Remedy is US-only | **RETRACTED.** No country has postal codes in this data; leave `pin` alone |
+| A13 | French function-word finding | **RETRACTED.** Inflated ~37.5% and misdiagnosed |
+
+**Confirmed**
+| § | Finding |
+|---|---|
+| N0 | `pin_eq` is dead across the whole dataset (0.0083% of rows) |
+| N1 | Ligatures silently deleted — `Cœur`/`Fœur`/`Sœur` → `ur` |
+| N2 | City lost when written with an inline postcode (0.02%) |
+| N3 | My F2 refutation was measured on the wrong file — France `state_eq` fires for only ~65% of source-2/3 |
+| N4 | `alt_tset` is a second dead feature (<1%) |
+| N5 | Both remaining dictionary "defects" are non-defects |
+| A1, A2, A5, A5b | `LEET` corrupts French ordinals; fix implemented; French-only guard caught just 19.1% |
+| A7 | The 71.10% vs 97.44% "contradiction" was never a contradiction |
+| A8, A11, A12 | Three independent audits confirm the state dictionaries are already correct |
+
+**Ruled out** — § "RULED OUT", plus component-order and cap-saturation hypotheses.
 
 ---
 

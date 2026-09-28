@@ -126,18 +126,25 @@ credit, and must not be traded against `matching_results.tsv` score.
 
 ## Findings
 
-Full detail in `docs/FRANCE_FINDINGS.md`. The headline is a set of
-**retractions**:
+Full detail in `docs/FRANCE_FINDINGS.md`, which opens with an index because the
+body is append-only — the sequence of wrong turns is itself the evidence. The
+headline is a set of **four retractions**:
 
 | Original claim | Measured reality |
 |---|---|
 | France loses postal codes | False. France `dig5/row` = 0.004 vs US 0.110 — French addresses carry house numbers, not postcodes |
 | `FR_REGIONS` too thin, no state signal | Partly false. All regions in the data resolve; the real gap is the *query* side |
 | Pin asymmetry is country-based | Inverted. It is **source**-based (US s1 0.001 vs s2/s3 0.013) |
+| French function-word signal | Retracted. Inflated ~37.5% and misdiagnosed |
 
 Every one of those came from reasoning about code instead of running it. The
 rule the docs now hold themselves to: **a claim ships with the script that
 produced it, or it does not ship.**
+
+`docs/ER_research_vs_upstream_report.pdf` (9pp) is the comparison against the
+upstream repo. It was **revised** after every finding in it was re-tested:
+**four of eight were withdrawn or partly withdrawn**, and the priority table was
+re-ranked as a result.
 
 ### What is real
 
