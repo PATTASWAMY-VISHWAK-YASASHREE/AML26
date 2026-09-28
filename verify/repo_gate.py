@@ -51,6 +51,26 @@ for rel in tracked:
     if "student_resource" in rel or "node_modules" in rel or rel.startswith(".venv"):
         problems.append(f"FORBIDDEN PATH TRACKED: {rel}")
 
+# 2b. markdown must render: code fences balanced, no heading trapped inside one
+#     (an unclosed fence once swallowed the whole README and rendered every
+#     heading as literal text inside a grey code block)
+md = root / "README.md"
+if md.is_file():
+    lines = md.read_text(encoding="utf-8-sig").splitlines()
+    fences = [i for i, ln in enumerate(lines) if ln.startswith("```")]
+    if len(fences) % 2:
+        problems.append(
+            f"README.md: {len(fences)} code-fence markers (odd) - a fence is unclosed")
+    inside = False
+    for i, ln in enumerate(lines, 1):
+        if ln.startswith("```"):
+            inside = not inside
+        elif inside and ln.startswith("#"):
+            problems.append(f"README.md:{i}: heading trapped inside a code fence: {ln[:60]}")
+            inside = False  # report once per fence
+else:
+    problems.append("MISSING: README.md")
+
 # 3. every tracked .py must parse
 #
 # Colab cells are notebooks, not Python: `!pip install ...` is a shell magic and
